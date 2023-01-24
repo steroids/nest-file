@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./../../../myproject/backend-nest/node_modules/@steroidsjs/nest-file",
+    "watch": true
+  }
+}
