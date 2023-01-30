@@ -4,10 +4,9 @@ import {join} from 'path';
 import FileStorageEnum from '../enums/FileStorageEnum';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
+import {IFileModuleConfig} from '../../infrastructure/config';
 
-export type IFileConfig = Omit<Readonly<FileConfigService>, 'onModuleInit'>
-
-export class FileConfigService implements OnModuleInit, IFileConfig {
+export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     /**
      * Default storage (local)
      * Env:
@@ -53,7 +52,7 @@ export class FileConfigService implements OnModuleInit, IFileConfig {
     public imagesMimeTypes: string[];
 
     constructor(
-        private custom: IFileConfig,
+        private custom: IFileModuleConfig,
     ) {
     }
 
@@ -61,7 +60,7 @@ export class FileConfigService implements OnModuleInit, IFileConfig {
         this.init(this.custom);
     }
 
-    protected init(custom: IFileConfig) {
+    protected init(custom: IFileModuleConfig) {
         // Default storage
         this.defaultStorageName = process.env.APP_FILE_STORAGE_NAME
             || custom?.defaultStorageName

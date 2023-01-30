@@ -1,19 +1,20 @@
-import {Controller, Put, Query, UploadedFile} from '@nestjs/common';
+import {Controller, Inject, Put, Query, UploadedFile} from '@nestjs/common';
 import {ApiOkResponse, ApiQuery} from '@nestjs/swagger';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {FileUpload} from '../decorators/FileUpload';
 import {IExpressSource} from '../../domain/interfaces/IExpressSource';
-import {FileService} from '../../domain/services/FileService';
 import {FileUploadOptions} from '../../domain/dtos/FileUploadOptions';
 import {FileExpressSourceDto} from '../../domain/dtos/sources/FileExpressSourceDto';
 import {FileUploadDto} from '../../domain/dtos/FileUploadDto';
 import {FileImageSchema} from '../schemas/FileImageSchema';
 import {FileSchema} from '../schemas/FileSchema';
+import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
 
 @Controller('/file')
 export default class FileController {
     constructor(
-        private readonly fileService: FileService,
+        @Inject(IFileService)
+        private readonly fileService: IFileService,
     ) {
     }
 
