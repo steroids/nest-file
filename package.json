@@ -1,6 +1,6 @@
 {
   "name": "@steroidsjs/nest-file",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Steroids Nest File Module",
   "author": "",
   "license": "MIT",
@@ -28,8 +28,8 @@
     "@steroidsjs/typeorm": "^0"
   },
   "devDependencies": {
-    "@steroidsjs/nest": "^1.7.0",
-    "@steroidsjs/nest-modules": "^0.0.11",
+    "@steroidsjs/nest": "^1.7.3",
+    "@steroidsjs/nest-modules": "^0.0.13",
     "@steroidsjs/nest-typeorm": "^9.0.3",
     "@steroidsjs/typeorm": "^0.3.11",
     "@steroidsjs/eslint-config": "^2.1.2",

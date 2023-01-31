@@ -384,10 +384,10 @@
   resolved "https://registry.yarnpkg.com/@sqltools/formatter/-/formatter-1.2.5.tgz#3abc203c79b8c3e90fd6c156a0c62d5403520e12"
   integrity sha512-Uy0+khmZqUrUGm5dmMqVlnvufZRSK0FbYzVgp0UMstm+F5+W2/jnEEQyc9vo1ZR/E5ZI/B1WjjoTqBqwJL6Krw==
 
-"@steroidsjs/eslint-config@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@steroidsjs/eslint-config/-/eslint-config-2.1.1.tgz#3fb185a1898729a4dd74c7ab0ac6111d4105f39a"
-  integrity sha512-4+gBOT5vhjkg2xDsv7q2baWI1MX9wueoxJfYRe4gW/0MkoLhwlGB81+R7SUEYmcQhhCaZO78nJnoerZqcGZbqA==
+"@steroidsjs/eslint-config@^2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@steroidsjs/eslint-config/-/eslint-config-2.1.2.tgz#b1589f235178febc320636a62cbfab2565418963"
+  integrity sha512-sLflE4GBP6jxNUYNK8Is4KQf6K6Rwebk2EC3fOXe+Vou7FjTO1kqPH3N/qUC7lpD7weCLKlQ2b02vvMz+Q8Xlg==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.49.0"
     "@typescript-eslint/parser" "^5.49.0"

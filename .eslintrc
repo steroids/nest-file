@@ -2,14 +2,7 @@
     "extends": [
         "@steroidsjs/eslint-config"
     ],
-    "rules": {
-        "import/prefer-default-export": "off",
-        "no-useless-constructor": "off",
-        "class-methods-use-this": "off",
-        "no-await-in-loop": "off",
-        "linebreak-style": "off",
-        "no-restricted-syntax": "off"
-    },
+    "parser": "@typescript-eslint/parser",
     "env": {
         "node": true
     }
