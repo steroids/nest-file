@@ -17,8 +17,7 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "resolveJsonModule": true,
-    "noUnusedLocals": true
+    "resolveJsonModule": true
   },
   "include": [
     "src/**/*"

@@ -398,10 +398,10 @@
     eslint-plugin-react "^7.32.2"
     eslint-plugin-react-hooks "^4.6.0"
 
-"@steroidsjs/nest-modules@^0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@steroidsjs/nest-modules/-/nest-modules-0.0.11.tgz#5e1031d03d4d0938b93184f1aea07edcb57ae5b9"
-  integrity sha512-uMEj+mWZLE7Rhhbfno/MLmWzE8U/qcbW9ImXruHQo7TMZCJEdVGK63FVZ13SCsVpy1Ngrext3geqynJZXTYF5g==
+"@steroidsjs/nest-modules@^0.0.13":
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/@steroidsjs/nest-modules/-/nest-modules-0.0.13.tgz#3a6448f4ec98a10e97603b2d0d1fa2f2761cbcf2"
+  integrity sha512-JwlF19nxA8eY7zqxAvOIV2Y//7FAnXYTQ9OWvL8jNkq8hnKOnTIRpK+3+VFuqQEVzWj9cB8CwZ1Y5xIWyMloLA==
 
 "@steroidsjs/nest-typeorm@^9.0.3":
   version "9.0.3"
@@ -410,10 +410,10 @@
   dependencies:
     uuid "9.0.0"
 
-"@steroidsjs/nest@^1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@steroidsjs/nest/-/nest-1.7.0.tgz#b3b4fc6e81e457db6dd6850f3f5955441cbc60aa"
-  integrity sha512-QWOQMjO6EsSE217spez09Y7RQn9yYrqqKS4M8lv0tJQoCKrF16F+CyVYUUj58fRbP9F7ztYwMxjuJePcHZ/iYQ==
+"@steroidsjs/nest@^1.7.3":
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/@steroidsjs/nest/-/nest-1.7.3.tgz#0d3dbdbb5b8542d46bac91d0f61d92d18d0945b1"
+  integrity sha512-2DukVWcPxuchwpqVYGQDOId7ISoghAF7fOCpReba3U0bjpgMclr9WKHleNjCPrnN67LyOqhHwbHyx0x4liIQeQ==
   dependencies:
     "@dbml/core" "^2.4.4"
     "@nestjs/cli" "^9.1.9"

@@ -1,8 +1,7 @@
 import {Readable} from 'stream';
 import {IntegerField, StringField} from '@steroidsjs/nest/infrastructure/decorators/fields';
-import {Express} from 'express';
 
-export class FileExpressSourceDto implements Omit<Express.Multer.File, 'encoding'> {
+export class FileExpressSourceDto {
     @StringField({
         label: 'Name of the form field associated with this file',
     })
