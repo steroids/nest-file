@@ -1,5 +1,6 @@
 import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper';
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
+import {FileModule} from '@steroidsjs/nest-modules/file/FileModule';
 import {IFileRepository} from '../domain/interfaces/IFileRepository';
 import {FileRepository} from './repositories/FileRepository';
 import {IFileImageRepository} from '../domain/interfaces/IFileImageRepository';
@@ -20,6 +21,7 @@ import FileController from './controllers/FileController';
 export type IFileModuleConfig = Omit<Readonly<FileConfigService>, 'onModuleInit'>
 
 export default {
+    rootTarget: FileModule,
     entities: [
         FileTable,
         FileImageTable,
