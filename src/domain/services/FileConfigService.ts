@@ -6,6 +6,34 @@ import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IFileModuleConfig} from '../../infrastructure/config';
 
+const getStoragesConfig = (storagesConfig: IFileModuleConfig['storages'] = {}) => {
+    const localStorageConfig = {
+        rootPath: process.env.APP_FILE_STORAGE_ROOT_PATH || join(process.cwd(), '../files/uploaded'),
+        rootUrl: process.env.APP_FILE_STORAGE_ROOT_URL || '/files/uploaded',
+        ...storagesConfig[FileStorageEnum.LOCAL],
+    };
+    const minioS3Config =  {
+        host: process.env.APP_FILE_STORAGE_S3_HOST || '127.0.0.1',
+        port: process.env.APP_FILE_STORAGE_S3_PORT || '9000',
+        isUseSsl: process.env.APP_FILE_STORAGE_S3_USE_SSL || '0',
+        accessKey: process.env.APP_FILE_STORAGE_S3_ACCESS || '',
+        secretKey: process.env.APP_FILE_STORAGE_S3_SECRET || '',
+        region: process.env.APP_FILE_STORAGE_S3_REGION || 'us-east-1',
+        mainBucket: process.env.APP_FILE_STORAGE_S3_MAIN_BUCKET || 'main',
+        rootUrl: process.env.APP_FILE_STORAGE_ROOT_URL || '/files/uploaded',
+        ...storagesConfig[FileStorageEnum.MINIO_S3],
+    };
+
+    delete storagesConfig[FileStorageEnum.LOCAL];
+    delete storagesConfig[FileStorageEnum.MINIO_S3];
+
+    return {
+        [FileStorageEnum.LOCAL]: localStorageConfig,
+        [FileStorageEnum.MINIO_S3]: minioS3Config,
+        ...storagesConfig,
+    };
+}
+
 export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     /**
      * Default storage (local)
@@ -60,32 +88,14 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
         this.init(this.custom);
     }
 
-    protected init(custom: IFileModuleConfig) {
+    protected init(custom: IFileModuleConfig = {}) {
         // Default storage
         this.defaultStorageName = process.env.APP_FILE_STORAGE_NAME
-            || custom?.defaultStorageName
+            || custom.defaultStorageName
             || FileStorageEnum.LOCAL;
 
         // Storages
-        this.storages = {
-            [FileStorageEnum.LOCAL]: {
-                rootPath: process.env.APP_FILE_STORAGE_ROOT_PATH || join(process.cwd(), '../files/uploaded'),
-                rootUrl: process.env.APP_FILE_STORAGE_ROOT_URL || '/files/uploaded',
-                ...custom?.storages?.[FileStorageEnum.LOCAL],
-            },
-            [FileStorageEnum.MINIO_S3]: {
-                host: process.env.APP_FILE_STORAGE_S3_HOST || '127.0.0.1',
-                port: process.env.APP_FILE_STORAGE_S3_PORT || '9000',
-                isUseSsl: process.env.APP_FILE_STORAGE_S3_USE_SSL || '0',
-                accessKey: process.env.APP_FILE_STORAGE_S3_ACCESS || '',
-                secretKey: process.env.APP_FILE_STORAGE_S3_SECRET || '',
-                region: process.env.APP_FILE_STORAGE_S3_REGION || 'us-east-1',
-                mainBucket: process.env.APP_FILE_STORAGE_S3_MAIN_BUCKET || 'main',
-                rootUrl: process.env.APP_FILE_STORAGE_ROOT_URL || '/files/uploaded',
-                ...custom?.storages?.[FileStorageEnum.MINIO_S3],
-            },
-            ...custom?.storages,
-        };
+        this.storages = getStoragesConfig(custom.storages);
 
         // Previews
         this.previews = {
@@ -93,22 +103,22 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
                 enable: true,
                 width: null,
                 height: null,
-                ...custom?.previews?.[FilePreviewEnum.ORIGINAL],
+                ...custom.previews?.[FilePreviewEnum.ORIGINAL],
             },
             [FilePreviewEnum.THUMBNAIL]: {
                 enable: true,
                 width: process.env.APP_FILE_PREVIEW_THUMBNAIL_WIDTH || 500,
                 height: process.env.APP_FILE_PREVIEW_THUMBNAIL_HEIGHT || 300,
-                ...custom?.previews?.[FilePreviewEnum.THUMBNAIL],
+                ...custom.previews?.[FilePreviewEnum.THUMBNAIL],
             },
-            ...custom?.previews,
+            ...custom.previews,
         };
 
         // File max size
-        this.fileMaxSizeMb = _toInteger(process.env.APP_FILE_MAX_SIZE_MB || custom?.fileMaxSizeMb || 32);
+        this.fileMaxSizeMb = _toInteger(process.env.APP_FILE_MAX_SIZE_MB || custom.fileMaxSizeMb || 32);
 
         // Mime-types for detect images
-        this.imagesMimeTypes = custom?.imagesMimeTypes || [
+        this.imagesMimeTypes = custom.imagesMimeTypes || [
             'image/gif',
             'image/jpeg',
             'image/pjpeg',
