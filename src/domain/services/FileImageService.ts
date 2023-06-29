@@ -40,6 +40,7 @@ export class FileImageService {
                 : file.fileName,
             folder: file.folder,
             fileMimeType: file.fileMimeType,
+            storageName: file.storageName,
             fileSize: info.size,
             width: info.width,
             height: info.height,
