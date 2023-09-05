@@ -7,13 +7,14 @@ const MAX_BITS_SIZE = 25165824; // 10 mb;
 
 interface IFileUploadOptions {
     maxFileSize?: number,
+    fieldName?: string,
 }
 
 export function FileUpload(options?: IFileUploadOptions) {
     return applyDecorators(
         UseInterceptors(
             FileInterceptor(
-                'file',
+                options?.fieldName ?? 'file',
                 {
                     storage: diskStorage({
                         // TODO use FileConfigService
