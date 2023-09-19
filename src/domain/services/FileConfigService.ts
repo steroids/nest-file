@@ -127,6 +127,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
             'image/heic',
             'image/heif-sequence',
             'image/heic-sequence',
+            'image/webp',
         ];
     }
 }
