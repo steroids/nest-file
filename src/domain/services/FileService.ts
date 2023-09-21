@@ -26,9 +26,9 @@ import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 export class FileService extends ReadService<FileModel> {
     constructor(
         public repository: IFileRepository,
-        private fileImageService: FileImageService,
-        private fileConfigService: FileConfigService,
-        private fileStorageFabric: FileStorageFabric,
+        protected fileImageService: FileImageService,
+        protected fileConfigService: FileConfigService,
+        protected fileStorageFabric: FileStorageFabric,
         public validators: IValidator[],
     ) {
         super();
