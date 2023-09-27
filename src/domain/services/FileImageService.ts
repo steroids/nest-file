@@ -31,16 +31,22 @@ export class FileImageService {
             image.extend(preview.sharp.extend);
             hasChanges = true;
         }
-        const {data, info} = await image
-            //параметры добавлены исключительно для уменьшения веса превью
-            .png({
+
+        //добавляем параметры для уменьшения веса превью
+        if (file.fileMimeType === 'image/png') {
+            image.png({
                 quality: 80,
                 palette: true,
-            })
-            .jpeg({
+            });
+        }
+
+        if (file.fileMimeType === 'image/jpeg') {
+            image.jpeg({
                 quality: 60,
-            })
-            .toBuffer({resolveWithObject: true});
+            });
+        }
+
+        const {data, info} = await image.toBuffer({resolveWithObject: true});
 
         const imageModel = DataMapper.create<FileImageModel>(FileImageModel, {
             fileId: file.id,
