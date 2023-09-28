@@ -8,6 +8,7 @@ import {FileModel} from '../models/FileModel';
 import {FileHelper} from '../helpers/FileHelper';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {FileSaveDto} from '../dtos/FileSaveDto';
+import {SharpHelper} from '../helpers/SharpHelper';
 
 export class FileImageService {
     constructor(
@@ -32,18 +33,11 @@ export class FileImageService {
             hasChanges = true;
         }
 
-        //добавляем параметры для уменьшения веса превью
-        if (file.fileMimeType === 'image/png') {
-            image.png({
-                quality: 80,
-                palette: true,
-            });
-        }
+        //add image output options if they are specified
+        const sharpOptionName = SharpHelper.getImageOptionNameByMimeType(file.fileMimeType);
 
-        if (file.fileMimeType === 'image/jpeg') {
-            image.jpeg({
-                quality: 60,
-            });
+        if (sharpOptionName && preview.sharp?.outputImageOptions?.[sharpOptionName]) {
+            image[sharpOptionName](preview.sharp?.outputImageOptions[sharpOptionName])
         }
 
         const {data, info} = await image.toBuffer({resolveWithObject: true});
