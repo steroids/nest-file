@@ -5,10 +5,15 @@ export interface IFilePreviewOptions {
     sharp?: {
         resize?: any,
         extend?: any,
+        /** Настройки кропа изображения (извлечение прямоугольной области) */
         extract?: {
+            /** Смещенее от левого края (начиная с нулевого индекса) */
             left: number,
+            /** Смещенее от верхнего края (начиная с нулевого индекса) */
             top: number,
+            /** Ширина региона для кропа */
             width: number,
+            /** Высота региона для кропа */
             height: number,
         },
         outputImageOptions?: {
