@@ -11,7 +11,7 @@ import SearchQuery from '@steroidsjs/nest/usecases/base/SearchQuery';
 import {Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
-import { ContextDto } from '@steroidsjs/nest/usecases/dtos/ContextDto';
+import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
 import {IFileRepository} from '../interfaces/IFileRepository';
 import {FileModel} from '../models/FileModel';
 import {FileImageService} from './FileImageService';
@@ -22,6 +22,7 @@ import {FileStorageFabric} from './FileStorageFabric';
 import {FileExpressSourceDto} from '../dtos/sources/FileExpressSourceDto';
 import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
+import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 
 export class FileService extends ReadService<FileModel> {
     constructor(
@@ -43,6 +44,24 @@ export class FileService extends ReadService<FileModel> {
         rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
         schemaClass: T = null,
     ): Promise<T | FileModel> {
+        const fileModel = await this.uploadFileInternal(rawOptions);
+        await this.createPreviewsOnImage(fileModel, this.fileConfigService.previews);
+        return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
+    }
+
+    async uploadImage<T>(
+        rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
+        customPreviews: Record<string, IFilePreviewOptions> = null,
+        schemaClass: T = null,
+    ): Promise<T | FileModel> {
+        const fileModel = await this.uploadFileInternal(rawOptions);
+        await this.createPreviewsOnImage(fileModel, customPreviews || this.fileConfigService.previews);
+        return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
+    }
+
+    protected async uploadFileInternal(
+        rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
+    ): Promise<FileModel> {
         // Resolve options
         if (typeof rawOptions === 'string') {
             rawOptions = FileLocalSourceDto.createFromPath(rawOptions);
@@ -85,22 +104,24 @@ export class FileService extends ReadService<FileModel> {
         const writeResult = await this.fileStorageFabric.get(options.storageName).write(fileDto, stream);
 
         // Save file in database
-        const fileModel = await this.repository.create(DataMapper.create(FileModel, {
+        return this.repository.create(DataMapper.create(FileModel, {
             ...fileDto,
             fileMimeType: fileDto.fileMimeType || '',
             md5: fileDto.md5 || writeResult.md5,
             storageName: options.storageName,
         }));
+    }
 
+    protected async createPreviewsOnImage(fileModel: FileModel, previews: Record<string, IFilePreviewOptions>) {
         // Create previews for image
         if (this.fileConfigService.imagesMimeTypes.includes(fileModel.fileMimeType)) {
             fileModel.images = [];
-            for (const previewName of Object.keys(this.fileConfigService.previews)) {
-                const preview = this.fileConfigService.previews[previewName];
+            for (const previewName of Object.keys(previews)) {
+                const preview = previews[previewName];
                 if (preview?.enable) {
                     try {
                         fileModel.images.push(
-                            await this.fileImageService.createPreview(fileModel, previewName),
+                            await this.fileImageService.createPreview(fileModel, previewName, preview),
                         );
                     } catch (e) {
                         Sentry.captureException(e, {
@@ -113,8 +134,6 @@ export class FileService extends ReadService<FileModel> {
                 }
             }
         }
-
-        return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
     }
 
     /**

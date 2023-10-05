@@ -5,6 +5,12 @@ export interface IFilePreviewOptions {
     sharp?: {
         resize?: any,
         extend?: any,
+        extract?: {
+            left: number,
+            top: number,
+            width: number,
+            height: number,
+        },
         outputImageOptions?: {
             jpeg?: any,
             png?: any,
