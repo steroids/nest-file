@@ -9,6 +9,7 @@ import {FileHelper} from '../helpers/FileHelper';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {FileSaveDto} from '../dtos/FileSaveDto';
 import {SharpHelper} from '../helpers/SharpHelper';
+import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 
 export class FileImageService {
     constructor(
@@ -18,26 +19,33 @@ export class FileImageService {
     ) {
     }
 
-    async createPreview(file: FileModel, previewName: string): Promise<FileImageModel> {
-        const preview = this.fileConfigService.previews?.[previewName];
+    async createPreview(file: FileModel, previewName: string, previewOptions: IFilePreviewOptions = null): Promise<FileImageModel> {
+        if (!previewOptions) {
+            previewOptions = this.fileConfigService.previews?.[previewName];
+        }
+
         const content = await this.fileStorageFabric.get(file.storageName).read(file);
 
         const image = sharp(content, {failOnError: false});
         let hasChanges = false;
-        if (preview?.width && preview?.height) {
-            image.resize(preview.width, preview.height, preview.sharp?.resize);
+        if (previewOptions?.width && previewOptions?.height) {
+            image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
             hasChanges = true;
         }
-        if (preview?.sharp?.extend) {
-            image.extend(preview.sharp.extend);
+        if (previewOptions?.sharp?.extend) {
+            image.extend(previewOptions.sharp.extend);
+            hasChanges = true;
+        }
+        if (previewOptions?.sharp?.extract) {
+            image.extract(previewOptions.sharp.extract);
             hasChanges = true;
         }
 
         //add image output options if they are specified
         const sharpOptionName = SharpHelper.getImageOptionNameByMimeType(file.fileMimeType);
 
-        if (sharpOptionName && preview.sharp?.outputImageOptions?.[sharpOptionName]) {
-            image[sharpOptionName](preview.sharp?.outputImageOptions[sharpOptionName])
+        if (sharpOptionName && previewOptions.sharp?.outputImageOptions?.[sharpOptionName]) {
+            image[sharpOptionName](previewOptions.sharp?.outputImageOptions[sharpOptionName]);
         }
 
         const {data, info} = await image.toBuffer({resolveWithObject: true});
