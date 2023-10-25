@@ -15,6 +15,7 @@ import {MinioS3Storage} from '../domain/storages/MinioS3Storage';
 import FileStorageEnum from '../domain/enums/FileStorageEnum';
 import FileController from './controllers/FileController';
 import {IFileModuleConfig} from './config';
+import {FileRemoveService} from './services/FileRemoveService';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -63,6 +64,10 @@ export default (config: IFileModuleConfig) => ({
             IFileImageRepository,
             FileConfigService,
             FileStorageFabric,
+        ]),
+        ModuleHelper.provide(FileRemoveService, [
+            IFileRepository,
+            IFileImageRepository,
         ]),
     ],
     exports: [
