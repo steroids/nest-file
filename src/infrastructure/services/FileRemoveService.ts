@@ -2,10 +2,14 @@ import {Cron, CronExpression} from '@nestjs/schedule';
 import {Injectable} from '@nestjs/common';
 import {promises} from 'fs';
 import {join} from 'path';
+import * as dotenv from 'dotenv';
 import {ICrudRepository} from '@steroidsjs/nest/usecases/interfaces/ICrudRepository';
 import {IFileImageRepository} from '../../domain/interfaces/IFileImageRepository';
 import {IFileRepository} from '../../domain/interfaces/IFileRepository';
-import {REMOVING_FILES_BY_CRON_IS_ENABLE} from '../../domain/constants/constants';
+
+dotenv.config();
+
+const REMOVING_FILES_BY_CRON_IS_ENABLE = Boolean(process.env.REMOVING_FILES_BY_CRON_IS_ENABLE);
 
 @Injectable()
 export class FileRemoveService {
