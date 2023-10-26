@@ -100,6 +100,11 @@ export class FileService extends ReadService<FileModel> {
         // Get file stream from source
         const stream = await this.createStreamFromSource(options.source);
 
+        // Remove source
+        if (!(options.source instanceof FileStreamSourceDto) && !process.env.SAVE_SOURCE_FILE_AFTER_UPLOAD) {
+            await this.removeSource(options.source);
+        }
+
         // Save original file via storage
         const writeResult = await this.fileStorageFabric.get(options.storageName).write(fileDto, stream);
 
@@ -240,5 +245,18 @@ export class FileService extends ReadService<FileModel> {
 
     async getFileWithDocument(fileName: string) {
         return this.repository.getFileWithDocument(fileName);
+    }
+
+    private async removeSource(source: FileExpressSourceDto | FileLocalSourceDto): Promise<void> {
+        try {
+            await fs.promises.rm(source.path);
+        } catch (error) {
+            Sentry.captureException(error, {
+                extra: {
+                    scope: 'FileService',
+                    pathToFile: source.path,
+                },
+            });
+        }
     }
 }
