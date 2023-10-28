@@ -79,6 +79,11 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      */
     public imagesMimeTypes: string[];
 
+    /**
+     * Default behavior for temporary files
+     */
+    public saveTemporaryFileAfterUpload: boolean;
+
     constructor(
         private custom: IFileModuleConfig,
     ) {
@@ -130,5 +135,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
             'image/webp',
             'image/svg+xml',
         ];
+
+        this.saveTemporaryFileAfterUpload = Boolean(process.env.SAVE_TEMPORARY_FILE_AFTER_UPLOAD) || false;
     }
 }

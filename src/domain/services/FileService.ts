@@ -24,6 +24,8 @@ import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 
+type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
+
 export class FileService extends ReadService<FileModel> {
     constructor(
         public repository: IFileRepository,
@@ -102,6 +104,12 @@ export class FileService extends ReadService<FileModel> {
 
         // Save original file via storage
         const writeResult = await this.fileStorageFabric.get(options.storageName).write(fileDto, stream);
+
+        // Delete temporary file
+        const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
+        if (this.isFileExpressOrLocalSource(options.source) && shouldDeleteTemporaryFile) {
+            await this.deleteTemporaryFile(options.source.path);
+        }
 
         // Save file in database
         return this.repository.create(DataMapper.create(FileModel, {
@@ -240,5 +248,24 @@ export class FileService extends ReadService<FileModel> {
 
     async getFileWithDocument(fileName: string) {
         return this.repository.getFileWithDocument(fileName);
+    }
+
+    private async deleteTemporaryFile(pathToFile: string): Promise<void> {
+        try {
+            await fs.promises.rm(pathToFile);
+        } catch (error) {
+            Sentry.captureException(error, {
+                extra: {
+                    scope: 'FileService',
+                    pathToFile,
+                },
+            });
+        }
+    }
+
+    private isFileExpressOrLocalSource(
+        source: FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto,
+    ): source is FileExpressOrLocalSource {
+        return source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto;
     }
 }
