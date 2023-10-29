@@ -136,6 +136,6 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
             'image/svg+xml',
         ];
 
-        this.saveTemporaryFileAfterUpload = Boolean(process.env.SAVE_TEMPORARY_FILE_AFTER_UPLOAD) || false;
+        this.saveTemporaryFileAfterUpload = Boolean(process.env.SAVE_TEMPORARY_FILE_AFTER_UPLOAD);
     }
 }
