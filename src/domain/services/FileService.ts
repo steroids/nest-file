@@ -26,6 +26,12 @@ import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
+function isFileExpressOrLocalSource(
+    source: FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto,
+): source is FileExpressOrLocalSource {
+    return source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto;
+}
+
 export class FileService extends ReadService<FileModel> {
     constructor(
         public repository: IFileRepository,
@@ -107,8 +113,8 @@ export class FileService extends ReadService<FileModel> {
 
         // Delete temporary file
         const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
-        if (this.isFileExpressOrLocalSource(options.source) && shouldDeleteTemporaryFile) {
-            await this.deleteTemporaryFile(options.source.path);
+        if (isFileExpressOrLocalSource(options.source) && shouldDeleteTemporaryFile) {
+            this.deleteTemporaryFile(options.source.path);
         }
 
         // Save file in database
@@ -250,9 +256,9 @@ export class FileService extends ReadService<FileModel> {
         return this.repository.getFileWithDocument(fileName);
     }
 
-    private async deleteTemporaryFile(pathToFile: string): Promise<void> {
+    private deleteTemporaryFile(pathToFile: string): void {
         try {
-            await fs.promises.rm(pathToFile);
+            fs.rmSync(pathToFile);
         } catch (error) {
             Sentry.captureException(error, {
                 extra: {
@@ -261,11 +267,5 @@ export class FileService extends ReadService<FileModel> {
                 },
             });
         }
-    }
-
-    private isFileExpressOrLocalSource(
-        source: FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto,
-    ): source is FileExpressOrLocalSource {
-        return source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto;
     }
 }
