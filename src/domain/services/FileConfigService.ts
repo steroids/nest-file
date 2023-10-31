@@ -80,7 +80,8 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     public imagesMimeTypes: string[];
 
     /**
-     * Default behavior for temporary files
+     * Configuration for deleting temporary files.
+     * Temporary files are files downloaded locally to disk and intended for further loading into storage.
      */
     public saveTemporaryFileAfterUpload: boolean;
 
@@ -136,6 +137,6 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
             'image/svg+xml',
         ];
 
-        this.saveTemporaryFileAfterUpload = Boolean(process.env.SAVE_TEMPORARY_FILE_AFTER_UPLOAD);
+        this.saveTemporaryFileAfterUpload = custom.saveTemporaryFileAfterUpload;
     }
 }
