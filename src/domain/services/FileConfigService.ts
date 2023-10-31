@@ -79,6 +79,12 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      */
     public imagesMimeTypes: string[];
 
+    /**
+     * Enable to store temporary uploaded files. Default behavior is deleting temporary files after upload
+     * Temporary files are files downloaded locally to disk and intended for further loading into storage.
+     */
+    public saveTemporaryFileAfterUpload: boolean;
+
     constructor(
         private custom: IFileModuleConfig,
     ) {
@@ -130,5 +136,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
             'image/webp',
             'image/svg+xml',
         ];
+
+        this.saveTemporaryFileAfterUpload = custom.saveTemporaryFileAfterUpload;
     }
 }
