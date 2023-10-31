@@ -80,7 +80,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     public imagesMimeTypes: string[];
 
     /**
-     * Configuration for deleting temporary files.
+     * Enable to store temporary uploaded files. Default behavior is deleting temporary files after upload
      * Temporary files are files downloaded locally to disk and intended for further loading into storage.
      */
     public saveTemporaryFileAfterUpload: boolean;
