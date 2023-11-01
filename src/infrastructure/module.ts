@@ -15,6 +15,7 @@ import {MinioS3Storage} from '../domain/storages/MinioS3Storage';
 import FileStorageEnum from '../domain/enums/FileStorageEnum';
 import FileController from './controllers/FileController';
 import {IFileModuleConfig} from './config';
+import {FileDeleteScheduleService} from './services/FileDeleteScheduleService';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -64,6 +65,7 @@ export default (config: IFileModuleConfig) => ({
             FileConfigService,
             FileStorageFabric,
         ]),
+        FileDeleteScheduleService,
     ],
     exports: [
         IFileService,

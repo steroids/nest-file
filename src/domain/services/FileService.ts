@@ -12,6 +12,7 @@ import {Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
+import {join} from 'path';
 import {IFileRepository} from '../interfaces/IFileRepository';
 import {FileModel} from '../models/FileModel';
 import {FileImageService} from './FileImageService';
@@ -23,6 +24,8 @@ import {FileExpressSourceDto} from '../dtos/sources/FileExpressSourceDto';
 import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
+import FileStorageEnum from '../enums/FileStorageEnum';
+import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
@@ -114,7 +117,7 @@ export class FileService extends ReadService<FileModel> {
         // Delete temporary file
         const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
         if (isFileExpressOrLocalSource(options.source) && shouldDeleteTemporaryFile) {
-            this.deleteTemporaryFile(options.source.path);
+            this.deleteFile(options.source.path);
         }
 
         // Save file in database
@@ -256,7 +259,66 @@ export class FileService extends ReadService<FileModel> {
         return this.repository.getFileWithDocument(fileName);
     }
 
-    private deleteTemporaryFile(pathToFile: string): void {
+    async deleteLostAndTemporaryFiles(): Promise<void> {
+        const pathToLocalStorage = this.getPathToLocalStorage();
+        if (!pathToLocalStorage) {
+            return;
+        }
+
+        const fileNamesFromLocalStorage = await this.getFileNamesFromDir(pathToLocalStorage);
+
+        const fileNamesFromDb = [
+            ...await this.fileImageService.getFileNamesFromDb(),
+            ...await this.getFileNamesFromDb(),
+        ];
+
+        for (const fileName of fileNamesFromLocalStorage) {
+            if (!fileNamesFromDb.includes(fileName)) {
+                const pathToFile = join(pathToLocalStorage, fileName);
+                this.deleteFile(pathToFile);
+            }
+        }
+    }
+
+    private getPathToLocalStorage(): string | null {
+        let localStorage: IFileLocalStorage;
+
+        try {
+            localStorage = this.fileStorageFabric.get(FileStorageEnum.LOCAL) as IFileLocalStorage;
+            return localStorage.rootPath;
+        } catch (error) {
+            Sentry.captureException(error, {
+                extra: {
+                    scope: 'FileService',
+                    message: error.message,
+                },
+            });
+            return null;
+        }
+    }
+
+    private async getFileNamesFromDir(pathToDir: string): Promise<string[] | null> {
+        try {
+            return await fs.promises.readdir(pathToDir);
+        } catch (error) {
+            Sentry.captureException(error, {
+                extra: {
+                    scope: 'FileService',
+                    message: error.message,
+                },
+            });
+            return null;
+        }
+    }
+
+    private getFileNamesFromDb(): Promise<string[] | null> {
+        return this.repository.createQuery()
+            .select('fileName')
+            .where({storageName: FileStorageEnum.LOCAL})
+            .column();
+    }
+
+    private deleteFile(pathToFile: string): void {
         try {
             fs.rmSync(pathToFile);
         } catch (error) {

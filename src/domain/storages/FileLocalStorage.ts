@@ -3,13 +3,13 @@ import {join} from 'path';
 import * as fs from 'fs';
 import * as md5File from 'md5-file';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
-import {IFileStorage} from '../interfaces/IFileStorage';
 import {FileSaveDto} from '../dtos/FileSaveDto';
 import {FileWriteResult} from '../dtos/FileWriteResult';
 import {FileModel} from '../models/FileModel';
 import {FileImageModel} from '../models/FileImageModel';
+import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 
-export class FileLocalStorage implements IFileStorage {
+export class FileLocalStorage implements IFileLocalStorage {
     /**
      * Absolute path to root user files dir
      */
