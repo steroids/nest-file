@@ -23,8 +23,7 @@ import {FileExpressSourceDto} from '../dtos/sources/FileExpressSourceDto';
 import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
-import FileStorageEnum from '../enums/FileStorageEnum';
-import {FileHelper} from '../helpers/FileHelper';
+import {FileStorage} from '../enums/FileStorageEnum';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
@@ -116,7 +115,7 @@ export class FileService extends ReadService<FileModel> {
         // Delete temporary file
         const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
         if (isFileExpressOrLocalSource(options.source) && shouldDeleteTemporaryFile) {
-            FileHelper.deleteFile(options.source.path);
+            this.deleteTemporaryFile(options.source.path);
         }
 
         // Save file in database
@@ -258,7 +257,20 @@ export class FileService extends ReadService<FileModel> {
         return this.repository.getFileWithDocument(fileName);
     }
 
-    async getLocalStorageFileNamesFromDb(): Promise<string[] | null> {
-        return this.repository.getFileNamesByStorageName(FileStorageEnum.LOCAL);
+    private deleteTemporaryFile(pathToFile: string): void {
+        try {
+            fs.rmSync(pathToFile);
+        } catch (error) {
+            Sentry.captureException(error, {
+                extra: {
+                    scope: 'FileService',
+                    pathToFile,
+                },
+            });
+        }
+    }
+
+    async getFileNamesFromDb(storageName: FileStorage): Promise<string[] | null> {
+        return this.repository.getFileNamesByStorageName(storageName);
     }
 }

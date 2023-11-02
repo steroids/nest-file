@@ -7,6 +7,7 @@ import {IFileRepository} from '../../domain/interfaces/IFileRepository';
 import {FileTable} from '../tables/FileTable';
 import {FileModel} from '../../domain/models/FileModel';
 import {FileStorageFabric} from '../../domain/services/FileStorageFabric';
+import {FileStorage} from '../../domain/enums/FileStorageEnum';
 
 @Injectable()
 export class FileRepository extends CrudRepository<FileModel> implements IFileRepository {
@@ -40,7 +41,7 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
         return DataMapper.create(FileModel, file);
     }
 
-    async getFileNamesByStorageName(storageName: string): Promise<string[] | null> {
+    async getFileNamesByStorageName(storageName: FileStorage): Promise<string[] | null> {
         return this.createQuery()
             .select('fileName')
             .where({storageName})

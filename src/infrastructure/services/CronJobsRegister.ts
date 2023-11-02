@@ -19,7 +19,7 @@ export class CronJobsRegister implements OnModuleInit {
     }
 
     addCronJobForDeleteFiles(): void {
-        const {isEnable, cronTimePattern} = this.fileConfigService.deleteLostAndTemporaryFilesByCron;
+        const {isEnable, cronTimePattern, storageName} = this.fileConfigService.deleteLostAndTemporaryFilesByCron;
 
         if (!isEnable) {
             return;
@@ -27,7 +27,7 @@ export class CronJobsRegister implements OnModuleInit {
 
         // `any` type used because there is a type error - "Types of property 'cronTime' are incompatible."
         const job = new CronJob(cronTimePattern, () => {
-            this.deleteService.deleteLostAndTemporaryFiles();
+            this.deleteService.deleteLostAndTemporaryFiles(storageName);
         }) as any;
 
         this.schedulerRegistry.addCronJob(this.deleteLostAndTemporaryFilesJobName, job);

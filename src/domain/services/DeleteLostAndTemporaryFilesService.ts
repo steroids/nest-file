@@ -1,23 +1,9 @@
-import {join} from 'path';
 import * as Sentry from '@sentry/node';
 import {FileImageService} from './FileImageService';
 import {FileService} from './FileService';
 import {FileStorageFabric} from './FileStorageFabric';
-import {FileHelper} from '../helpers/FileHelper';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
-import FileStorageEnum from '../enums/FileStorageEnum';
-
-function getPathToLocalStorage(fileStorageFabric: FileStorageFabric): string | null {
-    let localStorage: IFileLocalStorage;
-
-    try {
-        localStorage = fileStorageFabric.get(FileStorageEnum.LOCAL) as IFileLocalStorage;
-        return localStorage.rootPath;
-    } catch (error) {
-        Sentry.captureException(error);
-        return null;
-    }
-}
+import {FileStorage} from '../enums/FileStorageEnum';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
@@ -26,24 +12,44 @@ export class DeleteLostAndTemporaryFilesService {
         private fileStorageFabric: FileStorageFabric,
     ) {}
 
-    async deleteLostAndTemporaryFiles(): Promise<void> {
-        const pathToLocalStorage = getPathToLocalStorage(this.fileStorageFabric);
-        if (!pathToLocalStorage) {
+    /**
+     * @dev This feature is currently only available for local storage.
+     * To implement work with s3 you need:
+     * - extend IFileStorage interface with methods of IFileLocalStorage interface
+     * - in MinioS3Storage class implement extended IFileStorage interface
+     * - return in getStorage() method object that implements IFileStorage interface
+     */
+    async deleteLostAndTemporaryFiles(storageName: FileStorage): Promise<void> {
+        const storage = this.getStorage(storageName);
+
+        if (!storage) {
             return;
         }
 
-        const fileNamesFromLocalStorage = await FileHelper.getFileNamesFromDir(pathToLocalStorage);
+        const fileNamesFromStorage = storage.getFileNames();
+
+        if (!fileNamesFromStorage) {
+            return;
+        }
 
         const fileNamesFromDb = [
-            ...await this.fileImageService.getLocalStorageFileNamesFromDb(),
-            ...await this.fileService.getLocalStorageFileNamesFromDb(),
+            ...await this.fileImageService.getFileNamesFromDb(storageName),
+            ...await this.fileService.getFileNamesFromDb(storageName),
         ];
 
-        for (const fileName of fileNamesFromLocalStorage) {
+        for (const fileName of fileNamesFromStorage) {
             if (!fileNamesFromDb.includes(fileName)) {
-                const pathToFile = join(pathToLocalStorage, fileName);
-                FileHelper.deleteFile(pathToFile);
+                storage.deleteFile(fileName);
             }
+        }
+    }
+
+    private getStorage(storageName: FileStorage): IFileLocalStorage {
+        try {
+            return this.fileStorageFabric.get(storageName) as IFileLocalStorage;
+        } catch (error) {
+            Sentry.captureException(error);
+            return null;
         }
     }
 }

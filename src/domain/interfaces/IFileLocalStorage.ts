@@ -1,5 +1,6 @@
 import {IFileStorage} from './IFileStorage';
 
 export interface IFileLocalStorage extends IFileStorage {
-    rootPath: string;
+    getFileNames(): string[] | null;
+    deleteFile(fileName: string): void;
 }

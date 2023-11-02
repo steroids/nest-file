@@ -2,7 +2,7 @@ import {toInteger as _toInteger} from 'lodash';
 import {OnModuleInit} from '@nestjs/common';
 import {join} from 'path';
 import {CronExpression} from '@nestjs/schedule';
-import FileStorageEnum from '../enums/FileStorageEnum';
+import FileStorageEnum, {FileStorage} from '../enums/FileStorageEnum';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IFileModuleConfig} from '../../infrastructure/config';
@@ -91,8 +91,10 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      * Lost files are files whose information has been deleted from the database
      * but the files themselves still exist in the storage.
      *
-     * IMPORTANT: When you enable this feature, temporary files will be deleted even if
+     * IMPORTANT:
+     * - when you enable this feature, temporary files will be deleted even if
      * saveTemporaryFileAfterUpload = true
+     * - this functionality is currently only available for local storage
      *
      * See cronTime patterns:
      * - https://www.npmjs.com/package/cron#cron-patterns
@@ -101,6 +103,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     public deleteLostAndTemporaryFilesByCron: {
         isEnable: boolean,
         cronTimePattern: string,
+        storageName: FileStorage,
     };
 
     constructor(
@@ -160,6 +163,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
         this.deleteLostAndTemporaryFilesByCron = {
             isEnable: false,
             cronTimePattern: CronExpression.EVERY_12_HOURS,
+            storageName: FileStorageEnum.LOCAL,
             ...custom.deleteLostAndTemporaryFilesByCron || {},
         };
     }

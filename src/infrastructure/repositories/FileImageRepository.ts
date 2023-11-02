@@ -5,6 +5,7 @@ import {IFileImageRepository} from '../../domain/interfaces/IFileImageRepository
 import {FileImageModel} from '../../domain/models/FileImageModel';
 import {FileImageTable} from '../tables/FileImageTable';
 import {FileStorageFabric} from '../../domain/services/FileStorageFabric';
+import {FileStorage} from '../../domain/enums/FileStorageEnum';
 
 export class FileImageRepository extends CrudRepository<FileImageModel> implements IFileImageRepository {
     protected modelClass = FileImageModel;
@@ -23,7 +24,7 @@ export class FileImageRepository extends CrudRepository<FileImageModel> implemen
         return model;
     }
 
-    async getFileNamesByStorageName(storageName: string): Promise<string[] | null> {
+    async getFileNamesByStorageName(storageName: FileStorage): Promise<string[] | null> {
         return this.createQuery()
             .select('fileName')
             .where({storageName})

@@ -10,7 +10,7 @@ import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {FileSaveDto} from '../dtos/FileSaveDto';
 import {SharpHelper} from '../helpers/SharpHelper';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
-import FileStorageEnum from '../enums/FileStorageEnum';
+import {FileStorage} from '../enums/FileStorageEnum';
 
 export class FileImageService {
     constructor(
@@ -81,7 +81,7 @@ export class FileImageService {
         return this.repository.create(imageModel);
     }
 
-    async getLocalStorageFileNamesFromDb(): Promise<string[] | null> {
-        return this.repository.getFileNamesByStorageName(FileStorageEnum.LOCAL);
+    async getFileNamesFromDb(storageName: FileStorage): Promise<string[] | null> {
+        return this.repository.getFileNamesByStorageName(storageName);
     }
 }
