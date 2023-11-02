@@ -157,9 +157,10 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
 
         this.saveTemporaryFileAfterUpload = custom.saveTemporaryFileAfterUpload;
 
-        this.deleteLostAndTemporaryFilesByCron = custom.deleteLostAndTemporaryFilesByCron || {
+        this.deleteLostAndTemporaryFilesByCron = {
             isEnable: false,
             cronTimePattern: CronExpression.EVERY_12_HOURS,
+            ...custom.deleteLostAndTemporaryFilesByCron || {},
         };
     }
 }
