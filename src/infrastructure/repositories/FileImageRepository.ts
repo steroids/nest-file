@@ -22,4 +22,11 @@ export class FileImageRepository extends CrudRepository<FileImageModel> implemen
         model.url = this.fileStorageFabric.get(model.storageName).getUrl(model);
         return model;
     }
+
+    async getFileNamesByStorageName(storageName: string): Promise<string[] | null> {
+        return this.createQuery()
+            .select('fileName')
+            .where({storageName})
+            .column();
+    }
 }

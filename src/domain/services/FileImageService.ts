@@ -81,10 +81,7 @@ export class FileImageService {
         return this.repository.create(imageModel);
     }
 
-    async getFileNamesFromDb(): Promise<string[] | null> {
-        return this.repository.createQuery()
-            .select('fileName')
-            .where({storageName: FileStorageEnum.LOCAL})
-            .column();
+    async getLocalStorageFileNamesFromDb(): Promise<string[] | null> {
+        return this.repository.getFileNamesByStorageName(FileStorageEnum.LOCAL);
     }
 }

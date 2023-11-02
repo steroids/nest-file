@@ -39,4 +39,11 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
             .getOne();
         return DataMapper.create(FileModel, file);
     }
+
+    async getFileNamesByStorageName(storageName: string): Promise<string[] | null> {
+        return this.createQuery()
+            .select('fileName')
+            .where({storageName})
+            .column();
+    }
 }

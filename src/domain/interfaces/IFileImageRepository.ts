@@ -3,4 +3,6 @@ import {FileImageModel} from '../models/FileImageModel';
 
 export const IFileImageRepository = 'IFileImageRepository';
 
-export type IFileImageRepository = ICrudRepository<FileImageModel>
+export interface IFileImageRepository extends ICrudRepository<FileImageModel> {
+    getFileNamesByStorageName: (storageName: string) => Promise<string[] | null>;
+}
