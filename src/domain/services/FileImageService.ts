@@ -15,8 +15,8 @@ import {FileStorage} from '../enums/FileStorageEnum';
 export class FileImageService {
     constructor(
         public repository: IFileImageRepository,
-        private fileConfigService: FileConfigService,
-        private fileStorageFabric: FileStorageFabric,
+        protected readonly fileConfigService: FileConfigService,
+        protected readonly fileStorageFabric: FileStorageFabric,
     ) {
     }
 
