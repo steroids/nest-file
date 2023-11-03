@@ -1,5 +1,6 @@
 import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper';
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
+import {ScheduleModule} from '@nestjs/schedule';
 import {IFileRepository} from '../domain/interfaces/IFileRepository';
 import {FileRepository} from './repositories/FileRepository';
 import {IFileImageRepository} from '../domain/interfaces/IFileImageRepository';
@@ -19,6 +20,9 @@ import {CronJobsRegister} from './services/CronJobsRegister';
 import {DeleteLostAndTemporaryFilesService} from '../domain/services/DeleteLostAndTemporaryFilesService';
 
 export default (config: IFileModuleConfig) => ({
+    imports: [
+        ScheduleModule.forRoot(),
+    ],
     controllers: [
         FileController,
     ],
