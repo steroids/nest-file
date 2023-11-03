@@ -15,6 +15,8 @@ import {MinioS3Storage} from '../domain/storages/MinioS3Storage';
 import FileStorageEnum from '../domain/enums/FileStorageEnum';
 import FileController from './controllers/FileController';
 import {IFileModuleConfig} from './config';
+import {CronJobsRegister} from './services/CronJobsRegister';
+import {DeleteLostAndTemporaryFilesService} from '../domain/services/DeleteLostAndTemporaryFilesService';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -64,6 +66,13 @@ export default (config: IFileModuleConfig) => ({
             FileConfigService,
             FileStorageFabric,
         ]),
+
+        ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
+            IFileService,
+            FileImageService,
+            FileStorageFabric,
+        ]),
+        CronJobsRegister,
     ],
     exports: [
         IFileService,

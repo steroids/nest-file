@@ -23,6 +23,7 @@ import {FileExpressSourceDto} from '../dtos/sources/FileExpressSourceDto';
 import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
+import {FileStorage} from '../enums/FileStorageEnum';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
@@ -267,5 +268,9 @@ export class FileService extends ReadService<FileModel> {
                 },
             });
         }
+    }
+
+    async getFileNamesFromDb(storageName: FileStorage): Promise<string[] | null> {
+        return this.repository.getFileNamesByStorageName(storageName);
     }
 }

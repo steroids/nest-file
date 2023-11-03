@@ -1,6 +1,9 @@
 import {ICrudRepository} from '@steroidsjs/nest/usecases/interfaces/ICrudRepository';
 import {FileImageModel} from '../models/FileImageModel';
+import {FileStorage} from '../enums/FileStorageEnum';
 
 export const IFileImageRepository = 'IFileImageRepository';
 
-export type IFileImageRepository = ICrudRepository<FileImageModel>
+export interface IFileImageRepository extends ICrudRepository<FileImageModel> {
+    getFileNamesByStorageName: (storageName: FileStorage) => Promise<string[] | null>;
+}

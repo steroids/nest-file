@@ -3,13 +3,14 @@ import {join} from 'path';
 import * as fs from 'fs';
 import * as md5File from 'md5-file';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
-import {IFileStorage} from '../interfaces/IFileStorage';
+import * as Sentry from '@sentry/node';
 import {FileSaveDto} from '../dtos/FileSaveDto';
 import {FileWriteResult} from '../dtos/FileWriteResult';
 import {FileModel} from '../models/FileModel';
 import {FileImageModel} from '../models/FileImageModel';
+import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 
-export class FileLocalStorage implements IFileStorage {
+export class FileLocalStorage implements IFileLocalStorage {
     /**
      * Absolute path to root user files dir
      */
@@ -52,5 +53,23 @@ export class FileLocalStorage implements IFileStorage {
 
     public getUrl(fileModel: FileModel | FileImageModel): string {
         return [this.rootUrl, fileModel.folder, fileModel.fileName].filter(Boolean).join('/');
+    }
+
+    getFileNames(): string[] | null {
+        try {
+            return fs.readdirSync(this.rootPath);
+        } catch (error) {
+            Sentry.captureException(error);
+            return null;
+        }
+    }
+
+    deleteFile(fileName: string): void {
+        const pathToFile = join(this.rootPath, fileName);
+        try {
+            fs.rmSync(pathToFile);
+        } catch (error) {
+            Sentry.captureException(error);
+        }
     }
 }
