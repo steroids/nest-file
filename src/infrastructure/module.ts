@@ -18,6 +18,8 @@ import FileController from './controllers/FileController';
 import {IFileModuleConfig} from './config';
 import {CronJobsRegister} from './services/CronJobsRegister';
 import {DeleteLostAndTemporaryFilesService} from '../domain/services/DeleteLostAndTemporaryFilesService';
+import {FileImageSubscriber} from './subscribers/FileImageSubscriber';
+import {FileSubscriber} from './subscribers/FileSubscriber';
 
 export default (config: IFileModuleConfig) => ({
     imports: [
@@ -77,6 +79,9 @@ export default (config: IFileModuleConfig) => ({
             FileStorageFabric,
         ]),
         CronJobsRegister,
+
+        FileSubscriber,
+        FileImageSubscriber,
     ],
     exports: [
         IFileService,
