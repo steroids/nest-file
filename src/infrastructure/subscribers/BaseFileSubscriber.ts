@@ -2,6 +2,7 @@ import {EntitySubscriberInterface, DataSource, RemoveEvent} from '@steroidsjs/ty
 import {Inject, Type} from '@nestjs/common';
 import * as Sentry from '@sentry/node';
 import {FileStorageFabric} from '../../domain/services/FileStorageFabric';
+import {FileConfigService} from '../../domain/services/FileConfigService';
 
 /**
  * This interface contains the common FileModel and FileImageModel properties needed to delete files from storage.
@@ -21,12 +22,17 @@ interface IFile {
 export abstract class BaseFileSubscriber<TTable, TModel extends IFile> implements EntitySubscriberInterface<TTable> {
     constructor(
         @Inject(FileStorageFabric) protected storageFabric: FileStorageFabric,
+        @Inject(FileConfigService) private fileConfigService: FileConfigService,
         dataSource: DataSource,
     ) {
         dataSource.subscribers.push(this);
     }
 
     async afterRemove(event: RemoveEvent<TTable>): Promise<void> {
+        if (!this.fileConfigService.deleteFileFromStorage) {
+            return;
+        }
+
         const removedModelInstance = this.getModelFromTable(event.databaseEntity);
 
         if (!removedModelInstance) {

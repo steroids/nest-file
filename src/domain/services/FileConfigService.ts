@@ -106,6 +106,12 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
         storageName: FileStorage,
     };
 
+    /**
+     * Enable to delete file from storage after deleting data about this file in database.
+     * This option is disabled by default.
+     */
+    public deleteFileFromStorage: boolean;
+
     constructor(
         private custom: IFileModuleConfig,
     ) {
@@ -166,5 +172,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
             storageName: FileStorageEnum.LOCAL,
             ...custom.deleteLostAndTemporaryFilesByCron || {},
         };
+
+        this.deleteFileFromStorage = custom.deleteFileFromStorage;
     }
 }
