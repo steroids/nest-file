@@ -29,6 +29,11 @@ export abstract class BaseFileSubscriber<TTable, TModel extends IFile> implement
     async afterRemove(event: RemoveEvent<TTable>): Promise<void> {
         const removedModelInstance = this.getModelFromTable(event.databaseEntity);
 
+        if (!removedModelInstance) {
+            Sentry.captureMessage('After deleting information about file from database, invalid event was emitted');
+            return;
+        }
+
         const storage = this.storageFabric.get(removedModelInstance.storageName);
 
         try {
