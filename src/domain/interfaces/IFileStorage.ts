@@ -9,4 +9,5 @@ export interface IFileStorage {
     read(fileModel: FileModel): Promise<Buffer>
     write(fileSaveDto: FileSaveDto, source: Readable | Buffer): Promise<FileWriteResult>
     getUrl(fileModel: FileModel | FileImageModel): string
+    deleteFile(fileName: string): void | Promise<void>;
 }
