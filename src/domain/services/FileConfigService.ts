@@ -95,6 +95,8 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      * - when you enable this feature, temporary files will be deleted even if
      * saveTemporaryFileAfterUpload = true
      * - this functionality is currently only available for local storage
+     * - to use this functionality you need import ScheduleModule into working project https://docs.nestjs.com/techniques/task-scheduling
+
      *
      * See cronTime patterns:
      * - https://www.npmjs.com/package/cron#cron-patterns

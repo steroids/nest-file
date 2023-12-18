@@ -1,6 +1,5 @@
 import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper';
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
-import {ScheduleModule} from '@nestjs/schedule';
 import {IFileRepository} from '../domain/interfaces/IFileRepository';
 import {FileRepository} from './repositories/FileRepository';
 import {IFileImageRepository} from '../domain/interfaces/IFileImageRepository';
@@ -22,9 +21,6 @@ import {FileImageSubscriber} from './subscribers/FileImageSubscriber';
 import {FileSubscriber} from './subscribers/FileSubscriber';
 
 export default (config: IFileModuleConfig) => ({
-    imports: [
-        ScheduleModule.forRoot(),
-    ],
     controllers: [
         FileController,
     ],

@@ -1,9 +1,13 @@
-import {Inject, Injectable, OnModuleInit} from '@nestjs/common';
+import {Inject, Injectable, OnModuleInit, Optional} from '@nestjs/common';
 import {SchedulerRegistry} from '@nestjs/schedule';
 import {CronJob} from 'cron';
 import {FileConfigService} from '../../domain/services/FileConfigService';
 import {DeleteLostAndTemporaryFilesService} from '../../domain/services/DeleteLostAndTemporaryFilesService';
 
+/**
+ * To use this functionality you need:
+ * - import ScheduleModule into the working project https://docs.nestjs.com/techniques/task-scheduling
+ */
 @Injectable()
 export class CronJobsRegister implements OnModuleInit {
     public deleteLostAndTemporaryFilesJobName = 'delete_lost_and_temporary_files_job';
@@ -11,10 +15,14 @@ export class CronJobsRegister implements OnModuleInit {
     constructor(
         @Inject(DeleteLostAndTemporaryFilesService) private deleteService: DeleteLostAndTemporaryFilesService,
         @Inject(FileConfigService) private fileConfigService: FileConfigService,
-        @Inject(SchedulerRegistry) private schedulerRegistry: SchedulerRegistry,
+        @Optional() @Inject(SchedulerRegistry) private schedulerRegistry: SchedulerRegistry,
     ) {}
 
     onModuleInit(): void {
+        if (!this.schedulerRegistry) {
+            return;
+        }
+
         this.addCronJobForDeleteFiles();
     }
 
