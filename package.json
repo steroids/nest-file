@@ -1,6 +1,6 @@
 {
   "name": "@steroidsjs/nest-file",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Steroids Nest File Module",
   "author": "",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "mime-types": "^2.1.35",
     "stream-mime-type": "^1.0.2",
     "md5-file": "^5.0.0",
-    "minio": "^7.0.32"
+    "minio": "7.1.3"
   },
   "peerDependencies": {
     "@steroidsjs/nest": "^1",
