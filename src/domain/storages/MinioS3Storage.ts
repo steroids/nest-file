@@ -52,21 +52,25 @@ export class MinioS3Storage implements IFileStorage {
         return new Promise((resolve, reject) => {
             // Get a full object.
             const chunks = [];
-            this.getClient().getObject(this.mainBucket, fileModel.fileName, (err, dataStream) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    dataStream.on('data', (chunk) => {
-                        chunks.push(chunk);
-                    });
-                    dataStream.on('end', () => {
-                        resolve(Buffer.concat(chunks));
-                    });
-                    dataStream.on('error', (err2) => {
-                        reject(err2);
-                    });
-                }
-            });
+            this.getClient().getObject(
+                this.mainBucket,
+                [fileModel.folder, fileModel.fileName].filter(Boolean).join('/'),
+                (err, dataStream) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        dataStream.on('data', (chunk) => {
+                            chunks.push(chunk);
+                        });
+                        dataStream.on('end', () => {
+                            resolve(Buffer.concat(chunks));
+                        });
+                        dataStream.on('error', (err2) => {
+                            reject(err2);
+                        });
+                    }
+                },
+            );
         });
     }
 
@@ -98,7 +102,7 @@ export class MinioS3Storage implements IFileStorage {
     }
 
     public getUrl(fileModel: FileModel | FileImageModel): string {
-        return [this.rootUrl, /*fileModel.folder, */fileModel.fileName].filter(Boolean).join('/');
+        return [this.rootUrl, fileModel.folder, fileModel.fileName].filter(Boolean).join('/');
     }
 
     protected makeMainBucket(): Promise<void> {
