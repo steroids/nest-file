@@ -76,7 +76,7 @@ export class MinioS3Storage implements IFileStorage {
         return new Promise((resolve, reject) => {
             this.getClient().putObject(
                 this.mainBucket,
-                fileSaveDto.fileName,
+                [fileSaveDto.folder, fileSaveDto.fileName].filter(Boolean).join('/'),
                 source,
                 {
                     'Content-Type': fileSaveDto.fileMimeType || 'application/octet-stream',
