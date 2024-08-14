@@ -273,4 +273,8 @@ export class FileService extends ReadService<FileModel> {
     async getFileNamesFromDb(storageName: FileStorage): Promise<string[] | null> {
         return this.repository.getFileNamesByStorageName(storageName);
     }
+
+    public async remove(id: number, context: ContextDto) {
+        await this.repository.remove(id);
+    }
 }

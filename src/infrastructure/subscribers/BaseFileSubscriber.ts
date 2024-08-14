@@ -21,11 +21,14 @@ interface IFile {
  */
 export abstract class BaseFileSubscriber<TTable, TModel extends IFile> implements EntitySubscriberInterface<TTable> {
     constructor(
-        @Inject(FileStorageFabric) protected storageFabric: FileStorageFabric,
-        @Inject(FileConfigService) private fileConfigService: FileConfigService,
-        dataSource: DataSource,
+        @Inject(FileStorageFabric)
+        protected storageFabric: FileStorageFabric,
+        @Inject(FileConfigService)
+        private fileConfigService: FileConfigService,
+        @Inject(FileConfigService)
+        private readonly dataSource: DataSource,
     ) {
-        dataSource.subscribers.push(this);
+        this.dataSource.subscribers.push(this);
     }
 
     async afterRemove(event: RemoveEvent<TTable>): Promise<void> {
