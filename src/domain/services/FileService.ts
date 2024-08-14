@@ -270,11 +270,20 @@ export class FileService extends ReadService<FileModel> {
         }
     }
 
-    async getFileNamesFromDb(storageName: FileStorage): Promise<string[] | null> {
-        return this.repository.getFileNamesByStorageName(storageName);
+    async getFilesPathsFromDb(storageName: FileStorage): Promise<string[] | null> {
+        return this.repository.getFilesPathsByStorageName(storageName);
     }
 
     public async remove(id: number, context: ContextDto) {
+        const file: FileModel = await this.createQuery()
+            .with(['images'])
+            .where({id})
+            .one();
+
+        for (const image of file.images) {
+            await this.fileImageService.remove(image.id, context);
+        }
+
         await this.repository.remove(id);
     }
 }

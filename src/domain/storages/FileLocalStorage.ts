@@ -9,6 +9,7 @@ import {FileWriteResult} from '../dtos/FileWriteResult';
 import {FileModel} from '../models/FileModel';
 import {FileImageModel} from '../models/FileImageModel';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
+import * as path from 'node:path';
 
 export class FileLocalStorage implements IFileLocalStorage {
     /**
@@ -55,17 +56,34 @@ export class FileLocalStorage implements IFileLocalStorage {
         return [this.rootUrl, fileModel.folder, fileModel.fileName].filter(Boolean).join('/');
     }
 
-    getFileNames(): string[] | null {
+    getFilesPaths(relativePath = ''): string[] | null {
         try {
-            return fs.readdirSync(this.rootPath);
+            const folderPath = path.join(this.rootPath, relativePath);
+            const files = fs.readdirSync(folderPath);
+            let results = [];
+
+            files.forEach(file => {
+                const filePath = path.join(folderPath, file);
+                const fileRelativePath = path.join(relativePath, file);
+                const stat = fs.statSync(filePath);
+
+                if (stat.isDirectory()) {
+                    results = results.concat(this.getFilesPaths(fileRelativePath));
+                } else {
+                    results.push(fileRelativePath);
+                }
+            });
+
+            return results;
         } catch (error) {
+            console.error(error);
             Sentry.captureException(error);
             return null;
         }
     }
 
-    deleteFile(fileName: string): void {
-        const pathToFile = join(this.rootPath, fileName);
+    deleteFile(filePath: string): void {
+        const pathToFile = join(this.rootPath, filePath);
         try {
             fs.rmSync(pathToFile);
         } catch (error) {

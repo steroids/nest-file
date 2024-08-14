@@ -24,10 +24,14 @@ export class FileImageRepository extends CrudRepository<FileImageModel> implemen
         return model;
     }
 
-    async getFileNamesByStorageName(storageName: FileStorage): Promise<string[] | null> {
-        return this.createQuery()
-            .select('fileName')
+    async getFilesPathsByStorageName(storageName: FileStorage): Promise<string[] | null> {
+        const files = await this.createQuery()
+            .select([
+                'fileName',
+                'folder',
+            ])
             .where({storageName})
-            .column();
+            .many();
+        return files.map(file => [file.folder, file.fileName].join('/'));
     }
 }
