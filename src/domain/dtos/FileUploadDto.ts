@@ -19,4 +19,10 @@ export class FileUploadDto {
         label: 'Set true, for auto set mime types as images (gif, jpeg, pjpeg, png)',
     })
     imagesOnly: boolean;
+
+    @StringField({
+        label: 'File type',
+        nullable: true,
+    })
+    fileType: string;
 }

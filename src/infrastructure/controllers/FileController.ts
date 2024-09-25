@@ -21,7 +21,6 @@ export default class FileController {
 
     @Put('/upload-photo')
     @FileUpload()
-    // @todo поправить useFile чтобы при загрузке картинок через FileField передавался Admin-Authorization
     // @AuthPermissions(PERMISSION_AUTH_ADMIN_AUTHORIZED)
     // @UseGuards(AdminJwtAuthGuard)
     @ApiQuery({type: FileUploadDto})
