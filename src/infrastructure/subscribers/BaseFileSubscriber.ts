@@ -10,6 +10,7 @@ import {FileConfigService} from '../../domain/services/FileConfigService';
 interface IFile {
     storageName: string;
     fileName: string;
+    folder: string,
 }
 
 /**
@@ -21,8 +22,10 @@ interface IFile {
  */
 export abstract class BaseFileSubscriber<TTable, TModel extends IFile> implements EntitySubscriberInterface<TTable> {
     constructor(
-        @Inject(FileStorageFabric) protected storageFabric: FileStorageFabric,
-        @Inject(FileConfigService) private fileConfigService: FileConfigService,
+        @Inject(FileStorageFabric)
+        protected storageFabric: FileStorageFabric,
+        @Inject(FileConfigService)
+        private fileConfigService: FileConfigService,
         dataSource: DataSource,
     ) {
         dataSource.subscribers.push(this);
@@ -43,7 +46,12 @@ export abstract class BaseFileSubscriber<TTable, TModel extends IFile> implement
         const storage = this.storageFabric.get(removedModelInstance.storageName);
 
         try {
-            await storage.deleteFile(removedModelInstance.fileName);
+            await storage.deleteFile(
+                [
+                    removedModelInstance.folder,
+                    removedModelInstance.fileName,
+                ].filter(Boolean).join('/'),
+            );
         } catch (error) {
             Sentry.captureException(error);
         }

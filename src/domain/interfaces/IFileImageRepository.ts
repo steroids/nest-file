@@ -5,5 +5,5 @@ import {FileStorage} from '../enums/FileStorageEnum';
 export const IFileImageRepository = 'IFileImageRepository';
 
 export interface IFileImageRepository extends ICrudRepository<FileImageModel> {
-    getFileNamesByStorageName: (storageName: FileStorage) => Promise<string[] | null>;
+    getFilesPathsByStorageName: (storageName: FileStorage) => Promise<string[] | null>;
 }

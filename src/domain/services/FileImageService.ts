@@ -11,6 +11,7 @@ import {FileSaveDto} from '../dtos/FileSaveDto';
 import {SharpHelper} from '../helpers/SharpHelper';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileStorage} from '../enums/FileStorageEnum';
+import { ContextDto } from '@steroidsjs/nest/usecases/dtos/ContextDto';
 
 export class FileImageService {
     constructor(
@@ -81,7 +82,11 @@ export class FileImageService {
         return this.repository.create(imageModel);
     }
 
-    async getFileNamesFromDb(storageName: FileStorage): Promise<string[] | null> {
-        return this.repository.getFileNamesByStorageName(storageName);
+    async getFilesPathsFromDb(storageName: FileStorage): Promise<string[] | null> {
+        return this.repository.getFilesPathsByStorageName(storageName);
+    }
+
+    public async remove(id: number, context: ContextDto) {
+        await this.repository.remove(id);
     }
 }

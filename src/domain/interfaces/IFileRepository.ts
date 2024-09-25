@@ -6,6 +6,5 @@ export const IFileRepository = 'IFileRepository';
 
 export interface IFileRepository extends ICrudRepository<FileModel> {
     getFileWithDocument: (fileName: string) => Promise<FileModel>;
-
-    getFileNamesByStorageName: (storageName: FileStorage) => Promise<string[] | null>;
+    getFilesPathsByStorageName: (storageName: FileStorage) => Promise<string[] | null>;
 }

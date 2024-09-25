@@ -145,10 +145,10 @@ export class MinioS3Storage implements IFileStorage {
         return this._client;
     }
 
-    async deleteFile(fileName: string): Promise<void> {
+    async deleteFile(filePath: string): Promise<void> {
         return new Promise((resolve, reject) => {
             const client = this.getClient();
-            client.removeObject(this.mainBucket, fileName, (err: any) => {
+            client.removeObject(this.mainBucket, filePath, (err: any) => {
                 if (err) {
                     reject(err);
                 } else {
