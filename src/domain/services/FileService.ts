@@ -24,6 +24,7 @@ import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileStorage} from '../enums/FileStorageEnum';
+import {IFIleTypeService} from '../interfaces/IFIleTypeService';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
@@ -36,9 +37,10 @@ function isFileExpressOrLocalSource(
 export class FileService extends ReadService<FileModel> {
     constructor(
         public repository: IFileRepository,
-        protected fileImageService: FileImageService,
-        protected fileConfigService: FileConfigService,
-        protected fileStorageFabric: FileStorageFabric,
+        protected readonly fileImageService: FileImageService,
+        protected readonly fileConfigService: FileConfigService,
+        protected readonly fileStorageFabric: FileStorageFabric,
+        protected readonly fileTypeService: IFIleTypeService,
         public validators: IValidator[],
     ) {
         super();
@@ -80,6 +82,11 @@ export class FileService extends ReadService<FileModel> {
         || rawOptions instanceof FileLocalSourceDto || rawOptions instanceof FileStreamSourceDto
             ? DataMapper.create(FileUploadOptions, {source: rawOptions})
             : rawOptions as FileUploadOptions;
+
+        if (options.fileType) {
+            const fileTypeOptions = await this.fileTypeService.getFileUploadOptionsByType(options.fileType);
+            DataMapper.applyValues(options, fileTypeOptions);
+        }
 
         // Resolve storage name
         if (!options.storageName) {

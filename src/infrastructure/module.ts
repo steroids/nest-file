@@ -19,6 +19,8 @@ import {CronJobsRegister} from './services/CronJobsRegister';
 import {DeleteLostAndTemporaryFilesService} from '../domain/services/DeleteLostAndTemporaryFilesService';
 import {FileImageSubscriber} from './subscribers/FileImageSubscriber';
 import {FileSubscriber} from './subscribers/FileSubscriber';
+import {IFIleTypeService} from '../domain/interfaces/IFIleTypeService';
+import {FileTypeService} from '../domain/services/FileTypeService';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -36,6 +38,10 @@ export default (config: IFileModuleConfig) => ({
         {
             provide: FileConfigService,
             useFactory: () => new FileConfigService(config),
+        },
+        {
+            provide: IFIleTypeService,
+            useClass: FileTypeService,
         },
         FileMaxSizeValidator,
         FileMimeTypesValidator,
@@ -58,6 +64,7 @@ export default (config: IFileModuleConfig) => ({
             FileImageService,
             FileConfigService,
             FileStorageFabric,
+            IFIleTypeService,
             [
                 FileMimeTypesValidator,
                 FileMaxSizeValidator,
