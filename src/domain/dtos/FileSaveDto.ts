@@ -27,4 +27,7 @@ export class FileSaveDto {
 
     @ExtendField(FileModel)
     md5: string;
+
+    @ExtendField(FileModel)
+    fileType: string;
 }
