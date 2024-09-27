@@ -1,5 +1,5 @@
-import { DataMapper } from '@steroidsjs/nest/usecases/helpers/DataMapper';
-import { FileUploadOptions } from '../dtos/FileUploadOptions';
+import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
+import {FileUploadOptions} from '../dtos/FileUploadOptions';
 
 export class FileTypeService {
     constructor() {}

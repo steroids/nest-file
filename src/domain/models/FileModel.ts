@@ -59,11 +59,6 @@ export class FileModel {
     fileMimeType: string;
 
     @StringField({
-        label: 'Тип файла в проекта',
-    })
-    fileType: string;
-
-    @StringField({
         label: 'Относительный путь до под-директории',
         nullable: true,
     })

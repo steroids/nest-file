@@ -1,4 +1,4 @@
-import { FileUploadOptions } from '../dtos/FileUploadOptions';
+import {FileUploadOptions} from '../dtos/FileUploadOptions';
 
 export const IFIleTypeService = 'IFIleTypeService';
 
