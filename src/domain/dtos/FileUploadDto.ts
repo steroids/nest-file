@@ -20,6 +20,7 @@ export class FileUploadDto {
     })
     imagesOnly: boolean;
 
+    // used in FileTypeService, helps to define file uploading parameters
     @StringField({
         label: 'File type',
         nullable: true,

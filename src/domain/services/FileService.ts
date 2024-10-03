@@ -83,6 +83,7 @@ export class FileService extends ReadService<FileModel> {
             ? DataMapper.create(FileUploadOptions, {source: rawOptions})
             : rawOptions as FileUploadOptions;
 
+        // If "fileType" filed is specified, the options associated with it are applied
         if (options.fileType) {
             const fileTypeOptions = await this.fileTypeService.getFileUploadOptionsByType(options.fileType);
             DataMapper.applyValues(options, fileTypeOptions);
