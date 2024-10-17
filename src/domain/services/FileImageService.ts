@@ -11,7 +11,7 @@ import {FileSaveDto} from '../dtos/FileSaveDto';
 import {SharpHelper} from '../helpers/SharpHelper';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileStorage} from '../enums/FileStorageEnum';
-import { ContextDto } from '@steroidsjs/nest/usecases/dtos/ContextDto';
+import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
 
 export class FileImageService {
     constructor(
