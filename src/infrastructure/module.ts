@@ -19,7 +19,7 @@ import {IFileModuleConfig} from './config';
 import {CronJobsRegister} from './services/CronJobsRegister';
 import {DeleteLostAndTemporaryFilesService} from '../domain/services/DeleteLostAndTemporaryFilesService';
 import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
-import { FileRemovedEventHandleUseCase } from '../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
+import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [

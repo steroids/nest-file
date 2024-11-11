@@ -4,12 +4,12 @@ import * as fs from 'fs';
 import * as md5File from 'md5-file';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import * as Sentry from '@sentry/node';
+import * as path from 'node:path';
 import {FileSaveDto} from '../dtos/FileSaveDto';
 import {FileWriteResult} from '../dtos/FileWriteResult';
 import {FileModel} from '../models/FileModel';
 import {FileImageModel} from '../models/FileImageModel';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
-import * as path from 'node:path';
 
 export class FileLocalStorage implements IFileLocalStorage {
     /**
