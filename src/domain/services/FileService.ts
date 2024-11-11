@@ -24,6 +24,8 @@ import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileStorage} from '../enums/FileStorageEnum';
+import {IEventEmitter} from '../interfaces/IEventEmitter';
+import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
@@ -36,9 +38,10 @@ function isFileExpressOrLocalSource(
 export class FileService extends ReadService<FileModel> {
     constructor(
         public repository: IFileRepository,
-        protected fileImageService: FileImageService,
-        protected fileConfigService: FileConfigService,
-        protected fileStorageFabric: FileStorageFabric,
+        protected readonly fileImageService: FileImageService,
+        protected readonly fileConfigService: FileConfigService,
+        protected readonly fileStorageFabric: FileStorageFabric,
+        protected readonly eventEmitter: IEventEmitter,
         public validators: IValidator[],
     ) {
         super();
@@ -285,5 +288,12 @@ export class FileService extends ReadService<FileModel> {
         }
 
         await this.repository.remove(id);
+
+        this.eventEmitter.emit(FileRemovedEventDto.eventName, DataMapper.create(FileRemovedEventDto, {
+            fileId: file.id,
+            folder: file.folder,
+            fileName: file.fileName,
+            storageName: file.storageName,
+        }));
     }
 }

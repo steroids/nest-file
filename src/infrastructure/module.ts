@@ -1,5 +1,6 @@
 import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper';
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
+import {EventEmitter2} from '@nestjs/event-emitter';
 import {IFileRepository} from '../domain/interfaces/IFileRepository';
 import {FileRepository} from './repositories/FileRepository';
 import {IFileImageRepository} from '../domain/interfaces/IFileImageRepository';
@@ -17,14 +18,15 @@ import FileController from './controllers/FileController';
 import {IFileModuleConfig} from './config';
 import {CronJobsRegister} from './services/CronJobsRegister';
 import {DeleteLostAndTemporaryFilesService} from '../domain/services/DeleteLostAndTemporaryFilesService';
-import {FileImageSubscriber} from './subscribers/FileImageSubscriber';
-import {FileSubscriber} from './subscribers/FileSubscriber';
+import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
+import { FileRemovedEventHandleUseCase } from '../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
         FileController,
     ],
     providers: [
+        // Repositories
         {
             provide: IFileRepository,
             useClass: FileRepository,
@@ -33,14 +35,23 @@ export default (config: IFileModuleConfig) => ({
             provide: IFileImageRepository,
             useClass: FileImageRepository,
         },
+
+        // Infrastructure services
+        CronJobsRegister,
+
+        // Validators
+        FileMaxSizeValidator,
+        FileMimeTypesValidator,
+
+        // Storages
+        FileLocalStorage,
+        MinioS3Storage,
+
+        // Services
         {
             provide: FileConfigService,
             useFactory: () => new FileConfigService(config),
         },
-        FileMaxSizeValidator,
-        FileMimeTypesValidator,
-        FileLocalStorage,
-        MinioS3Storage,
         {
             inject: [FileConfigService, FileLocalStorage, MinioS3Storage],
             provide: FileStorageFabric,
@@ -58,6 +69,7 @@ export default (config: IFileModuleConfig) => ({
             FileImageService,
             FileConfigService,
             FileStorageFabric,
+            EventEmitter2,
             [
                 FileMimeTypesValidator,
                 FileMaxSizeValidator,
@@ -67,6 +79,7 @@ export default (config: IFileModuleConfig) => ({
             IFileImageRepository,
             FileConfigService,
             FileStorageFabric,
+            EventEmitter2,
         ]),
 
         ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
@@ -74,10 +87,15 @@ export default (config: IFileModuleConfig) => ({
             FileImageService,
             FileStorageFabric,
         ]),
-        CronJobsRegister,
 
-        FileSubscriber,
-        FileImageSubscriber,
+        // Subscribers
+        FileEventsSubscriber,
+
+        // UseCases
+        ModuleHelper.provide(FileRemovedEventHandleUseCase, [
+            FileStorageFabric,
+            FileConfigService,
+        ]),
     ],
     exports: [
         IFileService,

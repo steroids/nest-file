@@ -1,5 +1,6 @@
 import * as sharp from 'sharp';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
+import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
 import {IFileImageRepository} from '../interfaces/IFileImageRepository';
 import {FileImageModel} from '../models/FileImageModel';
 import {FileConfigService} from './FileConfigService';
@@ -11,13 +12,15 @@ import {FileSaveDto} from '../dtos/FileSaveDto';
 import {SharpHelper} from '../helpers/SharpHelper';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileStorage} from '../enums/FileStorageEnum';
-import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
+import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
+import {IEventEmitter} from '../interfaces/IEventEmitter';
 
 export class FileImageService {
     constructor(
         public repository: IFileImageRepository,
         protected readonly fileConfigService: FileConfigService,
         protected readonly fileStorageFabric: FileStorageFabric,
+        protected readonly eventEmitter: IEventEmitter,
     ) {
     }
 
@@ -87,6 +90,17 @@ export class FileImageService {
     }
 
     public async remove(id: number, context: ContextDto) {
+        const fileImage = await this.repository.createQuery()
+            .where({id})
+            .one();
+
         await this.repository.remove(id);
+
+        this.eventEmitter.emit(FileRemovedEventDto.eventName, DataMapper.create(FileRemovedEventDto, {
+            fileId: fileImage.id,
+            folder: fileImage.folder,
+            fileName: fileImage.fileName,
+            storageName: fileImage.storageName,
+        }));
     }
 }
