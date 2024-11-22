@@ -26,6 +26,7 @@ import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileStorage} from '../enums/FileStorageEnum';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
+import {IFIleTypeService} from '../interfaces/IFIleTypeService';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
@@ -42,6 +43,7 @@ export class FileService extends ReadService<FileModel> {
         protected readonly fileConfigService: FileConfigService,
         protected readonly fileStorageFabric: FileStorageFabric,
         protected readonly eventEmitter: IEventEmitter,
+        protected readonly fileTypeService: IFIleTypeService,
         public validators: IValidator[],
     ) {
         super();
@@ -83,6 +85,12 @@ export class FileService extends ReadService<FileModel> {
         || rawOptions instanceof FileLocalSourceDto || rawOptions instanceof FileStreamSourceDto
             ? DataMapper.create(FileUploadOptions, {source: rawOptions})
             : rawOptions as FileUploadOptions;
+
+        // If "fileType" filed is specified, the options associated with it are applied
+        if (options.fileType) {
+            const fileTypeOptions = await this.fileTypeService.getFileUploadOptionsByType(options.fileType);
+            DataMapper.applyValues(options, fileTypeOptions);
+        }
 
         // Resolve storage name
         if (!options.storageName) {

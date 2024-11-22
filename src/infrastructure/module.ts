@@ -20,6 +20,8 @@ import {CronJobsRegister} from './services/CronJobsRegister';
 import {DeleteLostAndTemporaryFilesService} from '../domain/services/DeleteLostAndTemporaryFilesService';
 import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
+import {IFIleTypeService} from '../domain/interfaces/IFIleTypeService';
+import {FileTypeService} from '../domain/services/FileTypeService';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -53,6 +55,11 @@ export default (config: IFileModuleConfig) => ({
             useFactory: () => new FileConfigService(config),
         },
         {
+            provide: IFIleTypeService,
+            useClass: FileTypeService,
+        },
+
+        {
             inject: [FileConfigService, FileLocalStorage, MinioS3Storage],
             provide: FileStorageFabric,
             useFactory: (
@@ -70,6 +77,7 @@ export default (config: IFileModuleConfig) => ({
             FileConfigService,
             FileStorageFabric,
             EventEmitter2,
+            IFIleTypeService,
             [
                 FileMimeTypesValidator,
                 FileMaxSizeValidator,
