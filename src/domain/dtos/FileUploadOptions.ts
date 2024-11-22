@@ -51,4 +51,11 @@ export class FileUploadOptions {
         label: 'Set true, for auto set mime types as images (gif, jpeg, pjpeg, png)',
     })
     imagesOnly: boolean;
+
+    // used in FileTypeService, helps to define file uploading parameters
+    @StringField({
+        label: 'File type',
+        nullable: true,
+    })
+    fileType: string;
 }
