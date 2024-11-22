@@ -24,6 +24,8 @@ import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileStorage} from '../enums/FileStorageEnum';
+import {IEventEmitter} from '../interfaces/IEventEmitter';
+import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFIleTypeService} from '../interfaces/IFIleTypeService';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
@@ -40,6 +42,7 @@ export class FileService extends ReadService<FileModel> {
         protected readonly fileImageService: FileImageService,
         protected readonly fileConfigService: FileConfigService,
         protected readonly fileStorageFabric: FileStorageFabric,
+        protected readonly eventEmitter: IEventEmitter,
         protected readonly fileTypeService: IFIleTypeService,
         public validators: IValidator[],
     ) {
@@ -278,7 +281,27 @@ export class FileService extends ReadService<FileModel> {
         }
     }
 
-    async getFileNamesFromDb(storageName: FileStorage): Promise<string[] | null> {
-        return this.repository.getFileNamesByStorageName(storageName);
+    async getFilesPathsFromDb(storageName: FileStorage): Promise<string[] | null> {
+        return this.repository.getFilesPathsByStorageName(storageName);
+    }
+
+    public async remove(id: number, context: ContextDto) {
+        const file: FileModel = await this.createQuery()
+            .with(['images'])
+            .where({id})
+            .one();
+
+        for (const image of file.images) {
+            await this.fileImageService.remove(image.id, context);
+        }
+
+        await this.repository.remove(id);
+
+        this.eventEmitter.emit(FileRemovedEventDto.eventName, DataMapper.create(FileRemovedEventDto, {
+            fileId: file.id,
+            folder: file.folder,
+            fileName: file.fileName,
+            storageName: file.storageName,
+        }));
     }
 }

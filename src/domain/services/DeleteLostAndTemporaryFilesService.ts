@@ -26,20 +26,20 @@ export class DeleteLostAndTemporaryFilesService {
             return;
         }
 
-        const fileNamesFromStorage = storage.getFileNames();
+        const filePathsFromStorage = storage.getFilesPaths();
 
-        if (!fileNamesFromStorage) {
+        if (!filePathsFromStorage) {
             return;
         }
 
-        const fileNamesFromDb = [
-            ...await this.fileImageService.getFileNamesFromDb(storageName),
-            ...await this.fileService.getFileNamesFromDb(storageName),
+        const filesPathsFromDb = [
+            ...await this.fileImageService.getFilesPathsFromDb(storageName),
+            ...await this.fileService.getFilesPathsFromDb(storageName),
         ];
 
-        for (const fileName of fileNamesFromStorage) {
-            if (!fileNamesFromDb.includes(fileName)) {
-                storage.deleteFile(fileName);
+        for (const filePath of filePathsFromStorage) {
+            if (!filesPathsFromDb.includes(filePath)) {
+                storage.deleteFile(filePath);
             }
         }
     }
