@@ -304,4 +304,16 @@ export class FileService extends ReadService<FileModel> {
             storageName: file.storageName,
         }));
     }
+
+    public async getJunkFilesIds(config: {
+        fileNameLike: string,
+        ignoredTables: string[],
+        isEmpty: boolean,
+    }): Promise<number[]> {
+        return this.repository.getJunkFilesIds(config);
+    }
+
+    public async getCount(): Promise<number> {
+        return this.repository.getCount();
+    }
 }

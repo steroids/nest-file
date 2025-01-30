@@ -22,6 +22,7 @@ import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
 import {IFIleTypeService} from '../domain/interfaces/IFIleTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
+import {ClearJunkFilesCommand} from './commands/ClearJunkFilesCommand';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -104,9 +105,11 @@ export default (config: IFileModuleConfig) => ({
             FileStorageFabric,
             FileConfigService,
         ]),
+        ClearJunkFilesCommand,
     ],
     exports: [
         IFileService,
         FileImageService,
+        ClearJunkFilesCommand,
     ],
 });
