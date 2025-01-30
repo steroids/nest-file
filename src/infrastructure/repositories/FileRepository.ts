@@ -52,4 +52,55 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
             .many();
         return files.map(file => [file.folder, file.fileName].join('/'));
     }
+
+    public async getJunkFilesIds(config: {
+        fileNameLike: string,
+        ignoredTables: string[],
+        isEmpty: boolean,
+    }): Promise<number[]> {
+        const tables: Array<{table_name: string, col_name: string}> = await this.dbRepository.query(`
+            SELECT
+                conrelid::regclass AS table_name,
+                (regexp_match(pg_get_constraintdef(oid), 'FOREIGN KEY \\("([^"]+)"'))[1] as col_name
+            FROM pg_constraint
+            WHERE
+                contype = 'f'
+                AND connamespace = 'public'::regnamespace
+                AND pg_get_constraintdef(oid) LIKE '%REFERENCES file(id)%'
+            ORDER BY conrelid::regclass::text, contype DESC;
+        `);
+
+        const tablesFilesIds = await Promise.all(tables.map(async (table) => {
+            if (!config.ignoredTables?.length || !config.ignoredTables.includes(table.table_name)) {
+                const tableFilesIds = await this.dbRepository.query(`
+                    SELECT DISTINCT "${table.col_name}" as id FROM ${table.table_name}
+                `);
+                return tableFilesIds.map(item => item.id);
+            }
+            return [];
+        }));
+
+        const usefulFilesIds = [...new Set(tablesFilesIds.flat())].filter(Boolean);
+
+        const allFilesQb = this.dbRepository.createQueryBuilder('model')
+            .select('model.id');
+
+        if (config.fileNameLike) {
+            allFilesQb.where('model.title ILIKE :title', {title: `%${config.fileNameLike}%`});
+        }
+
+        if (config.isEmpty) {
+            allFilesQb.andWhere('(model.fileSize = 0 OR model.fileSize IS NULL)');
+        }
+
+        const allFiles = await allFilesQb.getRawMany();
+
+        const allFilesIds = allFiles.map(file => file.model_id);
+
+        return allFilesIds.filter(element => !usefulFilesIds.includes(element));
+    }
+
+    public async getCount() {
+        return this.dbRepository.createQueryBuilder().getCount();
+    }
 }
