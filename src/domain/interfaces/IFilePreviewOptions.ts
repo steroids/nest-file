@@ -3,6 +3,7 @@ export interface IFilePreviewOptions {
     width: number,
     height: number,
     sharp?: {
+        rotate?: boolean,
         resize?: any,
         extend?: any,
         /** Настройки кропа изображения (извлечение прямоугольной области) */

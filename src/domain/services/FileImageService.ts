@@ -32,6 +32,11 @@ export class FileImageService {
         const content = await this.fileStorageFabric.get(file.storageName).read(file);
 
         const image = sharp(content, {failOnError: false});
+
+        if (previewOptions?.sharp?.rotate) {
+            image.rotate();
+        }
+
         let hasChanges = false;
         if (previewOptions?.width && previewOptions?.height) {
             image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
