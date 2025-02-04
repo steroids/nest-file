@@ -33,7 +33,7 @@ export class FileImageService {
 
         const image = sharp(content, {failOnError: false});
 
-        if (previewOptions?.sharp?.rotate) {
+        if (previewOptions?.rotate) {
             image.rotate();
         }
 
