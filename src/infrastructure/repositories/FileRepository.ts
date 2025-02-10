@@ -53,7 +53,7 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
         return files.map(file => [file.folder, file.fileName].join('/'));
     }
 
-    public async getJunkFilesIds(config: {
+    public async getUnusedFilesIds(config: {
         fileNameLike: string,
         ignoredTables: string[],
         isEmpty: boolean,
@@ -71,16 +71,16 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
         `);
 
         const tablesFilesIds = await Promise.all(tables.map(async (table) => {
-            if (!config.ignoredTables?.length || !config.ignoredTables.includes(table.table_name)) {
-                const tableFilesIds = await this.dbRepository.query(`
+            if (config.ignoredTables?.length && config.ignoredTables.includes(table.table_name)) {
+                return [];
+            }
+            const tableFilesIds = await this.dbRepository.query(`
                     SELECT DISTINCT "${table.col_name}" as id FROM ${table.table_name}
                 `);
-                return tableFilesIds.map(item => item.id);
-            }
-            return [];
+            return tableFilesIds.map(item => item.id);
         }));
 
-        const usefulFilesIds = [...new Set(tablesFilesIds.flat())].filter(Boolean);
+        const usedFilesIds = [...new Set(tablesFilesIds.flat())].filter(Boolean);
 
         const allFilesQb = this.dbRepository.createQueryBuilder('model')
             .select('model.id');
@@ -93,11 +93,9 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
             allFilesQb.andWhere('(model.fileSize = 0 OR model.fileSize IS NULL)');
         }
 
-        const allFiles = await allFilesQb.getRawMany();
-
-        const allFilesIds = allFiles.map(file => file.model_id);
-
-        return allFilesIds.filter(element => !usefulFilesIds.includes(element));
+        return (await allFilesQb.getRawMany())
+            .map(file => file.model_id)
+            .filter(fileId => !usedFilesIds.includes(fileId));
     }
 
     public async getCount() {

@@ -7,7 +7,7 @@ export const IFileRepository = 'IFileRepository';
 export interface IFileRepository extends ICrudRepository<FileModel> {
     getFileWithDocument: (fileName: string) => Promise<FileModel>;
     getFilesPathsByStorageName: (storageName: FileStorageEnum) => Promise<string[] | null>;
-    getJunkFilesIds: (config: {
+    getUnusedFilesIds: (config: {
         fileNameLike: string,
         ignoredTables: string[],
         isEmpty: boolean,
