@@ -305,12 +305,12 @@ export class FileService extends ReadService<FileModel> {
         }));
     }
 
-    public async getJunkFilesIds(config: {
+    public async getUnusedFilesIds(config: {
         fileNameLike: string,
         ignoredTables: string[],
         isEmpty: boolean,
     }): Promise<number[]> {
-        return this.repository.getJunkFilesIds(config);
+        return this.repository.getUnusedFilesIds(config);
     }
 
     public async getCount(): Promise<number> {

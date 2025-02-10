@@ -4,7 +4,7 @@ import {Inject, Injectable} from '@nestjs/common';
 import {FileService} from '../../domain/services/FileService';
 
 @Injectable()
-export class ClearJunkFilesCommand {
+export class ClearUnusedFilesCommand {
     constructor(
         @Inject(FileService)
         private fileService: FileService,
@@ -15,7 +15,7 @@ export class ClearJunkFilesCommand {
         command: 'junk-files',
         describe: 'Remove junk files',
     })
-    async junkFiles(
+    async processUnusedFiles(
         @Option({
             name: 'name',
             describe: 'File title query',
@@ -34,35 +34,35 @@ export class ClearJunkFilesCommand {
             isEmpty: boolean,
 
         @Option({
-            name: 'count',
-            describe: 'Count of example files',
+            name: 'preview-limit',
+            describe: 'Example files limit',
             type: 'number',
-            alias: 'c',
+            alias: 'pl',
             demandOption: false,
         })
-            exampleCount: number,
+            previewLimit: number,
 
         @Option({
-            name: 'remove',
-            describe: 'Remove files?',
+            name: 'dry-run',
+            describe: 'Is dry run?',
             type: 'boolean',
-            alias: 'r',
+            alias: 'dr',
             demandOption: false,
         })
-            isRemove: boolean,
+            isDryRun: boolean,
     ) {
-        const filesCount = await this.fileService.getCount();
-        const filesIds = await this.fileService.getJunkFilesIds({
+        const totalFilesCount = await this.fileService.getCount();
+        const junkFilesIds = await this.fileService.getUnusedFilesIds({
             ignoredTables: ['file_image'],
             fileNameLike: nameLike,
             isEmpty,
         });
-        console.log(`Всего файлов: ${filesCount}`);
-        console.log(`Найдено файлов: ${filesIds.length}`);
+        console.log(`Всего файлов: ${totalFilesCount}`);
+        console.log(`Файлов для удаления: ${junkFilesIds.length}`);
 
-        if (exampleCount && exampleCount > 0) {
+        if (previewLimit && previewLimit > 0) {
             const exampleFiles = await this.fileService.createQuery()
-                .where(['in', 'id', filesIds.slice(0, exampleCount)])
+                .where(['in', 'id', junkFilesIds.slice(0, previewLimit)])
                 .many();
             console.table(exampleFiles.map(file => ({
                 Title: file.title,
@@ -72,9 +72,12 @@ export class ClearJunkFilesCommand {
             })));
         }
 
-        if (isRemove) {
-            await Promise.all(filesIds.map(fileId => this.fileService.remove(fileId, null)));
+        if (!isDryRun) {
+            console.log('Удаление файлов...');
+            await Promise.all(junkFilesIds.map(fileId => this.fileService.remove(fileId, null)));
             console.log('Файлы удалены!');
+        } else {
+            console.log('Установлен флаг dry run, поэтому удаления файлов не произошло');
         }
     }
 }
