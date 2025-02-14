@@ -12,8 +12,8 @@ export class ClearUnusedFilesCommand {
     }
 
     @Command({
-        command: 'junk-files',
-        describe: 'Remove junk files',
+        command: 'unused-files',
+        describe: 'Remove unused files',
     })
     async processUnusedFiles(
         @Option({
