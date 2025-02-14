@@ -2,6 +2,7 @@ import {toInteger as _toInteger} from 'lodash';
 import {OnModuleInit} from '@nestjs/common';
 import {join} from 'path';
 import {CronExpression} from '@nestjs/schedule';
+import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
 import FileStorageEnum, {FileStorage} from '../enums/FileStorageEnum';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
@@ -13,7 +14,7 @@ const getStoragesConfig = (storagesConfig: IFileModuleConfig['storages'] = {}) =
         rootUrl: process.env.APP_FILE_STORAGE_ROOT_URL || '/files/uploaded',
         ...storagesConfig[FileStorageEnum.LOCAL],
     };
-    const minioS3Config =  {
+    const minioS3Config = {
         host: process.env.APP_FILE_STORAGE_S3_HOST || '127.0.0.1',
         port: process.env.APP_FILE_STORAGE_S3_PORT || '9000',
         isUseSsl: process.env.APP_FILE_STORAGE_S3_USE_SSL || '0',
@@ -33,7 +34,7 @@ const getStoragesConfig = (storagesConfig: IFileModuleConfig['storages'] = {}) =
         [FileStorageEnum.MINIO_S3]: minioS3Config,
         ...storagesConfig,
     };
-}
+};
 
 export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     /**
@@ -62,6 +63,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      * Env:
      *  - APP_FILE_PREVIEW_THUMBNAIL_WIDTH
      *  - APP_FILE_PREVIEW_THUMBNAIL_HEIGHT
+     *  - APP_FILE_PREVIEW_ROTATE
      */
     public previews: {
         original?: IFilePreviewOptions,
@@ -138,12 +140,14 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
                 enable: true,
                 width: null,
                 height: null,
+                rotate: normalizeBoolean(process.env.APP_FILE_PREVIEW_ROTATE || false),
                 ...custom.previews?.[FilePreviewEnum.ORIGINAL],
             },
             [FilePreviewEnum.THUMBNAIL]: {
                 enable: true,
                 width: process.env.APP_FILE_PREVIEW_THUMBNAIL_WIDTH || 500,
                 height: process.env.APP_FILE_PREVIEW_THUMBNAIL_HEIGHT || 300,
+                rotate: normalizeBoolean(process.env.APP_FILE_PREVIEW_ROTATE || false),
                 ...custom.previews?.[FilePreviewEnum.THUMBNAIL],
             },
             ...custom.previews,

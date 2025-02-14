@@ -2,6 +2,7 @@ export interface IFilePreviewOptions {
     enable: boolean,
     width: number,
     height: number,
+    rotate: boolean,
     sharp?: {
         resize?: any,
         extend?: any,
