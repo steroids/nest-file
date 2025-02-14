@@ -20,16 +20,24 @@ export class DeleteLostAndTemporaryFilesService {
      * - return in getStorage() method object that implements IFileStorage interface
      */
     async deleteLostAndTemporaryFiles(storageName: FileStorageEnum): Promise<void> {
+        const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
+        const storage = this.getStorage(storageName);
+        if (storage) {
+            lostAndTemporaryFilesPaths.forEach(storage.deleteFile);
+        }
+    }
+
+    async getLostAndTemporaryFilesPaths(storageName: FileStorageEnum): Promise<string[]> {
         const storage = this.getStorage(storageName);
 
         if (!storage) {
-            return;
+            return [];
         }
 
         const filePathsFromStorage = storage.getFilesPaths();
 
         if (!filePathsFromStorage) {
-            return;
+            return [];
         }
 
         const filesPathsFromDb = [
@@ -37,11 +45,15 @@ export class DeleteLostAndTemporaryFilesService {
             ...await this.fileService.getFilesPathsFromDb(storageName),
         ];
 
+        const lostAndTemporaryFilesPaths = [];
+
         for (const filePath of filePathsFromStorage) {
             if (!filesPathsFromDb.includes(filePath)) {
-                storage.deleteFile(filePath);
+                lostAndTemporaryFilesPaths.push(filePath);
             }
         }
+
+        return lostAndTemporaryFilesPaths;
     }
 
     private getStorage(storageName: FileStorageEnum): IFileLocalStorage {
