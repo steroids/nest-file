@@ -1,11 +1,8 @@
 /* eslint-disable no-console */
 import {Command, Option} from 'nestjs-command';
 import {Inject, Injectable} from '@nestjs/common';
-import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper';
-import {FileModule} from '@steroidsjs/nest-modules/file/FileModule';
-import {IFileModuleConfig} from '../config';
 import {DeleteLostAndTemporaryFilesService} from '../../domain/services/DeleteLostAndTemporaryFilesService';
-import { FileStorage } from '../../domain/enums/FileStorageEnum';
+import FileStorageEnum, {FileStorage} from '../../domain/enums/FileStorageEnum';
 
 @Injectable()
 export class ClearLostAndTemporaryFilesCommand {
@@ -21,6 +18,17 @@ export class ClearLostAndTemporaryFilesCommand {
     })
     async processLostFiles(
         @Option({
+            name: 'storage',
+            describe: 'File storage name',
+            type: 'string',
+            alias: 'st',
+            demandOption: false,
+            choices: FileStorageEnum.getKeys(),
+            default: FileStorage.LOCAL,
+        })
+            storageName: FileStorage,
+
+        @Option({
             name: 'dry-run',
             describe: 'Is dry run?',
             type: 'boolean',
@@ -29,10 +37,13 @@ export class ClearLostAndTemporaryFilesCommand {
         })
             isDryRun: boolean,
     ) {
-        const config = ModuleHelper.getConfig<IFileModuleConfig>(FileModule);
-        const storageName = config.defaultStorageName as FileStorage;
         const lostAndTemporaryFilesPaths = await this.deleteLostAndTemporaryFilesService
             .getLostAndTemporaryFilesPaths(storageName);
+
+        if (!lostAndTemporaryFilesPaths.length) {
+            console.log('Нет неудалённых файлов');
+            return;
+        }
 
         console.log('Пути неудалённых файлов:');
         lostAndTemporaryFilesPaths.map(console.log);

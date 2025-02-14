@@ -20,10 +20,13 @@ export class DeleteLostAndTemporaryFilesService {
      * - return in getStorage() method object that implements IFileStorage interface
      */
     async deleteLostAndTemporaryFiles(storageName: FileStorageEnum): Promise<void> {
-        const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
         const storage = this.getStorage(storageName);
-        if (storage) {
-            lostAndTemporaryFilesPaths.forEach(storage.deleteFile);
+        if (!storage) {
+            return;
+        }
+        const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
+        for (const filePath of lostAndTemporaryFilesPaths) {
+            await storage.deleteFile(filePath);
         }
     }
 
