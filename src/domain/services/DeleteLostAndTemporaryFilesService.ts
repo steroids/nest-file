@@ -21,15 +21,26 @@ export class DeleteLostAndTemporaryFilesService {
      */
     async deleteLostAndTemporaryFiles(storageName: FileStorage): Promise<void> {
         const storage = this.getStorage(storageName);
-
         if (!storage) {
             return;
+        }
+        const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
+        for (const filePath of lostAndTemporaryFilesPaths) {
+            await storage.deleteFile(filePath);
+        }
+    }
+
+    async getLostAndTemporaryFilesPaths(storageName: FileStorage): Promise<string[]> {
+        const storage = this.getStorage(storageName);
+
+        if (!storage) {
+            return [];
         }
 
         const filePathsFromStorage = storage.getFilesPaths();
 
         if (!filePathsFromStorage) {
-            return;
+            return [];
         }
 
         const filesPathsFromDb = [
@@ -37,11 +48,15 @@ export class DeleteLostAndTemporaryFilesService {
             ...await this.fileService.getFilesPathsFromDb(storageName),
         ];
 
+        const lostAndTemporaryFilesPaths = [];
+
         for (const filePath of filePathsFromStorage) {
             if (!filesPathsFromDb.includes(filePath)) {
-                storage.deleteFile(filePath);
+                lostAndTemporaryFilesPaths.push(filePath);
             }
         }
+
+        return lostAndTemporaryFilesPaths;
     }
 
     private getStorage(storageName: FileStorage): IFileLocalStorage {
