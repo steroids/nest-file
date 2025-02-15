@@ -15,6 +15,8 @@ import {FileStorage} from '../enums/FileStorageEnum';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
 
+const SVG_MIME_TYPE = 'image/svg+xml';
+
 export class FileImageService {
     constructor(
         public repository: IFileImageRepository,
@@ -30,7 +32,6 @@ export class FileImageService {
         }
 
         const content = await this.fileStorageFabric.get(file.storageName).read(file);
-
         const image = sharp(content, {failOnError: false});
 
         if (previewOptions?.rotate) {
@@ -38,24 +39,29 @@ export class FileImageService {
         }
 
         let hasChanges = false;
-        if (previewOptions?.width && previewOptions?.height) {
-            image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
-            hasChanges = true;
-        }
-        if (previewOptions?.sharp?.extend) {
-            image.extend(previewOptions.sharp.extend);
-            hasChanges = true;
-        }
-        if (previewOptions?.sharp?.extract) {
-            image.extract(previewOptions.sharp.extract);
-            hasChanges = true;
-        }
 
-        //add image output options if they are specified
-        const sharpOptionName = SharpHelper.getImageOptionNameByMimeType(file.fileMimeType);
+        const isSvg = file.fileMimeType === SVG_MIME_TYPE;
 
-        if (sharpOptionName && previewOptions.sharp?.outputImageOptions?.[sharpOptionName]) {
-            image[sharpOptionName](previewOptions.sharp?.outputImageOptions[sharpOptionName]);
+        if (!isSvg) {
+            if (previewOptions?.width && previewOptions?.height) {
+                image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
+                hasChanges = true;
+            }
+            if (previewOptions?.sharp?.extend) {
+                image.extend(previewOptions.sharp.extend);
+                hasChanges = true;
+            }
+            if (previewOptions?.sharp?.extract) {
+                image.extract(previewOptions.sharp.extract);
+                hasChanges = true;
+            }
+
+            //add image output options if they are specified
+            const sharpOptionName = SharpHelper.getImageOptionNameByMimeType(file.fileMimeType);
+
+            if (sharpOptionName && previewOptions.sharp?.outputImageOptions?.[sharpOptionName]) {
+                image[sharpOptionName](previewOptions.sharp?.outputImageOptions[sharpOptionName]);
+            }
         }
 
         const {data, info} = await image.toBuffer({resolveWithObject: true});
@@ -68,7 +74,7 @@ export class FileImageService {
             folder: file.folder,
             fileMimeType: file.fileMimeType,
             storageName: file.storageName,
-            fileSize: info.size,
+            fileSize: isSvg ? file.fileSize : info.size,
             width: info.width,
             height: info.height,
             previewName,
