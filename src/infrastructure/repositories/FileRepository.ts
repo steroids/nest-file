@@ -51,4 +51,53 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
             .many();
         return files.map(file => [file.folder, file.fileName].join('/'));
     }
+
+    public async getUnusedFilesIds(config: {
+        fileNameLike: string,
+        ignoredTables: string[],
+        isEmpty: boolean,
+    }): Promise<number[]> {
+        const tables: Array<{table_name: string, col_name: string}> = await this.dbRepository.query(`
+            SELECT
+                conrelid::regclass AS table_name,
+                (regexp_match(pg_get_constraintdef(oid), 'FOREIGN KEY \\("([^"]+)"'))[1] as col_name
+            FROM pg_constraint
+            WHERE
+                contype = 'f'
+                AND connamespace = 'public'::regnamespace
+                AND pg_get_constraintdef(oid) LIKE '%REFERENCES file(id)%'
+            ORDER BY conrelid::regclass::text, contype DESC;
+        `);
+
+        const tablesFilesIds = await Promise.all(tables.map(async (table) => {
+            if (config.ignoredTables?.length && config.ignoredTables.includes(table.table_name)) {
+                return [];
+            }
+            const tableFilesIds = await this.dbRepository.query(`
+                    SELECT DISTINCT "${table.col_name}" as id FROM ${table.table_name}
+                `);
+            return tableFilesIds.map(item => item.id);
+        }));
+
+        const usedFilesIds = [...new Set(tablesFilesIds.flat())].filter(Boolean);
+
+        const allFilesQb = this.dbRepository.createQueryBuilder('model')
+            .select('model.id');
+
+        if (config.fileNameLike) {
+            allFilesQb.where('model.title ILIKE :title', {title: `%${config.fileNameLike}%`});
+        }
+
+        if (config.isEmpty) {
+            allFilesQb.andWhere('(model.fileSize = 0 OR model.fileSize IS NULL)');
+        }
+
+        return (await allFilesQb.getRawMany())
+            .map(file => file.model_id)
+            .filter(fileId => !usedFilesIds.includes(fileId));
+    }
+
+    public async getCount() {
+        return this.dbRepository.createQueryBuilder().getCount();
+    }
 }
