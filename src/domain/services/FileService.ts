@@ -25,7 +25,7 @@ import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFIleTypeService} from '../interfaces/IFIleTypeService';
-import { IFIleStorageFactory } from '../interfaces/IFIleStorageFactory';
+import { IFileStorageFactory } from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
@@ -41,7 +41,7 @@ export class FileService extends ReadService<FileModel> {
         public repository: IFileRepository,
         protected readonly fileImageService: FileImageService,
         protected readonly fileConfigService: FileConfigService,
-        protected readonly fileStorageFactory: IFIleStorageFactory,
+        protected readonly fileStorageFactory: IFileStorageFactory,
         protected readonly eventEmitter: IEventEmitter,
         protected readonly fileTypeService: IFIleTypeService,
         public validators: IValidator[],

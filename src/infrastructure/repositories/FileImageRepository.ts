@@ -1,10 +1,11 @@
 import {InjectRepository} from '@steroidsjs/nest-typeorm';
 import {Repository} from '@steroidsjs/typeorm';
 import {CrudRepository} from '@steroidsjs/nest/infrastructure/repositories/CrudRepository';
+import {Inject} from '@nestjs/common';
 import {IFileImageRepository} from '../../domain/interfaces/IFileImageRepository';
 import {FileImageModel} from '../../domain/models/FileImageModel';
 import {FileImageTable} from '../tables/FileImageTable';
-import {IFIleStorageFactory} from '../../domain/interfaces/IFIleStorageFactory';
+import {IFileStorageFactory} from '../../domain/interfaces/IFileStorageFactory';
 import FileStorageEnum from '../../domain/enums/FileStorageEnum';
 
 export class FileImageRepository extends CrudRepository<FileImageModel> implements IFileImageRepository {
@@ -13,7 +14,8 @@ export class FileImageRepository extends CrudRepository<FileImageModel> implemen
     constructor(
         @InjectRepository(FileImageTable)
         public dbRepository: Repository<FileImageTable>,
-        private fileStorageFactory: IFIleStorageFactory,
+        @Inject(IFileStorageFactory)
+        private fileStorageFactory: IFileStorageFactory,
     ) {
         super();
     }

@@ -1,9 +1,9 @@
 import {FileConfigService} from './FileConfigService';
 import {IFileStorage} from '../interfaces/IFileStorage';
 import { FileStorageEnum } from '../enums/FileStorageEnum';
-import { IFIleStorageFactory } from '../interfaces/IFIleStorageFactory';
+import { IFileStorageFactory } from '../interfaces/IFileStorageFactory';
 
-export class FileStorageFactory implements IFIleStorageFactory {
+export class FileStorageFactory implements IFileStorageFactory {
     private initializedNames: FileStorageEnum[] = [];
 
     constructor(

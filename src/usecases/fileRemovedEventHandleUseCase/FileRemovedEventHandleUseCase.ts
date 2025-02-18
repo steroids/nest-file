@@ -1,11 +1,11 @@
 import * as Sentry from '@sentry/node';
 import {FileConfigService} from '../../domain/services/FileConfigService';
 import {FileRemovedEventDto} from '../../domain/dtos/events/FileRemovedEventDto';
-import {IFIleStorageFactory} from '../../domain/interfaces/IFIleStorageFactory';
+import {IFileStorageFactory} from '../../domain/interfaces/IFileStorageFactory';
 
 export class FileRemovedEventHandleUseCase {
     constructor(
-        private readonly storageFactory: IFIleStorageFactory,
+        private readonly storageFactory: IFileStorageFactory,
         private readonly fileConfigService: FileConfigService,
     ) {}
 

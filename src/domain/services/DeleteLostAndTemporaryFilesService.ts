@@ -2,14 +2,14 @@ import * as Sentry from '@sentry/node';
 import {FileImageService} from './FileImageService';
 import {FileService} from './FileService';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
-import {IFIleStorageFactory} from '../interfaces/IFIleStorageFactory';
+import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
         private fileService: FileService,
         private fileImageService: FileImageService,
-        private fileStorageFactory: IFIleStorageFactory,
+        private fileStorageFactory: IFileStorageFactory,
     ) {}
 
     /**

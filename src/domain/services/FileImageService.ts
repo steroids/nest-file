@@ -12,14 +12,14 @@ import {SharpHelper} from '../helpers/SharpHelper';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
-import { IFIleStorageFactory } from '../interfaces/IFIleStorageFactory';
+import { IFileStorageFactory } from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 
 export class FileImageService {
     constructor(
         public repository: IFileImageRepository,
         protected readonly fileConfigService: FileConfigService,
-        protected readonly fileStorageFactory: IFIleStorageFactory,
+        protected readonly fileStorageFactory: IFileStorageFactory,
         protected readonly eventEmitter: IEventEmitter,
     ) {
     }

@@ -22,7 +22,7 @@ import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
 import {IFIleTypeService} from '../domain/interfaces/IFIleTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
-import {IFIleStorageFactory} from '../domain/interfaces/IFIleStorageFactory';
+import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -62,7 +62,7 @@ export default (config: IFileModuleConfig) => ({
 
         {
             inject: [FileConfigService, FileLocalStorage, MinioS3Storage],
-            provide: IFIleStorageFactory,
+            provide: IFileStorageFactory,
             useFactory: (
                 fileConfigService: FileConfigService,
                 fileLocalStorage: FileLocalStorage,
@@ -76,7 +76,7 @@ export default (config: IFileModuleConfig) => ({
             IFileRepository,
             FileImageService,
             FileConfigService,
-            IFIleStorageFactory,
+            IFileStorageFactory,
             EventEmitter2,
             IFIleTypeService,
             [
@@ -87,14 +87,14 @@ export default (config: IFileModuleConfig) => ({
         ModuleHelper.provide(FileImageService, [
             IFileImageRepository,
             FileConfigService,
-            IFIleStorageFactory,
+            IFileStorageFactory,
             EventEmitter2,
         ]),
 
         ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
             IFileService,
             FileImageService,
-            IFIleStorageFactory,
+            IFileStorageFactory,
         ]),
 
         // Subscribers
@@ -102,7 +102,7 @@ export default (config: IFileModuleConfig) => ({
 
         // UseCases
         ModuleHelper.provide(FileRemovedEventHandleUseCase, [
-            IFIleStorageFactory,
+            IFileStorageFactory,
             FileConfigService,
         ]),
     ],
