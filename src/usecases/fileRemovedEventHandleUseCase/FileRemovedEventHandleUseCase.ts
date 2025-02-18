@@ -1,11 +1,11 @@
 import * as Sentry from '@sentry/node';
-import {FileStorageFabric} from '../../domain/services/FileStorageFabric';
 import {FileConfigService} from '../../domain/services/FileConfigService';
 import {FileRemovedEventDto} from '../../domain/dtos/events/FileRemovedEventDto';
+import {IFIleStorageFactory} from '../../domain/interfaces/IFIleStorageFactory';
 
 export class FileRemovedEventHandleUseCase {
     constructor(
-        private readonly storageFabric: FileStorageFabric,
+        private readonly storageFactory: IFIleStorageFactory,
         private readonly fileConfigService: FileConfigService,
     ) {}
 
@@ -14,7 +14,7 @@ export class FileRemovedEventHandleUseCase {
             return;
         }
 
-        const storage = this.storageFabric.get(dto.storageName);
+        const storage = this.storageFactory.get(dto.storageName);
 
         const filePath = [
             dto.folder,

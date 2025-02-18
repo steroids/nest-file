@@ -18,15 +18,15 @@ import {FileImageService} from './FileImageService';
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
 import {FileSaveDto} from '../dtos/FileSaveDto';
 import {FileConfigService} from './FileConfigService';
-import {FileStorageFabric} from './FileStorageFabric';
 import {FileExpressSourceDto} from '../dtos/sources/FileExpressSourceDto';
 import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
-import {FileStorage} from '../enums/FileStorageEnum';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFIleTypeService} from '../interfaces/IFIleTypeService';
+import { IFIleStorageFactory } from '../interfaces/IFIleStorageFactory';
+import FileStorageEnum from '../enums/FileStorageEnum';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
@@ -41,7 +41,7 @@ export class FileService extends ReadService<FileModel> {
         public repository: IFileRepository,
         protected readonly fileImageService: FileImageService,
         protected readonly fileConfigService: FileConfigService,
-        protected readonly fileStorageFabric: FileStorageFabric,
+        protected readonly fileStorageFactory: IFIleStorageFactory,
         protected readonly eventEmitter: IEventEmitter,
         protected readonly fileTypeService: IFIleTypeService,
         public validators: IValidator[],
@@ -50,7 +50,7 @@ export class FileService extends ReadService<FileModel> {
     }
 
     async read(model: FileModel): Promise<Buffer> {
-        const storage = this.fileStorageFabric.get(model.storageName);
+        const storage = this.fileStorageFactory.get(model.storageName);
         return storage.read(model);
     }
 
@@ -94,7 +94,7 @@ export class FileService extends ReadService<FileModel> {
 
         // Resolve storage name
         if (!options.storageName) {
-            options.storageName = this.fileConfigService.defaultStorageName;
+            options.storageName = this.fileConfigService.defaultStorageName as FileStorageEnum;
         }
 
         // Create FileModel from source
@@ -121,7 +121,7 @@ export class FileService extends ReadService<FileModel> {
         const stream = await this.createStreamFromSource(options.source);
 
         // Save original file via storage
-        const writeResult = await this.fileStorageFabric.get(options.storageName).write(fileDto, stream);
+        const writeResult = await this.fileStorageFactory.get(options.storageName).write(fileDto, stream);
 
         // Delete temporary file
         const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
@@ -281,7 +281,7 @@ export class FileService extends ReadService<FileModel> {
         }
     }
 
-    async getFilesPathsFromDb(storageName: FileStorage): Promise<string[] | null> {
+    async getFilesPathsFromDb(storageName: FileStorageEnum): Promise<string[] | null> {
         return this.repository.getFilesPathsByStorageName(storageName);
     }
 

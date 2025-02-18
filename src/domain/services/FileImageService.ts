@@ -4,22 +4,22 @@ import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
 import {IFileImageRepository} from '../interfaces/IFileImageRepository';
 import {FileImageModel} from '../models/FileImageModel';
 import {FileConfigService} from './FileConfigService';
-import {FileStorageFabric} from './FileStorageFabric';
 import {FileModel} from '../models/FileModel';
 import {FileHelper} from '../helpers/FileHelper';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {FileSaveDto} from '../dtos/FileSaveDto';
 import {SharpHelper} from '../helpers/SharpHelper';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
-import {FileStorage} from '../enums/FileStorageEnum';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
+import { IFIleStorageFactory } from '../interfaces/IFIleStorageFactory';
+import FileStorageEnum from '../enums/FileStorageEnum';
 
 export class FileImageService {
     constructor(
         public repository: IFileImageRepository,
         protected readonly fileConfigService: FileConfigService,
-        protected readonly fileStorageFabric: FileStorageFabric,
+        protected readonly fileStorageFactory: IFIleStorageFactory,
         protected readonly eventEmitter: IEventEmitter,
     ) {
     }
@@ -29,7 +29,7 @@ export class FileImageService {
             previewOptions = this.fileConfigService.previews?.[previewName];
         }
 
-        const content = await this.fileStorageFabric.get(file.storageName).read(file);
+        const content = await this.fileStorageFactory.get(file.storageName).read(file);
 
         const image = sharp(content, {failOnError: false});
 
@@ -76,7 +76,7 @@ export class FileImageService {
         });
 
         if (hasChanges) {
-            await this.fileStorageFabric.get(file.storageName).write(
+            await this.fileStorageFactory.get(file.storageName).write(
                 DataMapper.create<FileSaveDto>(FileSaveDto, {
                     uid: file.uid,
                     folder: imageModel.folder,
@@ -90,7 +90,7 @@ export class FileImageService {
         return this.repository.create(imageModel);
     }
 
-    async getFilesPathsFromDb(storageName: FileStorage): Promise<string[] | null> {
+    async getFilesPathsFromDb(storageName: FileStorageEnum): Promise<string[] | null> {
         return this.repository.getFilesPathsByStorageName(storageName);
     }
 

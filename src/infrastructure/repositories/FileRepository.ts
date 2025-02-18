@@ -6,8 +6,8 @@ import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {IFileRepository} from '../../domain/interfaces/IFileRepository';
 import {FileTable} from '../tables/FileTable';
 import {FileModel} from '../../domain/models/FileModel';
-import {FileStorageFabric} from '../../domain/services/FileStorageFabric';
-import {FileStorage} from '../../domain/enums/FileStorageEnum';
+import { IFIleStorageFactory } from '../../domain/interfaces/IFIleStorageFactory';
+import FileStorageEnum from '../../domain/enums/FileStorageEnum';
 
 @Injectable()
 export class FileRepository extends CrudRepository<FileModel> implements IFileRepository {
@@ -16,14 +16,14 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
     constructor(
         @InjectRepository(FileTable)
         public dbRepository: Repository<FileTable>,
-        private fileStorageFabric: FileStorageFabric,
+        private fileStorageFactory: IFIleStorageFactory,
     ) {
         super();
     }
 
     protected entityToModel(obj: any): FileModel {
         const model = super.entityToModel(obj);
-        model.url = this.fileStorageFabric.get(model.storageName).getUrl(model);
+        model.url = this.fileStorageFactory.get(model.storageName).getUrl(model);
         return model;
     }
 
@@ -41,7 +41,7 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
         return DataMapper.create(FileModel, file);
     }
 
-    async getFilesPathsByStorageName(storageName: FileStorage): Promise<string[] | null> {
+    async getFilesPathsByStorageName(storageName: FileStorageEnum): Promise<string[] | null> {
         const files = await this.createQuery()
             .select([
                 'fileName',

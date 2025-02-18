@@ -10,7 +10,7 @@ import {FileImageService} from '../domain/services/FileImageService';
 import {FileConfigService} from '../domain/services/FileConfigService';
 import {FileMaxSizeValidator} from '../domain/validators/FileMaxSizeValidator';
 import {FileMimeTypesValidator} from '../domain/validators/FileMimeTypesValidator';
-import {FileStorageFabric} from '../domain/services/FileStorageFabric';
+import {FileStorageFactory} from '../domain/services/FileStorageFactory';
 import {FileLocalStorage} from '../domain/storages/FileLocalStorage';
 import {MinioS3Storage} from '../domain/storages/MinioS3Storage';
 import FileStorageEnum from '../domain/enums/FileStorageEnum';
@@ -22,6 +22,7 @@ import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
 import {IFIleTypeService} from '../domain/interfaces/IFIleTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
+import {IFIleStorageFactory} from '../domain/interfaces/IFIleStorageFactory';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -61,12 +62,12 @@ export default (config: IFileModuleConfig) => ({
 
         {
             inject: [FileConfigService, FileLocalStorage, MinioS3Storage],
-            provide: FileStorageFabric,
+            provide: IFIleStorageFactory,
             useFactory: (
-                fileConfigService,
-                fileLocalStorage,
-                minioS3Storage,
-            ) => new FileStorageFabric(fileConfigService, {
+                fileConfigService: FileConfigService,
+                fileLocalStorage: FileLocalStorage,
+                minioS3Storage: MinioS3Storage,
+            ) => new FileStorageFactory(fileConfigService, {
                 [FileStorageEnum.LOCAL]: fileLocalStorage,
                 [FileStorageEnum.MINIO_S3]: minioS3Storage,
             }),
@@ -75,7 +76,7 @@ export default (config: IFileModuleConfig) => ({
             IFileRepository,
             FileImageService,
             FileConfigService,
-            FileStorageFabric,
+            IFIleStorageFactory,
             EventEmitter2,
             IFIleTypeService,
             [
@@ -86,14 +87,14 @@ export default (config: IFileModuleConfig) => ({
         ModuleHelper.provide(FileImageService, [
             IFileImageRepository,
             FileConfigService,
-            FileStorageFabric,
+            IFIleStorageFactory,
             EventEmitter2,
         ]),
 
         ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
             IFileService,
             FileImageService,
-            FileStorageFabric,
+            IFIleStorageFactory,
         ]),
 
         // Subscribers
@@ -101,7 +102,7 @@ export default (config: IFileModuleConfig) => ({
 
         // UseCases
         ModuleHelper.provide(FileRemovedEventHandleUseCase, [
-            FileStorageFabric,
+            IFIleStorageFactory,
             FileConfigService,
         ]),
     ],

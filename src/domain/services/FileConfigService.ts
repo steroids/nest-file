@@ -3,7 +3,7 @@ import {OnModuleInit} from '@nestjs/common';
 import {join} from 'path';
 import {CronExpression} from '@nestjs/schedule';
 import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
-import FileStorageEnum, {FileStorage} from '../enums/FileStorageEnum';
+import FileStorageEnum from '../enums/FileStorageEnum';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IFileModuleConfig} from '../../infrastructure/config';
@@ -42,7 +42,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      * Env:
      *  - APP_FILE_STORAGE_NAME
      */
-    public defaultStorageName: string;
+    public defaultStorageName: FileStorageEnum;
 
     /**
      * Configurations for storages
@@ -107,7 +107,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     public deleteLostAndTemporaryFilesByCron: {
         isEnable: boolean,
         cronTimePattern: string,
-        storageName: FileStorage,
+        storageName: FileStorageEnum,
     };
 
     /**
@@ -127,7 +127,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
 
     protected init(custom: IFileModuleConfig = {}) {
         // Default storage
-        this.defaultStorageName = process.env.APP_FILE_STORAGE_NAME
+        this.defaultStorageName = process.env.APP_FILE_STORAGE_NAME as FileStorageEnum
             || custom.defaultStorageName
             || FileStorageEnum.LOCAL;
 

@@ -1,15 +1,15 @@
 import * as Sentry from '@sentry/node';
 import {FileImageService} from './FileImageService';
 import {FileService} from './FileService';
-import {FileStorageFabric} from './FileStorageFabric';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
-import {FileStorage} from '../enums/FileStorageEnum';
+import {IFIleStorageFactory} from '../interfaces/IFIleStorageFactory';
+import FileStorageEnum from '../enums/FileStorageEnum';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
         private fileService: FileService,
         private fileImageService: FileImageService,
-        private fileStorageFabric: FileStorageFabric,
+        private fileStorageFactory: IFIleStorageFactory,
     ) {}
 
     /**
@@ -19,7 +19,7 @@ export class DeleteLostAndTemporaryFilesService {
      * - in MinioS3Storage class implement extended IFileStorage interface
      * - return in getStorage() method object that implements IFileStorage interface
      */
-    async deleteLostAndTemporaryFiles(storageName: FileStorage): Promise<void> {
+    async deleteLostAndTemporaryFiles(storageName: FileStorageEnum): Promise<void> {
         const storage = this.getStorage(storageName);
 
         if (!storage) {
@@ -44,9 +44,9 @@ export class DeleteLostAndTemporaryFilesService {
         }
     }
 
-    private getStorage(storageName: FileStorage): IFileLocalStorage {
+    private getStorage(storageName: FileStorageEnum): IFileLocalStorage {
         try {
-            return this.fileStorageFabric.get(storageName) as IFileLocalStorage;
+            return this.fileStorageFactory.get(storageName) as IFileLocalStorage;
         } catch (error) {
             Sentry.captureException(error);
             return null;

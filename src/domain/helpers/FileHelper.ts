@@ -1,5 +1,5 @@
 export class FileHelper {
-    static addPreviewSuffix(fileName, previewName) {
+    static addPreviewSuffix(fileName: string, previewName: string) {
         return fileName.replace(/\.[^.]+$/, `.${previewName}$&`);
     }
 }

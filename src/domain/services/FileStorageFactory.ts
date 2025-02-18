@@ -1,17 +1,19 @@
 import {FileConfigService} from './FileConfigService';
 import {IFileStorage} from '../interfaces/IFileStorage';
+import { FileStorageEnum } from '../enums/FileStorageEnum';
+import { IFIleStorageFactory } from '../interfaces/IFIleStorageFactory';
 
-export class FileStorageFabric {
-    private initializedNames: string[] = [];
+export class FileStorageFactory implements IFIleStorageFactory {
+    private initializedNames: FileStorageEnum[] = [];
 
     constructor(
         private fileConfigService: FileConfigService,
-        private storages: any,
+        private storages: Record<FileStorageEnum, IFileStorage>,
     ) {
     }
 
-    public get(name = null): IFileStorage {
-        name = name || this.fileConfigService.defaultStorageName;
+    public get(name: FileStorageEnum = null): IFileStorage {
+        name = name || this.fileConfigService.defaultStorageName as FileStorageEnum;
 
         if (!this.storages[name]) {
             throw new Error('Not found storage by name: ' + name);
