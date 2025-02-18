@@ -20,7 +20,7 @@ import {CronJobsRegister} from './services/CronJobsRegister';
 import {DeleteLostAndTemporaryFilesService} from '../domain/services/DeleteLostAndTemporaryFilesService';
 import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
-import {IFIleTypeService} from '../domain/interfaces/IFIleTypeService';
+import {IFileTypeService} from '../domain/interfaces/IFileTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
 
@@ -56,7 +56,7 @@ export default (config: IFileModuleConfig) => ({
             useFactory: () => new FileConfigService(config),
         },
         {
-            provide: IFIleTypeService,
+            provide: IFileTypeService,
             useClass: FileTypeService,
         },
 
@@ -78,7 +78,7 @@ export default (config: IFileModuleConfig) => ({
             FileConfigService,
             IFileStorageFactory,
             EventEmitter2,
-            IFIleTypeService,
+            IFileTypeService,
             [
                 FileMimeTypesValidator,
                 FileMaxSizeValidator,

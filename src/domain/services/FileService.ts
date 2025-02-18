@@ -24,7 +24,7 @@ import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
-import {IFIleTypeService} from '../interfaces/IFIleTypeService';
+import {IFileTypeService} from '../interfaces/IFileTypeService';
 import { IFileStorageFactory } from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 
@@ -43,7 +43,7 @@ export class FileService extends ReadService<FileModel> {
         protected readonly fileConfigService: FileConfigService,
         protected readonly fileStorageFactory: IFileStorageFactory,
         protected readonly eventEmitter: IEventEmitter,
-        protected readonly fileTypeService: IFIleTypeService,
+        protected readonly fileTypeService: IFileTypeService,
         public validators: IValidator[],
     ) {
         super();

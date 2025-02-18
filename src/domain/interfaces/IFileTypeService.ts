@@ -1,7 +1,7 @@
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
 
-export const IFIleTypeService = 'IFIleTypeService';
+export const IFileTypeService = 'IFIleTypeService';
 
-export interface IFIleTypeService {
+export interface IFileTypeService {
     getFileUploadOptionsByType: (fileType: string) => Promise<FileUploadOptions>;
 }
