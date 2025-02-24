@@ -17,25 +17,26 @@ export class ClearUnusedFilesCommand {
     })
     async processUnusedFiles(
         @Option({
-            name: 'name',
-            describe: 'File title query',
+            name: 'partial-name',
+            describe: 'Partial file name',
             type: 'string',
-            alias: 'n',
+            alias: 'pn',
             demandOption: false,
         })
             nameLike: string,
 
         @Option({
-            name: 'empty',
+            name: 'only-empty',
             describe: 'Files with size = 0',
             type: 'boolean',
+            alias: 'oe',
             demandOption: false,
         })
             isEmpty: boolean,
 
         @Option({
             name: 'preview-limit',
-            describe: 'Example files limit',
+            describe: 'Preview files limit',
             type: 'number',
             alias: 'pl',
             demandOption: false,
