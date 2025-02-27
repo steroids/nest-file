@@ -58,19 +58,27 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
         ignoredTables: string[],
         isEmpty: boolean,
     }): Promise<number[]> {
-        const tables: Array<{table_name: string, col_name: string}> = await this.dbRepository.query(`
+        // Массив объектов, где каждый объект содержит название таблицы и колонку в этой таблице, ссылающуюся на таблицу file
+        const tablesWithFileReferenceColumn: Array<{table_name: string, col_name: string}> = await this.dbRepository.query(`
             SELECT
-                conrelid::regclass AS table_name,
-                (regexp_match(pg_get_constraintdef(oid), 'FOREIGN KEY \\("([^"]+)"'))[1] as col_name
-            FROM pg_constraint
+                tc.table_name as table_name,
+                kcu.column_name as col_name
+            FROM
+                information_schema.table_constraints AS tc
+                    JOIN information_schema.key_column_usage AS kcu
+                         ON tc.constraint_name = kcu.constraint_name
+                             AND tc.table_schema = kcu.table_schema
+                    JOIN information_schema.constraint_column_usage AS ccu
+                         ON ccu.constraint_name = tc.constraint_name
+                             AND ccu.table_schema = tc.table_schema
             WHERE
-                contype = 'f'
-                AND connamespace = 'public'::regnamespace
-                AND pg_get_constraintdef(oid) LIKE '%REFERENCES file(id)%'
-            ORDER BY conrelid::regclass::text, contype DESC;
+                tc.constraint_type = 'FOREIGN KEY'
+              AND tc.table_schema = 'public'
+              AND ccu.table_name = 'file'
+              AND ccu.column_name = 'id';
         `);
 
-        const tablesFilesIds = await Promise.all(tables.map(async (table) => {
+        const tablesFilesIds = await Promise.all(tablesWithFileReferenceColumn.map(async (table) => {
             if (config.ignoredTables?.length && config.ignoredTables.includes(table.table_name)) {
                 return [];
             }
