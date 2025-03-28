@@ -24,6 +24,7 @@ import {IFileTypeService} from '../domain/interfaces/IFileTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
 import {ClearLostAndTemporaryFilesCommand} from './commands/ClearLostAndTemporaryFilesCommand';
+import {GetFileModelsPathUsecase} from '../usecases/getFilePathModels/GetFileModelsPathUsecase';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -93,9 +94,14 @@ export default (config: IFileModuleConfig) => ({
         ]),
 
         ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
-            IFileService,
-            FileImageService,
             IFileStorageFactory,
+            // При использовании заинжектить GetFileModelsPathUsecase
+            {},
+        ]),
+
+        ModuleHelper.provide(GetFileModelsPathUsecase, [
+            FileService,
+            FileImageService,
         ]),
 
         // Subscribers
