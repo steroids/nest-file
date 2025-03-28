@@ -93,9 +93,14 @@ export default (config: IFileModuleConfig) => ({
         ]),
 
         ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
-            IFileService,
-            FileImageService,
             IFileStorageFactory,
+            // При использовании заинжектить GetFileModelsPathUsecase
+            {},
+        ]),
+
+        ModuleHelper.provide(GetFileModelsPathUsecase, [
+            FileService,
+            FileImageService,
         ]),
 
         // Subscribers

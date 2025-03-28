@@ -1,15 +1,13 @@
 import * as Sentry from '@sentry/node';
-import {FileImageService} from './FileImageService';
-import {FileService} from './FileService';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
+import {GetFileModelsPathUsecase} from '../../usecases/getFilePathModels/GetFileModelsPathUsecase';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
-        private fileService: FileService,
-        private fileImageService: FileImageService,
         private fileStorageFactory: IFileStorageFactory,
+        private getFileModelsPathUsecase: GetFileModelsPathUsecase,
     ) {}
 
     /**
@@ -43,15 +41,12 @@ export class DeleteLostAndTemporaryFilesService {
             return [];
         }
 
-        const filesPathsFromDb = [
-            ...await this.fileImageService.getFilesPathsFromDb(storageName),
-            ...await this.fileService.getFilesPathsFromDb(storageName),
-        ];
+        const fileModelsPaths = await this.getFileModelsPathUsecase.handle(storageName);
 
         const lostAndTemporaryFilesPaths = [];
 
         for (const filePath of filePathsFromStorage) {
-            if (!filesPathsFromDb.includes(filePath)) {
+            if (!fileModelsPaths.includes(filePath)) {
                 lostAndTemporaryFilesPaths.push(filePath);
             }
         }
