@@ -1,6 +1,6 @@
 import {FileService} from '../../domain/services/FileService';
 import {FileImageService} from '../../domain/services/FileImageService';
-import {FileStorage} from '../../domain/enums/FileStorageEnum';
+import {FileStorageEnum} from '../../domain/enums/FileStorageEnum';
 
 export class GetFileModelsPathUsecase {
     constructor(
@@ -8,7 +8,7 @@ export class GetFileModelsPathUsecase {
         protected readonly fileImageService: FileImageService,
     ) {}
 
-    async handle(storageName: FileStorage) {
+    async handle(storageName: FileStorageEnum) {
         return [
             ...await this.fileImageService.getFilesPathsFromDb(storageName),
             ...await this.fileService.getFilesPathsFromDb(storageName),
