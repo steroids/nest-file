@@ -26,6 +26,15 @@ export class ClearUnusedFilesCommand {
             nameLike: string,
 
         @Option({
+            name: 'ignored-tables',
+            describe: 'The tables that need to be ignored when searching for the files used',
+            type: 'array',
+            alias: 'it',
+            demandOption: false,
+        })
+            ignoredTables: string[],
+
+        @Option({
             name: 'only-empty',
             describe: 'Files with size = 0',
             type: 'boolean',
@@ -54,7 +63,7 @@ export class ClearUnusedFilesCommand {
     ) {
         const totalFilesCount = await this.fileService.getCount();
         const unusedFilesIds = await this.fileService.getUnusedFilesIds({
-            ignoredTables: ['file_image'],
+            ignoredTables,
             fileNameLike: nameLike,
             isEmpty,
         });
