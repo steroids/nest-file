@@ -27,6 +27,25 @@ export class FileImageService {
     }
 
     async createPreview(file: FileModel, previewName: string, previewOptions: IFilePreviewOptions = null): Promise<FileImageModel> {
+        const isSvg = file.fileMimeType === SVG_MIME_TYPE;
+
+        if (isSvg) {
+            const imageModel = DataMapper.create<FileImageModel>(FileImageModel, {
+                fileId: file.id,
+                fileName: file.fileName,
+                folder: file.folder,
+                fileMimeType: file.fileMimeType,
+                storageName: file.storageName,
+                fileSize: file.fileSize,
+                width: null,
+                height: null,
+                previewName,
+                isOriginal: previewName === FilePreviewEnum.ORIGINAL,
+            });
+
+            return this.repository.create(imageModel);
+        }
+
         if (!previewOptions) {
             previewOptions = this.fileConfigService.previews?.[previewName];
         }
@@ -41,28 +60,24 @@ export class FileImageService {
 
         let hasChanges = false;
 
-        const isSvg = file.fileMimeType === SVG_MIME_TYPE;
+        if (previewOptions?.width && previewOptions?.height) {
+            image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
+            hasChanges = true;
+        }
+        if (previewOptions?.sharp?.extend) {
+            image.extend(previewOptions.sharp.extend);
+            hasChanges = true;
+        }
+        if (previewOptions?.sharp?.extract) {
+            image.extract(previewOptions.sharp.extract);
+            hasChanges = true;
+        }
 
-        if (!isSvg) {
-            if (previewOptions?.width && previewOptions?.height) {
-                image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
-                hasChanges = true;
-            }
-            if (previewOptions?.sharp?.extend) {
-                image.extend(previewOptions.sharp.extend);
-                hasChanges = true;
-            }
-            if (previewOptions?.sharp?.extract) {
-                image.extract(previewOptions.sharp.extract);
-                hasChanges = true;
-            }
+        //add image output options if they are specified
+        const sharpOptionName = SharpHelper.getImageOptionNameByMimeType(file.fileMimeType);
 
-            //add image output options if they are specified
-            const sharpOptionName = SharpHelper.getImageOptionNameByMimeType(file.fileMimeType);
-
-            if (sharpOptionName && previewOptions.sharp?.outputImageOptions?.[sharpOptionName]) {
-                image[sharpOptionName](previewOptions.sharp?.outputImageOptions[sharpOptionName]);
-            }
+        if (sharpOptionName && previewOptions.sharp?.outputImageOptions?.[sharpOptionName]) {
+            image[sharpOptionName](previewOptions.sharp?.outputImageOptions[sharpOptionName]);
         }
 
         const {data, info} = await image.toBuffer({resolveWithObject: true});
@@ -75,7 +90,7 @@ export class FileImageService {
             folder: file.folder,
             fileMimeType: file.fileMimeType,
             storageName: file.storageName,
-            fileSize: isSvg ? file.fileSize : info.size,
+            fileSize: info.size,
             width: info.width,
             height: info.height,
             previewName,
