@@ -15,6 +15,8 @@ import {IEventEmitter} from '../interfaces/IEventEmitter';
 import { IFileStorageFactory } from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 
+const SVG_MIME_TYPE = 'image/svg+xml';
+
 export class FileImageService {
     constructor(
         public repository: IFileImageRepository,
@@ -25,6 +27,25 @@ export class FileImageService {
     }
 
     async createPreview(file: FileModel, previewName: string, previewOptions: IFilePreviewOptions = null): Promise<FileImageModel> {
+        const isSvg = file.fileMimeType === SVG_MIME_TYPE;
+
+        if (isSvg) {
+            const imageModel = DataMapper.create<FileImageModel>(FileImageModel, {
+                fileId: file.id,
+                fileName: file.fileName,
+                folder: file.folder,
+                fileMimeType: file.fileMimeType,
+                storageName: file.storageName,
+                fileSize: file.fileSize,
+                width: null,
+                height: null,
+                previewName,
+                isOriginal: previewName === FilePreviewEnum.ORIGINAL,
+            });
+
+            return this.repository.create(imageModel);
+        }
+
         if (!previewOptions) {
             previewOptions = this.fileConfigService.previews?.[previewName];
         }
@@ -38,6 +59,7 @@ export class FileImageService {
         }
 
         let hasChanges = false;
+
         if (previewOptions?.width && previewOptions?.height) {
             image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
             hasChanges = true;
