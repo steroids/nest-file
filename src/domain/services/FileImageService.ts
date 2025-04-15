@@ -70,11 +70,11 @@ export class FileImageService {
 
         let hasChanges = false;
 
-        const isNeedResize = previewOptions?.width && previewOptions?.height;
-        const isNeedStretch = imageWidth < previewOptions.width || imageHeight < previewOptions.height;
-        const isAllowStretch = previewOptions?.stretch;
+        const isSizesProvided = previewOptions?.width && previewOptions?.height;
+        const isStretchNeeded = imageWidth < previewOptions.width || imageHeight < previewOptions.height;
+        const isStretchEnabled = previewOptions?.stretch;
 
-        if (isNeedResize && (!isNeedStretch || isAllowStretch)) {
+        if (isSizesProvided && (!isStretchNeeded || isStretchEnabled)) {
             image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
             hasChanges = true;
         }
