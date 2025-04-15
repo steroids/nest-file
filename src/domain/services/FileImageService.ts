@@ -58,25 +58,23 @@ export class FileImageService {
         let imageHeight: number;
 
         if (previewOptions?.rotate) {
-            image.rotate();
+            // base on EXIF
+            image.autoOrient();
             imageWidth = imageMetadata.autoOrient.width;
             imageHeight = imageMetadata.autoOrient.height;
         } else {
+            // not base on EXIF
             imageWidth = imageMetadata.width;
             imageHeight = imageMetadata.height;
         }
 
         let hasChanges = false;
 
-        if (previewOptions?.width && previewOptions?.height
-            && (previewOptions?.stretch
-                || (
-                    !previewOptions?.stretch
-                    && imageWidth >= previewOptions.width
-                    && imageHeight >= previewOptions.height
-                )
-            )
-        ) {
+        const isNeedResize = previewOptions?.width && previewOptions?.height;
+        const isNeedStretch = imageWidth < previewOptions.width || imageHeight < previewOptions.height;
+        const isAllowStretch = previewOptions?.stretch;
+
+        if (isNeedResize && (!isNeedStretch || isAllowStretch)) {
             image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
             hasChanges = true;
         }
