@@ -3,6 +3,7 @@ export interface IFilePreviewOptions {
     width: number,
     height: number,
     rotate: boolean,
+    stretch: boolean,
     sharp?: {
         resize?: any,
         extend?: any,
