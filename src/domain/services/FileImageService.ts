@@ -71,7 +71,7 @@ export class FileImageService {
         let hasChanges = false;
 
         const isSizesProvided = previewOptions?.width && previewOptions?.height;
-        const isStretchNeeded = imageWidth < previewOptions.width || imageHeight < previewOptions.height;
+        const isStretchNeeded = imageWidth < previewOptions?.width || imageHeight < previewOptions?.height;
         const isStretchEnabled = previewOptions?.stretch;
 
         if (isSizesProvided && (!isStretchNeeded || isStretchEnabled)) {
