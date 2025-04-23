@@ -24,7 +24,7 @@ import {IFileTypeService} from '../domain/interfaces/IFileTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
 import {ClearLostAndTemporaryFilesCommand} from './commands/ClearLostAndTemporaryFilesCommand';
-import {GetFileModelsPathUsecase} from '../usecases/getFilePathModels/GetFileModelsPathUsecase';
+import {GetFileModelsPathUsecaseToken} from '../usecases/getFilePathModels/constants/GetFileModelsPathUsecaseToken';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
@@ -93,15 +93,15 @@ export default (config: IFileModuleConfig) => ({
             EventEmitter2,
         ]),
 
+        {
+            provide: GetFileModelsPathUsecaseToken,
+            // При использовании передавать GetFileModelsPathUsecase
+            useClass: {},
+        },
+
         ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
             IFileStorageFactory,
-            // При использовании заинжектить GetFileModelsPathUsecase
-            {},
-        ]),
-
-        ModuleHelper.provide(GetFileModelsPathUsecase, [
-            FileService,
-            FileImageService,
+            GetFileModelsPathUsecaseToken,
         ]),
 
         // Subscribers
