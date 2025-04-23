@@ -24,7 +24,7 @@ import {IFileTypeService} from '../domain/interfaces/IFileTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
 import {ClearLostAndTemporaryFilesCommand} from './commands/ClearLostAndTemporaryFilesCommand';
-import {GetFileModelsPathUsecaseToken} from '../usecases/getFilePathModels/constants/GetFileModelsPathUsecaseToken';
+import {GetFileModelsPathUsecaseToken} from '../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [
