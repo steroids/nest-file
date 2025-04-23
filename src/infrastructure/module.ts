@@ -92,15 +92,15 @@ export default (config: IFileModuleConfig) => ({
             EventEmitter2,
         ]),
 
+        {
+            provide: GetFileModelsPathUsecaseToken,
+            // При использовании передавать GetFileModelsPathUsecase
+            useClass: {},
+        },
+
         ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
             IFileStorageFactory,
-            // При использовании заинжектить GetFileModelsPathUsecase
-            {},
-        ]),
-
-        ModuleHelper.provide(GetFileModelsPathUsecase, [
-            FileService,
-            FileImageService,
+            GetFileModelsPathUsecaseToken,
         ]),
 
         // Subscribers
