@@ -1,6 +1,7 @@
-import {Inject, Injectable, OnModuleInit, Optional} from '@nestjs/common';
+import {Inject, Injectable, Optional} from '@nestjs/common';
 import {SchedulerRegistry} from '@nestjs/schedule';
 import {CronJob} from 'cron';
+import {OnApplicationBootstrap} from '@nestjs/common/interfaces/hooks/on-application-bootstrap.interface';
 import {FileConfigService} from '../../domain/services/FileConfigService';
 import {DeleteLostAndTemporaryFilesService} from '../../domain/services/DeleteLostAndTemporaryFilesService';
 
@@ -9,7 +10,7 @@ import {DeleteLostAndTemporaryFilesService} from '../../domain/services/DeleteLo
  * - import ScheduleModule into the working project https://docs.nestjs.com/techniques/task-scheduling
  */
 @Injectable()
-export class CronJobsRegister implements OnModuleInit {
+export class CronJobsRegister implements OnApplicationBootstrap {
     public deleteLostAndTemporaryFilesJobName = 'delete_lost_and_temporary_files_job';
 
     constructor(
@@ -18,7 +19,7 @@ export class CronJobsRegister implements OnModuleInit {
         @Optional() @Inject(SchedulerRegistry) private schedulerRegistry: SchedulerRegistry,
     ) {}
 
-    onModuleInit(): void {
+    onApplicationBootstrap(): void {
         if (!this.schedulerRegistry) {
             return;
         }
