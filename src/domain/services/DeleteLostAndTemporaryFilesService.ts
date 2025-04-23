@@ -1,13 +1,13 @@
 import * as Sentry from '@sentry/node';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
-import {GetFileModelsPathUsecase} from '../../usecases/getFilePathModels/GetFileModelsPathUsecase';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
+import {IGetFileModelsPathUsecase} from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
         private fileStorageFactory: IFileStorageFactory,
-        private getFileModelsPathUsecase: GetFileModelsPathUsecase,
+        private getFileModelsPathUsecase: IGetFileModelsPathUsecase,
     ) {}
 
     /**
