@@ -64,6 +64,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      *  - APP_FILE_PREVIEW_THUMBNAIL_WIDTH
      *  - APP_FILE_PREVIEW_THUMBNAIL_HEIGHT
      *  - APP_FILE_PREVIEW_ROTATE
+     *  - APP_FILE_PREVIEW_STRETCH
      */
     public previews: {
         original?: IFilePreviewOptions,

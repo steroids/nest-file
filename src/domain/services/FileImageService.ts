@@ -53,17 +53,32 @@ export class FileImageService {
         const content = await this.fileStorageFactory.get(file.storageName).read(file);
 
         const image = sharp(content, {failOnError: false});
+        const imageMetadata = await image.metadata();
+        let imageWidth: number;
+        let imageHeight: number;
 
         if (previewOptions?.rotate) {
-            image.rotate();
+            // base on EXIF
+            image.autoOrient();
+            imageWidth = imageMetadata.autoOrient.width;
+            imageHeight = imageMetadata.autoOrient.height;
+        } else {
+            // not base on EXIF
+            imageWidth = imageMetadata.width;
+            imageHeight = imageMetadata.height;
         }
 
         let hasChanges = false;
 
-        if (previewOptions?.width && previewOptions?.height) {
+        const isSizesProvided = previewOptions?.width && previewOptions?.height;
+        const isStretchNeeded = imageWidth < previewOptions?.width || imageHeight < previewOptions?.height;
+        const isStretchEnabled = previewOptions?.stretch;
+
+        if (isSizesProvided && (!isStretchNeeded || isStretchEnabled)) {
             image.resize(previewOptions.width, previewOptions.height, previewOptions.sharp?.resize);
             hasChanges = true;
         }
+
         if (previewOptions?.sharp?.extend) {
             image.extend(previewOptions.sharp.extend);
             hasChanges = true;
