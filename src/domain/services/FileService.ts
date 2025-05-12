@@ -1,10 +1,9 @@
 import * as fs from 'fs';
-import * as mime from 'mime-types';
-import {getMimeType} from 'stream-mime-type';
+import {Readable} from 'stream';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {ValidationHelper} from '@steroidsjs/nest/usecases/helpers/ValidationHelper';
-import {Readable} from 'stream';
-import {generateUid} from '@steroidsjs/nest/infrastructure/decorators/fields/UidField';
+import {getMimeType} from 'stream-mime-type';
+import * as mime from 'mime-types';
 import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
 import {ReadService} from '@steroidsjs/nest/usecases/services/ReadService';
 import SearchQuery from '@steroidsjs/nest/usecases/base/SearchQuery';
@@ -12,12 +11,11 @@ import {Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
+import {generateUid} from '@steroidsjs/nest/infrastructure/decorators/typeorm/fields/TypeOrmUidField/TypeOrmUidBehaviour';
 import {IFileRepository} from '../interfaces/IFileRepository';
 import {FileModel} from '../models/FileModel';
-import {FileImageService} from './FileImageService';
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
 import {FileSaveDto} from '../dtos/FileSaveDto';
-import {FileConfigService} from './FileConfigService';
 import {FileExpressSourceDto} from '../dtos/sources/FileExpressSourceDto';
 import {FileLocalSourceDto} from '../dtos/sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from '../dtos/sources/FileStreamSourceDto';
@@ -25,8 +23,10 @@ import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFileTypeService} from '../interfaces/IFileTypeService';
-import { IFileStorageFactory } from '../interfaces/IFileStorageFactory';
+import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
+import {FileConfigService} from './FileConfigService';
+import {FileImageService} from './FileImageService';
 
 type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
 
@@ -60,6 +60,7 @@ export class FileService extends ReadService<FileModel> {
     ): Promise<T | FileModel> {
         const fileModel = await this.uploadFileInternal(rawOptions);
         await this.createPreviewsOnImage(fileModel, this.fileConfigService.previews);
+        // @ts-ignore
         return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
     }
 
@@ -70,6 +71,7 @@ export class FileService extends ReadService<FileModel> {
     ): Promise<T | FileModel> {
         const fileModel = await this.uploadFileInternal(rawOptions);
         await this.createPreviewsOnImage(fileModel, customPreviews || this.fileConfigService.previews);
+        // @ts-ignore
         return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
     }
 
@@ -226,11 +228,11 @@ export class FileService extends ReadService<FileModel> {
 
         // Auto get mime type, if no exists
         if (!dto.fileSize && (source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto)) {
-            dto.mimeType = mime.lookup('.' + source.path.split('.').pop());
+            dto.fileMimeType = mime.lookup('.' + source.path.split('.').pop());
         } else if (source instanceof FileStreamSourceDto && source.stream instanceof Readable) {
-            dto.mimeType = await getMimeType(source.stream, {
+            dto.fileMimeType = (await getMimeType(source.stream, {
                 filename: dto.fileName,
-            });
+            })).mime;
         }
 
         // Generate file name by uid and extension
@@ -261,6 +263,7 @@ export class FileService extends ReadService<FileModel> {
         const model = await this.repository.findOne(
             (new SearchQuery<FileModel>()).where({id}),
         );
+        // @ts-ignore
         return schemaClass ? DataMapper.create(schemaClass, model) : model;
     }
 
