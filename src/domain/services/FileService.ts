@@ -307,4 +307,16 @@ export class FileService extends ReadService<FileModel> {
             storageName: file.storageName,
         }));
     }
+
+    public async getUnusedFilesIds(config: {
+        fileNameLike: string,
+        ignoredTables: string[],
+        isEmpty: boolean,
+    }): Promise<number[]> {
+        return this.repository.getUnusedFilesIds(config);
+    }
+
+    public async getCount(): Promise<number> {
+        return this.repository.getCount();
+    }
 }
