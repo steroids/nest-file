@@ -6,7 +6,8 @@ import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import * as Sentry from '@sentry/node';
 import {FileWriteResult} from '../dtos/FileWriteResult';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
-import {IFile} from '../interfaces/IFile';
+import {IFileReadable} from '../interfaces/IFileReadable';
+import {IFileWritable} from '../interfaces/IFileWritable';
 
 export class FileLocalStorage implements IFileLocalStorage {
     /**
@@ -28,12 +29,12 @@ export class FileLocalStorage implements IFileLocalStorage {
         }
     }
 
-    public async read(file: IFile): Promise<Buffer> {
+    public async read(file: IFileReadable): Promise<Buffer> {
         const filePath = join(...[this.rootPath, file.folder, file.fileName].filter(Boolean));
         return fs.promises.readFile(filePath);
     }
 
-    public async write(file: IFile, source: Readable | Buffer): Promise<FileWriteResult> {
+    public async write(file: IFileWritable, source: Readable | Buffer): Promise<FileWriteResult> {
         const dir = join(...[this.rootPath, file.folder].filter(Boolean));
 
         // Create dir
@@ -49,7 +50,7 @@ export class FileLocalStorage implements IFileLocalStorage {
         });
     }
 
-    public getUrl(file: IFile): string {
+    public getUrl(file: IFileReadable): string {
         return [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
     }
 

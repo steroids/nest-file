@@ -5,7 +5,8 @@ import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
 import {IFileStorage} from '../interfaces/IFileStorage';
 import {FileWriteResult} from '../dtos/FileWriteResult';
-import {IFile} from '../interfaces/IFile';
+import {IFileReadable} from '../interfaces/IFileReadable';
+import {IFileWritable} from '../interfaces/IFileWritable';
 
 export class MinioS3Storage implements IFileStorage {
     public host: string;
@@ -46,7 +47,7 @@ export class MinioS3Storage implements IFileStorage {
         // }
     }
 
-    public async read(file: IFile): Promise<Buffer> {
+    public async read(file: IFileReadable): Promise<Buffer> {
         return new Promise((resolve, reject) => {
             // Get a full object.
             const chunks = [];
@@ -72,7 +73,7 @@ export class MinioS3Storage implements IFileStorage {
         });
     }
 
-    public async write(file: IFile, source: Readable | Buffer): Promise<FileWriteResult> {
+    public async write(file: IFileWritable, source: Readable | Buffer): Promise<FileWriteResult> {
         await this.makeMainBucket();
 
         return new Promise((resolve, reject) => {
@@ -97,7 +98,7 @@ export class MinioS3Storage implements IFileStorage {
         });
     }
 
-    public getUrl(file: IFile): string {
+    public getUrl(file: IFileReadable): string {
         return [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
     }
 
