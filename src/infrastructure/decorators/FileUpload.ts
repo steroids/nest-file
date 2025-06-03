@@ -30,7 +30,7 @@ export function FileUpload(options?: IFileUploadOptions) {
                     limits: {
                         fileSize: options?.maxFileSize || MAX_BITS_SIZE,
                     },
-                    fileFilter: (req, file, callback) => {
+                    fileFilter: (request, file, callback) => {
                         const allowedMimeTypes = options?.allowedMimeTypes || [];
 
                         if (allowedMimeTypes.length && !allowedMimeTypes.includes(file.mimetype)) {
