@@ -1,10 +1,9 @@
 /* eslint-disable no-console */
 import {Command, Option} from 'nestjs-command';
-import {Inject, Injectable} from '@nestjs/common';
+import {Inject} from '@nestjs/common';
 import {DeleteLostAndTemporaryFilesService} from '../../domain/services/DeleteLostAndTemporaryFilesService';
-import FileStorageEnum, {FileStorage} from '../../domain/enums/FileStorageEnum';
+import {FileStorageEnum, FileStorageEnumHelper} from '../../domain/enums/FileStorageEnum';
 
-@Injectable()
 export class ClearLostAndTemporaryFilesCommand {
     constructor(
         @Inject(DeleteLostAndTemporaryFilesService)
@@ -23,10 +22,10 @@ export class ClearLostAndTemporaryFilesCommand {
             type: 'string',
             alias: 'st',
             demandOption: false,
-            choices: FileStorageEnum.getKeys(),
-            default: FileStorage.LOCAL,
+            choices: FileStorageEnumHelper.getKeys(),
+            default: FileStorageEnum.LOCAL,
         })
-            storageName: FileStorage,
+            storageName: FileStorageEnum,
 
         @Option({
             name: 'dry-run',

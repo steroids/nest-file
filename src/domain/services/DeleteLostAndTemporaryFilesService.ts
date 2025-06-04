@@ -1,12 +1,18 @@
 import * as Sentry from '@sentry/node';
+import {Inject, Optional} from '@nestjs/common';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
-import {IGetFileModelsPathUsecase} from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
+import {
+    GetFileModelsPathUsecaseToken,
+    IGetFileModelsPathUsecase,
+} from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
+        @Inject(IFileStorageFactory)
         private fileStorageFactory: IFileStorageFactory,
+        @Optional() @Inject(GetFileModelsPathUsecaseToken)
         private getFileModelsPathUsecase: IGetFileModelsPathUsecase,
     ) {}
 
@@ -29,6 +35,10 @@ export class DeleteLostAndTemporaryFilesService {
     }
 
     async getLostAndTemporaryFilesPaths(storageName: FileStorageEnum): Promise<string[]> {
+        if (!this.getFileModelsPathUsecase) {
+            throw new Error('GetFileModelsPathUsecase is not provided');
+        }
+
         const storage = this.getStorage(storageName);
 
         if (!storage) {
