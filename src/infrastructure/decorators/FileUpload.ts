@@ -1,4 +1,4 @@
-import {applyDecorators, UseInterceptors} from '@nestjs/common';
+import {applyDecorators, UnsupportedMediaTypeException, UseInterceptors} from '@nestjs/common';
 import {FileInterceptor} from '@nestjs/platform-express';
 import {diskStorage} from 'multer';
 import {extname, join} from 'path';
@@ -8,6 +8,7 @@ const MAX_BITS_SIZE = 25165824; // 10 mb;
 interface IFileUploadOptions {
     maxFileSize?: number,
     fieldName?: string,
+    allowedMimeTypes?: string[];
 }
 
 export function FileUpload(options?: IFileUploadOptions) {
@@ -28,6 +29,17 @@ export function FileUpload(options?: IFileUploadOptions) {
                     }),
                     limits: {
                         fileSize: options?.maxFileSize || MAX_BITS_SIZE,
+                    },
+                    fileFilter: (request, file, callback) => {
+                        const allowedMimeTypes = options?.allowedMimeTypes || [];
+
+                        if (allowedMimeTypes.length && !allowedMimeTypes.includes(file.mimetype)) {
+                            return callback(
+                                new UnsupportedMediaTypeException(`Недопустимый тип файла: ${file.mimetype}`),
+                                false,
+                            );
+                        }
+                        return callback(null, true);
                     },
                 },
             ),
