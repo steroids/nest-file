@@ -1,5 +1,14 @@
 # Steroids Nest File
 
+## [0.3.1](https://github.com/steroids/nest/compare/0.3.0...0.3.1) (2025-06-24)
+
+### Features
+
+- Добавлена CLI команда для удаления файлов из хранилища, для которых нет записи в БД. ([#17](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/17))
+- Добавлена CLI команда для удаления неиспользуемых загруженных файлов ([#95](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/95))
+- Обновлены интерфейсы методов в IFileStorage ([#114](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/114))
+- Добавлен тип загружаемых файлов в конфиг для @FileUpload ([#120](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/120))
+
 ## [0.3.0](https://github.com/steroids/nest/compare/0.2.6...0.3.0) (2025-05-12)
 
 ### Features
