@@ -92,11 +92,7 @@ export default (config: IFileModuleConfig) => ({
             EventEmitter2,
         ]),
 
-        ModuleHelper.provide(DeleteLostAndTemporaryFilesService, [
-            IFileService,
-            FileImageService,
-            IFileStorageFactory,
-        ]),
+        DeleteLostAndTemporaryFilesService,
 
         // Subscribers
         FileEventsSubscriber,

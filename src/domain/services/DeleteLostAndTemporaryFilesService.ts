@@ -1,15 +1,19 @@
 import * as Sentry from '@sentry/node';
-import {FileImageService} from './FileImageService';
-import {FileService} from './FileService';
+import {Inject, Optional} from '@nestjs/common';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
+import {
+    GetFileModelsPathUsecaseToken,
+    IGetFileModelsPathUsecase,
+} from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
-        private fileService: FileService,
-        private fileImageService: FileImageService,
+        @Inject(IFileStorageFactory)
         private fileStorageFactory: IFileStorageFactory,
+        @Optional() @Inject(GetFileModelsPathUsecaseToken)
+        private getFileModelsPathUsecase: IGetFileModelsPathUsecase,
     ) {}
 
     /**
@@ -21,27 +25,43 @@ export class DeleteLostAndTemporaryFilesService {
      */
     async deleteLostAndTemporaryFiles(storageName: FileStorageEnum): Promise<void> {
         const storage = this.getStorage(storageName);
-
         if (!storage) {
             return;
+        }
+        const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
+        for (const filePath of lostAndTemporaryFilesPaths) {
+            await storage.deleteFile(filePath);
+        }
+    }
+
+    async getLostAndTemporaryFilesPaths(storageName: FileStorageEnum): Promise<string[]> {
+        if (!this.getFileModelsPathUsecase) {
+            throw new Error('GetFileModelsPathUsecase is not provided');
+        }
+
+        const storage = this.getStorage(storageName);
+
+        if (!storage) {
+            return [];
         }
 
         const filePathsFromStorage = storage.getFilesPaths();
 
         if (!filePathsFromStorage) {
-            return;
+            return [];
         }
 
-        const filesPathsFromDb = [
-            ...await this.fileImageService.getFilesPathsFromDb(storageName),
-            ...await this.fileService.getFilesPathsFromDb(storageName),
-        ];
+        const fileModelsPaths = await this.getFileModelsPathUsecase.handle(storageName);
+
+        const lostAndTemporaryFilesPaths = [];
 
         for (const filePath of filePathsFromStorage) {
-            if (!filesPathsFromDb.includes(filePath)) {
-                storage.deleteFile(filePath);
+            if (!fileModelsPaths.includes(filePath)) {
+                lostAndTemporaryFilesPaths.push(filePath);
             }
         }
+
+        return lostAndTemporaryFilesPaths;
     }
 
     private getStorage(storageName: FileStorageEnum): IFileLocalStorage {
