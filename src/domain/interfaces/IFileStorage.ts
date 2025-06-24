@@ -1,13 +1,12 @@
 import {Readable} from 'stream';
-import {FileSaveDto} from '../dtos/FileSaveDto';
 import {FileWriteResult} from '../dtos/FileWriteResult';
-import {FileModel} from '../models/FileModel';
-import {FileImageModel} from '../models/FileImageModel';
+import {IFileReadable} from './IFileReadable';
+import {IFileWritable} from './IFileWritable';
 
 export interface IFileStorage {
     init(config: any)
-    read(fileModel: FileModel): Promise<Buffer>
-    write(fileSaveDto: FileSaveDto, source: Readable | Buffer): Promise<FileWriteResult>
-    getUrl(fileModel: FileModel | FileImageModel): string
+    read(file: IFileReadable): Promise<Buffer>
+    write(file: IFileWritable, source: Readable | Buffer): Promise<FileWriteResult>
+    getUrl(file: IFileReadable): string
     deleteFile(fileName: string): void | Promise<void>;
 }

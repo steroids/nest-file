@@ -4,10 +4,9 @@ import * as Minio from 'minio';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
 import {IFileStorage} from '../interfaces/IFileStorage';
-import {FileSaveDto} from '../dtos/FileSaveDto';
 import {FileWriteResult} from '../dtos/FileWriteResult';
-import {FileModel} from '../models/FileModel';
-import {FileImageModel} from '../models/FileImageModel';
+import {IFileReadable} from '../interfaces/IFileReadable';
+import {IFileWritable} from '../interfaces/IFileWritable';
 
 export class MinioS3Storage implements IFileStorage {
     public host: string;
@@ -26,9 +25,9 @@ export class MinioS3Storage implements IFileStorage {
 
     public rootUrl: string;
 
-    private _client;
+    private _client: Minio.Client;
 
-    private _isBucketCreated;
+    private _isBucketCreated: boolean;
 
     public init(config: any) {
         this.host = config?.host;
@@ -48,13 +47,13 @@ export class MinioS3Storage implements IFileStorage {
         // }
     }
 
-    public async read(fileModel: FileModel): Promise<Buffer> {
+    public async read(file: IFileReadable): Promise<Buffer> {
         return new Promise((resolve, reject) => {
             // Get a full object.
             const chunks = [];
             this.getClient().getObject(
                 this.mainBucket,
-                [fileModel.folder, fileModel.fileName].filter(Boolean).join('/'),
+                [file.folder, file.fileName].filter(Boolean).join('/'),
                 (err, dataStream) => {
                     if (err) {
                         reject(err);
@@ -74,18 +73,16 @@ export class MinioS3Storage implements IFileStorage {
         });
     }
 
-    public async write(fileSaveDto: FileSaveDto, source: Readable | Buffer): Promise<FileWriteResult> {
+    public async write(file: IFileWritable, source: Readable | Buffer): Promise<FileWriteResult> {
         await this.makeMainBucket();
 
         return new Promise((resolve, reject) => {
             this.getClient().putObject(
                 this.mainBucket,
-                [fileSaveDto.folder, fileSaveDto.fileName].filter(Boolean).join('/'),
+                [file.folder, file.fileName].filter(Boolean).join('/'),
                 source,
-                {
-                    'Content-Type': fileSaveDto.fileMimeType || 'application/octet-stream',
-                    Uid: fileSaveDto.uid || '',
-                },
+                file.fileSize,
+                {'Content-Type': file.fileMimeType},
                 (err, {etag}) => {
                     if (err) {
                         reject(err);
@@ -101,8 +98,8 @@ export class MinioS3Storage implements IFileStorage {
         });
     }
 
-    public getUrl(fileModel: FileModel | FileImageModel): string {
-        return [this.rootUrl, fileModel.folder, fileModel.fileName].filter(Boolean).join('/');
+    public getUrl(file: IFileReadable): string {
+        return [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
     }
 
     protected makeMainBucket(): Promise<void> {

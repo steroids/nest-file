@@ -4,12 +4,10 @@ import * as fs from 'fs';
 import * as md5File from 'md5-file';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import * as Sentry from '@sentry/node';
-import * as path from 'node:path';
-import {FileSaveDto} from '../dtos/FileSaveDto';
 import {FileWriteResult} from '../dtos/FileWriteResult';
-import {FileModel} from '../models/FileModel';
-import {FileImageModel} from '../models/FileImageModel';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
+import {IFileReadable} from '../interfaces/IFileReadable';
+import {IFileWritable} from '../interfaces/IFileWritable';
 
 export class FileLocalStorage implements IFileLocalStorage {
     /**
@@ -31,40 +29,40 @@ export class FileLocalStorage implements IFileLocalStorage {
         }
     }
 
-    public async read(fileModel: FileModel): Promise<Buffer> {
-        const path = join(...[this.rootPath, fileModel.folder, fileModel.fileName].filter(Boolean));
-        return fs.promises.readFile(path);
+    public async read(file: IFileReadable): Promise<Buffer> {
+        const filePath = join(...[this.rootPath, file.folder, file.fileName].filter(Boolean));
+        return fs.promises.readFile(filePath);
     }
 
-    public async write(fileSaveDto: FileSaveDto, source: Readable | Buffer): Promise<FileWriteResult> {
-        const dir = join(...[this.rootPath, fileSaveDto.folder].filter(Boolean));
+    public async write(file: IFileWritable, source: Readable | Buffer): Promise<FileWriteResult> {
+        const dir = join(...[this.rootPath, file.folder].filter(Boolean));
 
         // Create dir
         if (!fs.existsSync(dir)) {
             await fs.promises.mkdir(dir, {recursive: true});
         }
 
-        const path = join(dir, fileSaveDto.fileName);
-        await fs.promises.writeFile(path, source, 'utf8');
+        const filePath = join(dir, file.fileName);
+        await fs.promises.writeFile(filePath, source, 'utf8');
 
         return DataMapper.create<FileWriteResult>(FileWriteResult, {
-            md5: await md5File(path),
+            md5: await md5File(filePath),
         });
     }
 
-    public getUrl(fileModel: FileModel | FileImageModel): string {
-        return [this.rootUrl, fileModel.folder, fileModel.fileName].filter(Boolean).join('/');
+    public getUrl(file: IFileReadable): string {
+        return [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
     }
 
     getFilesPaths(relativePath = ''): string[] | null {
         try {
-            const folderPath = path.join(this.rootPath, relativePath);
+            const folderPath = join(this.rootPath, relativePath);
             const files = fs.readdirSync(folderPath);
             let results = [];
 
             files.forEach(file => {
-                const filePath = path.join(folderPath, file);
-                const fileRelativePath = path.join(relativePath, file);
+                const filePath = join(folderPath, file);
+                const fileRelativePath = join(relativePath, file);
                 const stat = fs.statSync(filePath);
 
                 if (stat.isDirectory()) {
