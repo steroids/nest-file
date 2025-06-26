@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 import {Command, Option} from 'nestjs-command';
 import {Inject, Injectable} from '@nestjs/common';
+import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
 import {FileService} from '../../domain/services/FileService';
 
 @Injectable()
 export class ClearUnusedFilesCommand {
     constructor(
-        @Inject(FileService)
+        @Inject(IFileService)
         private fileService: FileService,
     ) {
     }
