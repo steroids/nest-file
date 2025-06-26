@@ -1,5 +1,11 @@
 # Steroids Nest File
 
+## [0.3.2](https://github.com/steroids/nest/compare/0.3.1...0.3.2) (2025-06-26)
+
+### Fixes
+
+- Фикс ClearUnusedFilesCommand
+
 ## [0.3.1](https://github.com/steroids/nest/compare/0.3.0...0.3.1) (2025-06-24)
 
 ### Features
