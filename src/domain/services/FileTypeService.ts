@@ -1,6 +1,6 @@
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
-import { IFileTypeService } from '../interfaces/IFileTypeService';
+import {IFileTypeService} from '../interfaces/IFileTypeService';
 
 /*
     Basic implementation of a service that, based on the fileType field, sets the necessary parameters for
@@ -11,10 +11,10 @@ export class FileTypeService implements IFileTypeService {
     constructor() {}
 
     public async getFileUploadOptionsByType(fileType: string) {
-        return DataMapper.create(FileUploadOptions, {
+        return DataMapper.create<FileUploadOptions>(FileUploadOptions, {
             folder: null,
-            maxSizeMb: null,
-            mimeTypes: null,
-        });
+            maxSizeMb: 10,
+            mimeTypes: ['image/png'],
+        } as object);
     }
 }
