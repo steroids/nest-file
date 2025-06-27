@@ -2,6 +2,8 @@ import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
 import {IFileTypeService} from '../interfaces/IFileTypeService';
 
+const DEFAULT_FILE_MAX_SIZE_MB = 10;
+
 /*
     Basic implementation of a service that, based on the fileType field, sets the necessary parameters for
     this type of file - their maximum size, format, directory, etc.
@@ -13,8 +15,8 @@ export class FileTypeService implements IFileTypeService {
     public async getFileUploadOptionsByType(fileType: string) {
         return DataMapper.create<FileUploadOptions>(FileUploadOptions, {
             folder: null,
-            maxSizeMb: 10,
-            mimeTypes: ['image/png'],
+            maxSizeMb: DEFAULT_FILE_MAX_SIZE_MB,
+            mimeTypes: [],
         } as object);
     }
 }

@@ -57,11 +57,11 @@ export class FileUploadInterceptor implements NestInterceptor {
 
         return new Observable<void>(observer => {
             upload(request, response, err => {
-                if (err.code === 'LIMIT_FILE_SIZE') {
-                    observer.error(new PayloadTooLargeException(`Файл слишком большой. Максимальный размер: ${config.maxSizeMb}MB`));
-                }
                 if (err) {
-                    observer.error(err);
+                    const error = err.code === 'LIMIT_FILE_SIZE'
+                        ? new PayloadTooLargeException(`Файл слишком большой. Максимальный размер: ${config.maxSizeMb}MB`)
+                        : err;
+                    observer.error(error);
                 } else {
                     observer.next();
                     observer.complete();
