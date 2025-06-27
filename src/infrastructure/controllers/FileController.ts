@@ -1,14 +1,14 @@
-import {Controller, Inject, Put, Query, UploadedFile} from '@nestjs/common';
+import {Controller, Inject, Put, Query, UploadedFile, UseInterceptors} from '@nestjs/common';
 import {ApiOkResponse, ApiQuery, ApiTags} from '@nestjs/swagger';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
-import {FileUpload} from '../decorators/FileUpload';
 import {IExpressSource} from '../../domain/interfaces/IExpressSource';
 import {FileUploadOptions} from '../../domain/dtos/FileUploadOptions';
 import {FileExpressSourceDto} from '../../domain/dtos/sources/FileExpressSourceDto';
 import {FileUploadDto} from '../../domain/dtos/FileUploadDto';
 import {FileImageSchema} from '../schemas/FileImageSchema';
 import {FileSchema} from '../schemas/FileSchema';
+import {FileUploadInterceptor} from '../interceptors/FileUploadInterceptor';
 
 @Controller('/file')
 @ApiTags('Файлы')
@@ -20,10 +20,10 @@ export default class FileController {
     }
 
     @Put('/upload-photo')
-    @FileUpload()
     // @todo поправить useFile чтобы при загрузке картинок через FileField передавался Admin-Authorization
     // @AuthPermissions(PERMISSION_AUTH_ADMIN_AUTHORIZED)
     // @UseGuards(AdminJwtAuthGuard)
+    @UseInterceptors(FileUploadInterceptor)
     @ApiQuery({type: FileUploadDto})
     @ApiOkResponse({type: FileImageSchema})
     async photos(
@@ -42,9 +42,9 @@ export default class FileController {
     @Put('/upload-file')
     // @todo поправить useFile чтобы при загрузке картинок через FileField передавался Admin-Authorization
     // @AuthPermissions(PERMISSION_AUTH_ADMIN_AUTHORIZED)
+    @UseInterceptors(FileUploadInterceptor)
     @ApiQuery({type: FileUploadDto})
     @ApiOkResponse({type: FileSchema})
-    @FileUpload()
     async files(
         @UploadedFile() file: IExpressSource,
         @Query()dto: FileUploadDto,
