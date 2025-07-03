@@ -1,6 +1,6 @@
 # Steroids Nest File Migration Guide
 
-## [0.4.0](../CHANGELOG.md#040-2025-07-03) (2025-07-03)
+## [0.3.3](../CHANGELOG.md#033-2025-07-03) (2025-07-03)
 
 ### FileUploadInterceptor
 
