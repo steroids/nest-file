@@ -9,9 +9,6 @@
 
 До
 ```ts
-import {IDeepPartial} from '@steroidsjs/nest/usecases/interfaces/IDeepPartial';
-import {TableFromModel} from '@steroidsjs/nest/infrastructure/decorators/TableFromModel';
-import {AuthConfirmModel} from '@steroidsjs/nest-auth/domain/models/AuthConfirmModel';
 @Put('/upload-file')
 @FileUpload()
 @ApiQuery({type: FileUploadDto})
