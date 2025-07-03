@@ -1,5 +1,14 @@
 # Steroids Nest File
 
+## [0.4.0](https://github.com/steroids/nest/compare/0.3.2...0.4.0) (2025-07-03)
+
+### Features
+
+[Migration guide](docs/MigrationGuide.md#040-2025-07-03)
+
+- На замену декоратору FileUpload добавлен FileUploadInterceptor, у которого есть доступ к DI.
+  Он обращается в FileTypeService, получает конфиг для загружаемого типа файла и валидирует его по этому конфигу ([#128](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/128))
+
 ## [0.3.2](https://github.com/steroids/nest/compare/0.3.1...0.3.2) (2025-06-26)
 
 ### Fixes
