@@ -3,12 +3,15 @@ import {Command, Option} from 'nestjs-command';
 import {Inject, Injectable} from '@nestjs/common';
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
 import {FileService} from '../../domain/services/FileService';
+import {FileConfigService} from '../../domain/services/FileConfigService';
 
 @Injectable()
 export class ClearUnusedFilesCommand {
     constructor(
         @Inject(IFileService)
         private fileService: FileService,
+        @Inject(FileConfigService)
+        private fileConfigService: FileConfigService,
     ) {
     }
 
@@ -67,6 +70,7 @@ export class ClearUnusedFilesCommand {
             ignoredTables,
             fileNameLike: nameLike,
             isEmpty,
+            unusedFileLifetimeMs: this.fileConfigService.justUploadedUnusedFileLifetimeMs,
         });
         console.log(`Всего файлов: ${totalFilesCount}`);
         console.log(`Файлов для удаления: ${unusedFilesIds.length}`);

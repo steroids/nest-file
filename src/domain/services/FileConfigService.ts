@@ -1,6 +1,6 @@
+import {join} from 'path';
 import {toInteger as _toInteger} from 'lodash';
 import {OnModuleInit} from '@nestjs/common';
-import {join} from 'path';
 import {CronExpression} from '@nestjs/schedule';
 import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
 import FileStorageEnum from '../enums/FileStorageEnum';
@@ -117,6 +117,33 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      */
     public deleteFileFromStorage: boolean;
 
+    /**
+     * Temporary file lifetime, stored in milliseconds.
+     * The value is configured via env in seconds and will be
+     * automatically converted to milliseconds.
+     * Default: 10 seconds.
+     *
+     * Env:
+     *  - JUST_UPLOADED_TEMP_FILE_LIFETIME_S
+     */
+    public justUploadedTempFileLifetimeMs: number;
+
+    /**
+     * Unused file lifetime, stored in milliseconds.
+     * The value is configured via env in seconds and will be
+     * automatically converted to milliseconds.
+     * Default: 86400 seconds (1 day).
+     *
+     * Env:
+     *  - JUST_UPLOADED_UNUSED_FILE_LIFETIME_S
+     */
+    public justUploadedUnusedFileLifetimeMs: number;
+
+    /**
+     * Temporary file lifetime
+     */
+    public justUploadedFileLifetimeMs: number;
+
     constructor(
         private custom: IFileModuleConfig,
     ) {
@@ -181,5 +208,11 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
         };
 
         this.deleteFileFromStorage = custom.deleteFileFromStorage;
+
+        this.justUploadedTempFileLifetimeMs = custom.justUploadedTempFileLifetimeMs
+          || parseInt(process.env.JUST_UPLOADED_TEMP_FILE_LIFETIME_S || '10', 10) * 1000;
+
+        this.justUploadedUnusedFileLifetimeMs = custom.justUploadedUnusedFileLifetimeMs
+          || parseInt(process.env.JUST_UPLOADED_UNUSED_FILE_LIFETIME_S || String(24 * 60 * 60), 10) * 1000;
     }
 }
