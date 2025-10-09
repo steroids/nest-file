@@ -9,6 +9,8 @@ import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 import {IFileReadable} from '../interfaces/IFileReadable';
 import {IFileWritable} from '../interfaces/IFileWritable';
 
+const DEFAULT_FILE_ENCODING: BufferEncoding = 'utf8';
+
 export class FileLocalStorage implements IFileLocalStorage {
     /**
      * Absolute path to root user files dir
@@ -34,7 +36,11 @@ export class FileLocalStorage implements IFileLocalStorage {
         return fs.promises.readFile(filePath);
     }
 
-    public async write(file: IFileWritable, source: Readable | Buffer): Promise<FileWriteResult> {
+    public async write(
+        file: IFileWritable,
+        source: Readable | Buffer,
+        fileStorageParams: Record<string, any> = {},
+    ): Promise<FileWriteResult> {
         const dir = join(...[this.rootPath, file.folder].filter(Boolean));
 
         // Create dir
@@ -43,7 +49,13 @@ export class FileLocalStorage implements IFileLocalStorage {
         }
 
         const filePath = join(dir, file.fileName);
-        await fs.promises.writeFile(filePath, source, 'utf8');
+
+        const options = {
+            encoding: DEFAULT_FILE_ENCODING,
+            ...fileStorageParams,
+        };
+
+        await fs.promises.writeFile(filePath, source, options);
 
         return DataMapper.create<FileWriteResult>(FileWriteResult, {
             md5: await md5File(filePath),
