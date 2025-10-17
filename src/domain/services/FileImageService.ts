@@ -122,7 +122,7 @@ export class FileImageService {
 
         if (hasChanges) {
             const fileStorageParams = this.getFileStorageParamsUseCase
-                ? await this.getFileStorageParamsUseCase.handle(file.fileType)
+                ? await this.getFileStorageParamsUseCase.handle(file.fileType, file.storageName)
                 : null;
 
             await this.fileStorageFactory

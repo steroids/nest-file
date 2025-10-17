@@ -127,7 +127,7 @@ export class FileService extends ReadService<FileModel> {
         const stream = await this.createStreamFromSource(options.source);
 
         const fileStorageParams = this.getFileStorageParamsUseCase
-            ? await this.getFileStorageParamsUseCase.handle(options.fileType)
+            ? await this.getFileStorageParamsUseCase.handle(options.fileType, options.storageName)
             : null;
 
         // Save original file via storage
