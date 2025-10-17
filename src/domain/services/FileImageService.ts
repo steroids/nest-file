@@ -125,16 +125,18 @@ export class FileImageService {
                 ? await this.getFileStorageParamsUseCase.handle(file.fileType)
                 : null;
 
-            await this.fileStorageFactory.get(file.storageName).write(
-                DataMapper.create<FileSaveDto>(FileSaveDto, {
-                    uid: file.uid,
-                    folder: imageModel.folder,
-                    fileName: imageModel.fileName,
-                    fileMimeType: file.fileMimeType,
-                }),
-                data,
-                fileStorageParams,
-            );
+            await this.fileStorageFactory
+                .get(file.storageName)
+                .write(
+                    DataMapper.create<FileSaveDto>(FileSaveDto, {
+                        uid: file.uid,
+                        folder: imageModel.folder,
+                        fileName: imageModel.fileName,
+                        fileMimeType: file.fileMimeType,
+                    }),
+                    data,
+                    fileStorageParams,
+                );
         }
 
         return this.repository.create(imageModel);
