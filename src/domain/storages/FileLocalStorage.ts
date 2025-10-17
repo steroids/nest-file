@@ -39,7 +39,7 @@ export class FileLocalStorage implements IFileLocalStorage {
     public async write(
         file: IFileWritable,
         source: Readable | Buffer,
-        fileStorageParams: Record<string, any> = {},
+        fileStorageParams: Record<string, any> | null = {},
     ): Promise<FileWriteResult> {
         const dir = join(...[this.rootPath, file.folder].filter(Boolean));
 

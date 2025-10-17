@@ -76,7 +76,7 @@ export class MinioS3Storage implements IFileStorage {
     public async write(
         file: IFileWritable,
         source: Readable | Buffer,
-        fileStorageParams: Record<string, any> = {},
+        fileStorageParams: Record<string, any> | null = {},
     ): Promise<FileWriteResult> {
         await this.makeMainBucket();
 
