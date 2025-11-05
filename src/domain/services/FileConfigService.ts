@@ -8,6 +8,10 @@ import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IFileModuleConfig} from '../../infrastructure/config';
 
+const DEFAULT_JUST_UPLOADED_TEMP_FILE_LIFETIME_S = 10;
+// 24 часа
+const DEFAULT_JUST_UPLOADED_UNUSED_FILE_LIFETIME_S = 24 * 60 * 60;
+
 const getStoragesConfig = (storagesConfig: IFileModuleConfig['storages'] = {}) => {
     const localStorageConfig = {
         rootPath: process.env.APP_FILE_STORAGE_ROOT_PATH || join(process.cwd(), '../files/uploaded'),
@@ -210,9 +214,9 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
         this.deleteFileFromStorage = custom.deleteFileFromStorage;
 
         this.justUploadedTempFileLifetimeMs = custom.justUploadedTempFileLifetimeMs
-          || parseInt(process.env.JUST_UPLOADED_TEMP_FILE_LIFETIME_S || '10', 10) * 1000;
+          || parseInt(process.env.JUST_UPLOADED_TEMP_FILE_LIFETIME_S || String(DEFAULT_JUST_UPLOADED_TEMP_FILE_LIFETIME_S), 10) * 1000;
 
         this.justUploadedUnusedFileLifetimeMs = custom.justUploadedUnusedFileLifetimeMs
-          || parseInt(process.env.JUST_UPLOADED_UNUSED_FILE_LIFETIME_S || String(24 * 60 * 60), 10) * 1000;
+          || parseInt(process.env.JUST_UPLOADED_UNUSED_FILE_LIFETIME_S || String(DEFAULT_JUST_UPLOADED_UNUSED_FILE_LIFETIME_S), 10) * 1000;
     }
 }

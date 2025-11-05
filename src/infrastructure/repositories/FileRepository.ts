@@ -103,6 +103,9 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
         }
 
         if (config.unusedFileLifetimeMs) {
+            // Добавляем условие фильтрации файлов по дате создания.
+            // Выбираются файлы, созданные до пороговой даты, которая определяется
+            // как текущее время минус значение unusedFileLifetimeMs.
             const thresholdDate = new Date(Date.now() - config.unusedFileLifetimeMs);
             allFilesQb.andWhere('model."createTime" < :threshold', {threshold: thresholdDate});
         }

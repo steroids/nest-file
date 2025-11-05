@@ -15,7 +15,6 @@ async function isFileJustCreated(storage: IFileLocalStorage, filePath: string, c
         createTimeFileMs = await storage.getFileCreateTimeMs(filePath);
     } catch (error) {
         Sentry.captureException(error);
-        return true;
     }
 
     return (currentTimeMs - createTimeFileMs) < justUploadedFileLifetimeMs;
@@ -47,8 +46,12 @@ export class DeleteLostAndTemporaryFilesService {
         const currentTimeMs = (new Date()).getTime();
         const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
         for (const filePath of lostAndTemporaryFilesPaths) {
-            if (!(await isFileJustCreated(storage, filePath, currentTimeMs, this.fileConfigService.justUploadedTempFileLifetimeMs))) {
-                await storage.deleteFile(filePath);
+            try {
+                if (!(await isFileJustCreated(storage, filePath, currentTimeMs, this.fileConfigService.justUploadedTempFileLifetimeMs))) {
+                    await storage.deleteFile(filePath);
+                }
+            } catch (er) {
+                /* empty */
             }
         }
     }
