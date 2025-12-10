@@ -319,9 +319,10 @@ export class FileService extends ReadService<FileModel> {
     }
 
     public async getUnusedFilesIds(config: {
-        fileNameLike: string,
-        ignoredTables: string[],
-        isEmpty: boolean,
+        fileNameLike?: string,
+        ignoredTables?: string[],
+        isEmpty?: boolean,
+        unusedFileLifetimeMs?: number,
     }): Promise<number[]> {
         return this.repository.getUnusedFilesIds(config);
     }
