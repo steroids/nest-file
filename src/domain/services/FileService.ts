@@ -25,6 +25,9 @@ import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFileTypeService} from '../interfaces/IFileTypeService';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
+import {
+    IGetFileStorageParamsUseCase,
+} from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
 import {FileConfigService} from './FileConfigService';
 import {FileImageService} from './FileImageService';
 
@@ -38,13 +41,14 @@ function isFileExpressOrLocalSource(
 
 export class FileService extends ReadService<FileModel> {
     constructor(
-        public repository: IFileRepository,
+        protected readonly repository: IFileRepository,
         protected readonly fileImageService: FileImageService,
         protected readonly fileConfigService: FileConfigService,
         protected readonly fileStorageFactory: IFileStorageFactory,
         protected readonly eventEmitter: IEventEmitter,
         protected readonly fileTypeService: IFileTypeService,
         public validators: IValidator[],
+        protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
     ) {
         super();
     }
@@ -122,8 +126,14 @@ export class FileService extends ReadService<FileModel> {
         // Get file stream from source
         const stream = await this.createStreamFromSource(options.source);
 
+        const fileStorageParams = this.getFileStorageParamsUseCase
+            ? await this.getFileStorageParamsUseCase.handle(options.fileType, options.storageName)
+            : null;
+
         // Save original file via storage
-        const writeResult = await this.fileStorageFactory.get(options.storageName).write(fileDto, stream);
+        const writeResult = await this.fileStorageFactory
+            .get(options.storageName)
+            .write(fileDto, stream, fileStorageParams);
 
         // Delete temporary file
         const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;

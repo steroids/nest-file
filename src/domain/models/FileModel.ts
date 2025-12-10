@@ -4,8 +4,8 @@ import {
     StringField,
     CreateTimeField, IntegerField, UidField, EnumField,
 } from '@steroidsjs/nest/infrastructure/decorators/fields';
-import {FileImageModel} from './FileImageModel';
 import FileStorageEnum from '../enums/FileStorageEnum';
+import {FileImageModel} from './FileImageModel';
 
 /**
  * Файлы
@@ -65,6 +65,12 @@ export class FileModel {
         nullable: true,
     })
     folder: string;
+
+    @StringField({
+        label: 'Тип файла',
+        nullable: true,
+    })
+    fileType: string;
 
     @CreateTimeField({
         label: 'Создан',
