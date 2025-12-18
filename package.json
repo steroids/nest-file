@@ -9,11 +9,6 @@
     "watch": "tsc -p tsconfig-debug.json"
   },
   "dependencies": {
-    "@nestjs/common": "^9.2.1",
-    "@nestjs/event-emitter": "^2.1.1",
-    "@nestjs/platform-express": "^9.2.1",
-    "@nestjs/schedule": "^4.0.0",
-    "@nestjs/swagger": "^6.1.4",
     "cron": "^3.1.6",
     "express": "^4.18.2",
     "lodash": "^4.17.21",
@@ -27,6 +22,11 @@
     "stream-mime-type": "^1.0.2"
   },
   "peerDependencies": {
+    "@nestjs/common": "^9.2.1",
+    "@nestjs/event-emitter": "^2.1.1",
+    "@nestjs/platform-express": "^9.2.1",
+    "@nestjs/schedule": "^4.0.0",
+    "@nestjs/swagger": "^6.1.4",
     "@steroidsjs/nest": "^3.2.0",
     "@steroidsjs/nest-modules": "^0",
     "@steroidsjs/nest-typeorm": "^9",
