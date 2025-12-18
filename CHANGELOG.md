@@ -1,5 +1,11 @@
 # Steroids Nest File
 
+## [0.4.1](https://github.com/steroids/nest-file/compare/0.4.0...0.4.1) (2025-12-18)
+
+### Fixes
+
+- Исправлено сохранение FileModel (поле fileType включено в состав save dto)
+
 ## [0.4.0](https://github.com/steroids/nest-file/compare/0.3.3...0.4.0) (2025-12-18)
 
 ### Features

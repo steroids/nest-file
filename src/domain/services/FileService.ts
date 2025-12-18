@@ -107,6 +107,9 @@ export class FileService extends ReadService<FileModel> {
         const firstUid = [].concat(options.uids || [])?.[0];
 
         const fileDto = await this.createDtoFromSource(options.source, firstUid);
+        if (options.fileType) {
+            fileDto.fileType = options.fileType;
+        }
         if (options.folder) {
             fileDto.folder = options.folder;
         }
