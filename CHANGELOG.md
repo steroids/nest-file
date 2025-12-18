@@ -1,10 +1,20 @@
 # Steroids Nest File
 
+## [0.4.0](https://github.com/steroids/nest/compare/0.3.3...0.4.0) (2025-12-18)
+
+### Features
+
+[Migration guide](docs/MigrationGuide.md#040-2025-12-18)
+
+- удален FileController ([#127](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/127))
+- Добавлены параметры загрузки файлов в хранилища по fileType ([#169](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/169))
+- Steroids зависимости вынесены в peerDependencies ([#190](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/190))
+
 ## [0.3.3](https://github.com/steroids/nest/compare/0.3.2...0.3.3) (2025-07-03)
 
 ### Features
 
-[Migration guide](docs/MigrationGuide.md#040-2025-07-03)
+[Migration guide](docs/MigrationGuide.md#033-2025-07-03)
 
 - На замену декоратору FileUpload добавлен FileUploadInterceptor, у которого есть доступ к DI.
   Он обращается в FileTypeService, получает конфиг для загружаемого типа файла и валидирует его по этому конфигу ([#128](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/128))
