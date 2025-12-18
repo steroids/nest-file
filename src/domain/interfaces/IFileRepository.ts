@@ -5,12 +5,13 @@ import FileStorageEnum from '../enums/FileStorageEnum';
 export const IFileRepository = 'IFileRepository';
 
 export interface IFileRepository extends ICrudRepository<FileModel> {
-    getFileWithDocument: (fileName: string) => Promise<FileModel>;
-    getFilesPathsByStorageName: (storageName: FileStorageEnum) => Promise<string[] | null>;
+    getFileWithDocument: (fileName: string) => Promise<FileModel>,
+    getFilesPathsByStorageName: (storageName: FileStorageEnum) => Promise<string[] | null>,
     getUnusedFilesIds: (config: {
-        fileNameLike: string,
-        ignoredTables: string[],
-        isEmpty: boolean,
+        fileNameLike?: string,
+        ignoredTables?: string[],
+        isEmpty?: boolean,
+        unusedFileLifetimeMs?: number,
     }) => Promise<number[]>,
     getCount: () => Promise<number>,
 }
