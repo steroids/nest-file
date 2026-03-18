@@ -1,19 +1,23 @@
-import {FileConfigService} from './FileConfigService';
+import {Inject, Injectable} from '@nestjs/common';
 import {IFileStorage} from '../interfaces/IFileStorage';
-import { FileStorageEnum } from '../enums/FileStorageEnum';
-import { IFileStorageFactory } from '../interfaces/IFileStorageFactory';
+import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
+import {FileStorageNameType} from '../types/FileStorageNameType';
+import {FILE_STORAGES_TOKEN} from '../storages';
+import {FileConfigService} from './FileConfigService';
 
+@Injectable()
 export class FileStorageFactory implements IFileStorageFactory {
-    private initializedNames: FileStorageEnum[] = [];
+    private initializedNames: FileStorageNameType[] = [];
 
     constructor(
         private fileConfigService: FileConfigService,
-        private storages: Record<FileStorageEnum, IFileStorage>,
+        @Inject(FILE_STORAGES_TOKEN)
+        private storages: Record<FileStorageNameType, IFileStorage>,
     ) {
     }
 
-    public get(name: FileStorageEnum = null): IFileStorage {
-        name = name || this.fileConfigService.defaultStorageName as FileStorageEnum;
+    public get(name: FileStorageNameType = null): IFileStorage {
+        name = name || this.fileConfigService.defaultStorageName;
 
         if (!this.storages[name]) {
             throw new Error('Not found storage by name: ' + name);
@@ -24,7 +28,10 @@ export class FileStorageFactory implements IFileStorageFactory {
         if (!this.initializedNames.includes(name)) {
             this.initializedNames.push(name);
 
-            storage.init(this.fileConfigService.storages?.[name]);
+            const storageConfig = this.fileConfigService.storages?.[name] ?? {storageName: name};
+            storageConfig.storageName ??= name;
+
+            storage.init(storageConfig);
         }
 
         return storage;

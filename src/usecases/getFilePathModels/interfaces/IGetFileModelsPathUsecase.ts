@@ -1,7 +1,7 @@
-import FileStorageEnum from '../../../domain/enums/FileStorageEnum';
+import {FileStorageNameType} from '../../../domain/types/FileStorageNameType';
 
 export const GetFileModelsPathUsecaseToken = 'GetFileModelsPathUsecaseToken';
 
 export interface IGetFileModelsPathUsecase {
-    handle: (storageName: FileStorageEnum) => Promise<string[]>
+    handle: (storageName: FileStorageNameType) => Promise<string[]>,
 }

@@ -1,7 +1,6 @@
 import * as sharp from 'sharp';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
-import {Inject, Optional} from '@nestjs/common';
 import {IFileImageRepository} from '../interfaces/IFileImageRepository';
 import {FileImageModel} from '../models/FileImageModel';
 import {FileModel} from '../models/FileModel';
@@ -13,11 +12,7 @@ import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
-import FileStorageEnum from '../enums/FileStorageEnum';
-import {
-    GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN,
-    IGetFileStorageParamsUseCase,
-} from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
+import {FileStorageNameType} from '../types/FileStorageNameType';
 import {FileConfigService} from './FileConfigService';
 
 const SVG_MIME_TYPE = 'image/svg+xml';
@@ -28,9 +23,6 @@ export class FileImageService {
         protected readonly fileConfigService: FileConfigService,
         protected readonly fileStorageFactory: IFileStorageFactory,
         protected readonly eventEmitter: IEventEmitter,
-        @Optional()
-        @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)
-        protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
     ) {
     }
 
@@ -121,10 +113,6 @@ export class FileImageService {
         });
 
         if (hasChanges) {
-            const fileStorageParams = this.getFileStorageParamsUseCase
-                ? await this.getFileStorageParamsUseCase.handle(file.fileType, file.storageName)
-                : null;
-
             await this.fileStorageFactory
                 .get(file.storageName)
                 .write(
@@ -133,16 +121,16 @@ export class FileImageService {
                         folder: imageModel.folder,
                         fileName: imageModel.fileName,
                         fileMimeType: file.fileMimeType,
+                        fileType: file.fileType,
                     }),
                     data,
-                    fileStorageParams,
                 );
         }
 
         return this.repository.create(imageModel);
     }
 
-    async getFilesPathsFromDb(storageName: FileStorageEnum): Promise<string[] | null> {
+    async getFilesPathsFromDb(storageName: FileStorageNameType): Promise<string[] | null> {
         return this.repository.getFilesPathsByStorageName(storageName);
     }
 

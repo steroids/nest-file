@@ -2,11 +2,11 @@ import * as Sentry from '@sentry/node';
 import {Inject, Optional} from '@nestjs/common';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
-import FileStorageEnum from '../enums/FileStorageEnum';
 import {
     GetFileModelsPathUsecaseToken,
     IGetFileModelsPathUsecase,
 } from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
+import {FileStorageNameType} from '../types/FileStorageNameType';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
@@ -23,7 +23,7 @@ export class DeleteLostAndTemporaryFilesService {
      * - in MinioS3Storage class implement extended IFileStorage interface
      * - return in getStorage() method object that implements IFileStorage interface
      */
-    async deleteLostAndTemporaryFiles(storageName: FileStorageEnum): Promise<void> {
+    async deleteLostAndTemporaryFiles(storageName: FileStorageNameType): Promise<void> {
         const storage = this.getStorage(storageName);
         if (!storage) {
             return;
@@ -34,7 +34,7 @@ export class DeleteLostAndTemporaryFilesService {
         }
     }
 
-    async getLostAndTemporaryFilesPaths(storageName: FileStorageEnum): Promise<string[]> {
+    async getLostAndTemporaryFilesPaths(storageName: FileStorageNameType): Promise<string[]> {
         if (!this.getFileModelsPathUsecase) {
             throw new Error('GetFileModelsPathUsecase is not provided');
         }
@@ -64,7 +64,7 @@ export class DeleteLostAndTemporaryFilesService {
         return lostAndTemporaryFilesPaths;
     }
 
-    private getStorage(storageName: FileStorageEnum): IFileLocalStorage {
+    private getStorage(storageName: FileStorageNameType): IFileLocalStorage {
         try {
             return this.fileStorageFactory.get(storageName) as IFileLocalStorage;
         } catch (error) {

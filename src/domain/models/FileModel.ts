@@ -2,9 +2,9 @@ import {
     RelationField,
     PrimaryKeyField,
     StringField,
-    CreateTimeField, IntegerField, UidField, EnumField,
+    CreateTimeField, IntegerField, UidField,
 } from '@steroidsjs/nest/infrastructure/decorators/fields';
-import FileStorageEnum from '../enums/FileStorageEnum';
+import {FileStorageNameType} from '../types/FileStorageNameType';
 import {FileImageModel} from './FileImageModel';
 
 /**
@@ -38,12 +38,11 @@ export class FileModel {
     })
     url: string;
 
-    @EnumField({
+    @StringField({
         label: 'Имя хранилища',
         nullable: true,
-        enum: FileStorageEnum,
     })
-    storageName: FileStorageEnum;
+    storageName: FileStorageNameType;
 
     @StringField({
         label: 'Название сохраненного файла',

@@ -1,5 +1,15 @@
 # Steroids Nest File
 
+### Fixes
+
+[Migration guide]()
+
+- `IFileStorage.write` больше не принимает в качестве аргумента `fileStorageParams`, вместо этого хранилища сами берут эти настройки
+из `IGetFileStorageParamsUseCase`
+- Добавлен токен `FILE_STORAGES_TOKEN`, по которому провайдится объект с хранилищами и их названиями
+- Хранилища теперь имеют injection scope `TRANSIENT`, что позволяет создать несколько экземпляров одного хранилища с разным конфигом
+- Использование `FileStorageEnum` в качестве типа обновлено на `FileStorageNameType`
+
 ## [0.4.1](https://github.com/steroids/nest-file/compare/0.4.0...0.4.1) (2025-12-18)
 
 ### Fixes

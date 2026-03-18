@@ -1,5 +1,6 @@
 import {Readable} from 'stream';
 import {FileWriteResult} from '../dtos/FileWriteResult';
+import {FileStorageNameType} from '../types/FileStorageNameType';
 import {IFileReadable} from './IFileReadable';
 import {IFileWritable} from './IFileWritable';
 
@@ -9,8 +10,8 @@ export interface IFileStorage {
     write(
         file: IFileWritable,
         source: Readable | Buffer,
-        fileStorageParams?: Record<string, any> | null,
     ): Promise<FileWriteResult>,
     getUrl(file: IFileReadable): string,
     deleteFile(fileName: string): void | Promise<void>,
+    storageName?: FileStorageNameType,
 }
