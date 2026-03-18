@@ -9,17 +9,6 @@ import {
 } from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
 import {FileConfigService} from './FileConfigService';
 
-async function isFileJustCreated(storage: IFileLocalStorage, filePath: string, currentTimeMs: number, justUploadedFileLifetimeMs: number) {
-    let createTimeFileMs: number;
-    try {
-        createTimeFileMs = await storage.getFileCreateTimeMs(filePath);
-    } catch (error) {
-        Sentry.captureException(error);
-    }
-
-    return (currentTimeMs - createTimeFileMs) < justUploadedFileLifetimeMs;
-}
-
 export class DeleteLostAndTemporaryFilesService {
     constructor(
         @Inject(IFileStorageFactory)
@@ -47,11 +36,13 @@ export class DeleteLostAndTemporaryFilesService {
         const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
         for (const filePath of lostAndTemporaryFilesPaths) {
             try {
-                if (!(await isFileJustCreated(storage, filePath, currentTimeMs, this.fileConfigService.justUploadedTempFileLifetimeMs))) {
+                const createTimeFileMs = await storage.getFileCreateTimeMs(filePath);
+                const isFileJustCreated = (currentTimeMs - createTimeFileMs) < this.fileConfigService.justUploadedTempFileLifetimeMs;
+                if (!isFileJustCreated) {
                     await storage.deleteFile(filePath);
                 }
             } catch (er) {
-                /* empty */
+                Sentry.captureException(er);
             }
         }
     }
