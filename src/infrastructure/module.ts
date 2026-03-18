@@ -1,6 +1,7 @@
 import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper';
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
 import {EventEmitter2} from '@nestjs/event-emitter';
+import {ModuleRef} from '@nestjs/core';
 import {IFileRepository} from '../domain/interfaces/IFileRepository';
 import {IFileImageRepository} from '../domain/interfaces/IFileImageRepository';
 import {FileService} from '../domain/services/FileService';
@@ -17,6 +18,7 @@ import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleU
 import {IFileTypeService} from '../domain/interfaces/IFileTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
+import {FILE_STORAGES_TOKEN} from '../domain/storages';
 import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {CronJobsRegister} from './services/CronJobsRegister';
 import {IFileModuleConfig} from './config';
@@ -59,16 +61,17 @@ export default (config: IFileModuleConfig) => ({
         },
 
         {
-            inject: [FileConfigService, FileLocalStorage, MinioS3Storage],
-            provide: IFileStorageFactory,
-            useFactory: (
-                fileConfigService: FileConfigService,
-                fileLocalStorage: FileLocalStorage,
-                minioS3Storage: MinioS3Storage,
-            ) => new FileStorageFactory(fileConfigService, {
-                [FileStorageEnum.LOCAL]: fileLocalStorage,
-                [FileStorageEnum.MINIO_S3]: minioS3Storage,
+            provide: FILE_STORAGES_TOKEN,
+            inject: [ModuleRef],
+            useFactory: async (moduleRef: ModuleRef) => ({
+                [FileStorageEnum.LOCAL]: await moduleRef.resolve(FileLocalStorage),
+                [FileStorageEnum.MINIO_S3]: await moduleRef.resolve(MinioS3Storage),
             }),
+        },
+
+        {
+            provide: IFileStorageFactory,
+            useClass: FileStorageFactory,
         },
         ModuleHelper.provide(FileService, IFileService, [
             IFileRepository,

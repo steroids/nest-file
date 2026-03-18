@@ -1,12 +1,13 @@
-import {toInteger as _toInteger} from 'lodash';
-import {OnModuleInit} from '@nestjs/common';
 import {join} from 'path';
+import {toInteger as _toInteger} from 'lodash';
+import {Injectable, OnModuleInit} from '@nestjs/common';
 import {CronExpression} from '@nestjs/schedule';
 import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
 import FileStorageEnum from '../enums/FileStorageEnum';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IFileModuleConfig} from '../../infrastructure/config';
+import {FileStorageNameType} from '../types/FileStorageNameType';
 
 const getStoragesConfig = (storagesConfig: IFileModuleConfig['storages'] = {}) => {
     const localStorageConfig = {
@@ -36,13 +37,14 @@ const getStoragesConfig = (storagesConfig: IFileModuleConfig['storages'] = {}) =
     };
 };
 
+@Injectable()
 export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     /**
      * Default storage (local)
      * Env:
      *  - APP_FILE_STORAGE_NAME
      */
-    public defaultStorageName: FileStorageEnum;
+    public defaultStorageName: FileStorageNameType;
 
     /**
      * Configurations for storages
@@ -108,7 +110,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     public deleteLostAndTemporaryFilesByCron: {
         isEnable: boolean,
         cronTimePattern: string,
-        storageName: FileStorageEnum,
+        storageName: FileStorageNameType,
     };
 
     /**

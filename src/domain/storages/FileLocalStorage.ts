@@ -4,13 +4,22 @@ import * as fs from 'fs';
 import * as md5File from 'md5-file';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import * as Sentry from '@sentry/node';
+import {Inject, Injectable, Optional, Scope} from '@nestjs/common';
 import {FileWriteResult} from '../dtos/FileWriteResult';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 import {IFileReadable} from '../interfaces/IFileReadable';
 import {IFileWritable} from '../interfaces/IFileWritable';
+import FileStorageEnum from '../enums/FileStorageEnum';
+import {
+    GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN,
+    IGetFileStorageParamsUseCase,
+} from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
 
 const DEFAULT_FILE_ENCODING: BufferEncoding = 'utf8';
 
+@Injectable({
+    scope: Scope.TRANSIENT,
+})
 export class FileLocalStorage implements IFileLocalStorage {
     /**
      * Absolute path to root user files dir
@@ -22,9 +31,19 @@ export class FileLocalStorage implements IFileLocalStorage {
      */
     public rootUrl: string;
 
+    public storageName: string;
+
+    constructor(
+        @Optional()
+        @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)
+        protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
+    ) {
+    }
+
     public init(config: any) {
         this.rootPath = config?.rootPath;
         this.rootUrl = config?.rootUrl;
+        this.storageName = config?.storageName ?? FileStorageEnum.LOCAL;
 
         if (!this.rootPath) {
             throw new Error('Not found file root path');
@@ -39,7 +58,6 @@ export class FileLocalStorage implements IFileLocalStorage {
     public async write(
         file: IFileWritable,
         source: Readable | Buffer,
-        fileStorageParams: Record<string, any> | null = {},
     ): Promise<FileWriteResult> {
         const dir = join(...[this.rootPath, file.folder].filter(Boolean));
 
@@ -50,9 +68,13 @@ export class FileLocalStorage implements IFileLocalStorage {
 
         const filePath = join(dir, file.fileName);
 
+        const fileTypeStorageParams = this.getFileStorageParamsUseCase
+            ? await this.getFileStorageParamsUseCase.handle(file.fileType, this.storageName)
+            : {};
+
         const options = {
             encoding: DEFAULT_FILE_ENCODING,
-            ...fileStorageParams,
+            ...fileTypeStorageParams,
         };
 
         await fs.promises.writeFile(filePath, source, options);
