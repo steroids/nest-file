@@ -25,6 +25,8 @@ export class MinioS3Storage implements IFileStorage {
 
     public rootUrl: string;
 
+    public cacheControl: string;
+
     private _client: Minio.Client;
 
     private _isBucketCreated: boolean;
@@ -38,6 +40,7 @@ export class MinioS3Storage implements IFileStorage {
         this.region = config?.region;
         this.mainBucket = config?.mainBucket;
         this.rootUrl = config?.rootUrl;
+        this.cacheControl = config?.cacheControl;
 
         // if (!this.accessKey) {
         //     throw new Error('Not found accessKey for MinioS3Storage');
@@ -85,6 +88,10 @@ export class MinioS3Storage implements IFileStorage {
             ...fileStorageParams,
         };
 
+        if (this.cacheControl) {
+            metaData['Cache-Control'] = this.cacheControl;
+        }
+
         return new Promise((resolve, reject) => {
             this.getClient().putObject(
                 this.mainBucket,
@@ -108,7 +115,14 @@ export class MinioS3Storage implements IFileStorage {
     }
 
     public getUrl(file: IFileReadable): string {
-        return [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
+        const url = [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
+
+        if (!this.cacheControl) {
+            return url;
+        }
+
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}response-cache-control=${encodeURIComponent(this.cacheControl)}`;
     }
 
     protected makeMainBucket(): Promise<void> {
