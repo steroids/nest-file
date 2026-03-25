@@ -116,6 +116,9 @@ export class FileService extends ReadService<FileModel> {
         if (options.title) {
             fileDto.title = options.title;
         }
+        if (options.userId) {
+            fileDto.userId = options.userId;
+        }
 
         // Validate
         if (options.imagesOnly) {

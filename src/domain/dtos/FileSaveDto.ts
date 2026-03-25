@@ -30,4 +30,7 @@ export class FileSaveDto {
 
     @ExtendField(FileModel)
     md5: string;
+
+    @ExtendField(FileModel)
+    userId?: number;
 }
