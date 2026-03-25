@@ -4,7 +4,6 @@ import {
     StringField,
     CreateTimeField, IntegerField, UidField, EnumField,
 } from '@steroidsjs/nest/infrastructure/decorators/fields';
-import {Index} from '@steroidsjs/typeorm';
 import FileStorageEnum from '../enums/FileStorageEnum';
 import {FileImageModel} from './FileImageModel';
 
@@ -86,7 +85,6 @@ export class FileModel {
     })
     images: FileImageModel[];
 
-    @Index()
     @IntegerField({
         label: 'ID пользователя',
         nullable: true,
