@@ -17,12 +17,14 @@ import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleU
 import {IFileTypeService} from '../domain/interfaces/IFileTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
+import {FILE_ACCESS_CHECKER} from '../domain/interfaces/IFileAccessChecker';
 import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {CronJobsRegister} from './services/CronJobsRegister';
 import {IFileModuleConfig} from './config';
 import {FileImageRepository} from './repositories/FileImageRepository';
 import {FileRepository} from './repositories/FileRepository';
 import {ClearUnusedFilesCommand} from './commands/ClearUnusedFilesCommand';
+import {AllowAllFileAccessChecker} from './services/AllowAllFileAccessChecker';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [],
@@ -39,6 +41,10 @@ export default (config: IFileModuleConfig) => ({
 
         // Infrastructure services
         CronJobsRegister,
+        {
+            provide: FILE_ACCESS_CHECKER,
+            useClass: AllowAllFileAccessChecker,
+        },
 
         // Validators
         FileMaxSizeValidator,
@@ -104,5 +110,6 @@ export default (config: IFileModuleConfig) => ({
     exports: [
         IFileService,
         FileImageService,
+        FILE_ACCESS_CHECKER,
     ],
 });
