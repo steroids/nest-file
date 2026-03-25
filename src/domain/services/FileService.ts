@@ -193,7 +193,7 @@ export class FileService extends ReadService<FileModel> {
             try {
                 await fs.promises.access(source.path, fs.constants.F_OK);
             } catch (e) {
-                throw new Error('Файл не найден: ' + source.path);
+                throw new Error('File not found: ' + source.path);
             }
 
             if (source instanceof FileExpressSourceDto) {
