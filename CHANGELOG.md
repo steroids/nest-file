@@ -1,5 +1,13 @@
 # Steroids Nest File
 
+## [0.5.0](https://github.com/steroids/nest-file/compare/0.4.1...0.5.0) (2026-03-25)
+
+[Migration guide](docs/MigrationGuide.md#050-2026-03-25)
+
+### Features
+
+- В FileModel добавлено поле userId. Поле также включено в FileUploadOptions
+
 ## [0.4.1](https://github.com/steroids/nest-file/compare/0.4.0...0.4.1) (2025-12-18)
 
 ### Fixes
