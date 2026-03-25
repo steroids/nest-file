@@ -111,9 +111,8 @@ export class MinioS3Storage implements IFileStorage {
     }
 
     public getUrl(file: IFileReadable): string {
-        const objectPath = [file.folder, file.fileName].filter(Boolean).join('/');
-        const baseUrl = this.rootUrl.endsWith('/') ? this.rootUrl : `${this.rootUrl}/`;
-        const url = new URL(objectPath, baseUrl);
+        const urlString = [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
+        const url = new URL(urlString);
 
         if (this.responseCacheControl) {
             url.searchParams.set('response-cache-control', this.responseCacheControl);
