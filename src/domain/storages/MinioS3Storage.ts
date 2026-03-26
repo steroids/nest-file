@@ -25,6 +25,14 @@ export class MinioS3Storage implements IFileStorage {
 
     public rootUrl: string;
 
+    /**
+     * https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html#API_GetObject_RequestSyntax
+     * The value of the `Cache-Control` header that will be passed as the
+     * `response-cache-control` query parameter when generating the file URL.
+     *
+     * Example:
+     * `public, max-age=31536000, immutable`.
+     */
     public responseCacheControl: string;
 
     private _client: Minio.Client;
