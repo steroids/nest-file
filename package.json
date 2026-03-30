@@ -1,9 +1,13 @@
 {
   "name": "@steroidsjs/nest-file",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Steroids Nest File Module",
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/steroids/nest-file"
+  },
   "scripts": {
     "build": "tsc && copyfiles ./{package.json,LICENSE,README.md} dist/",
     "watch": "tsc -p tsconfig-debug.json"
