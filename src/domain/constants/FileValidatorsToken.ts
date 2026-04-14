@@ -1,0 +1,1 @@
+export const FILE_VALIDATORS_TOKEN = Symbol('FILE_VALIDATORS_TOKEN');
