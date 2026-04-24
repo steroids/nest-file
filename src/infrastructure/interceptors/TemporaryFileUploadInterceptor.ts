@@ -1,4 +1,5 @@
 import {extname, join} from 'path';
+import * as fs from 'fs';
 import {
     Injectable,
     NestInterceptor,
@@ -7,31 +8,37 @@ import {
     UnsupportedMediaTypeException,
     Inject, PayloadTooLargeException,
 } from '@nestjs/common';
-import {Observable, switchMap} from 'rxjs';
+import {Observable, switchMap, finalize} from 'rxjs';
 import * as multer from 'multer';
 import type {Request} from 'express';
-import {IFileTypeService} from '../../domain/interfaces/IFileTypeService';
+import * as Sentry from '@sentry/nestjs';
 import {FILE_UPLOAD_FIELD_NAME_METADATA_KEY} from '../decorators/FileUploadFieldName';
+import {IFileTypeService} from '../../domain/interfaces/IFileTypeService';
+import {FileConfigService} from '../../domain/services/FileConfigService';
 
 // Имя multipart-поля для загружаемого файла по умолчанию
 const DEFAULT_FILE_UPLOAD_FIELD_NAME = 'file';
+type RequestWithOptionalFile = Request & {file?: Express.Multer.File};
 
 @Injectable()
-export class FileUploadInterceptor implements NestInterceptor {
+export class TemporaryFileUploadInterceptor implements NestInterceptor {
     constructor(
         @Inject(IFileTypeService)
         private readonly fileTypeService: IFileTypeService,
+        @Inject(FileConfigService)
+        private readonly fileConfigService: FileConfigService,
     ) {}
 
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<void>> {
         const ctx = context.switchToHttp();
-        const request = ctx.getRequest<Request>();
+        const request = ctx.getRequest<RequestWithOptionalFile>();
         const response = ctx.getResponse();
         const fileFieldName = this.getFileFieldName(context);
 
         const fileType = request.query.fileType as string;
 
         const config = await this.fileTypeService.getFileUploadOptionsByType(fileType);
+        const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
 
         const storage = multer.diskStorage({
             // TODO use FileConfigService
@@ -71,6 +78,15 @@ export class FileUploadInterceptor implements NestInterceptor {
             });
         }).pipe(
             switchMap(() => next.handle()),
+            finalize(() => {
+                const path = request.file?.path;
+                if (shouldDeleteTemporaryFile && path) {
+                    fs
+                        .promises
+                        .rm(path, {force: true})
+                        .catch((error) => Sentry.captureException(error));
+                }
+            }),
         );
     }
 
