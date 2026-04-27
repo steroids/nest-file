@@ -7,11 +7,12 @@ import * as mime from 'mime-types';
 import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
 import {ReadService} from '@steroidsjs/nest/usecases/services/ReadService';
 import SearchQuery from '@steroidsjs/nest/usecases/base/SearchQuery';
-import {Type} from '@nestjs/common';
+import {Inject, Optional, Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
 import {generateUid} from '@steroidsjs/nest/infrastructure/decorators/typeorm/fields/TypeOrmUidField/TypeOrmUidBehaviour';
+import {EventEmitter2} from '@nestjs/event-emitter';
 import {IFileRepository} from '../interfaces/IFileRepository';
 import {FileModel} from '../models/FileModel';
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
@@ -26,8 +27,10 @@ import {IFileTypeService} from '../interfaces/IFileTypeService';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 import {
+    GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN,
     IGetFileStorageParamsUseCase,
 } from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
+import {FILE_VALIDATORS_TOKEN} from '../constants/FileValidatorsToken';
 import {FileConfigService} from './FileConfigService';
 import {FileImageService} from './FileImageService';
 
@@ -41,13 +44,22 @@ function isFileExpressOrLocalSource(
 
 export class FileService extends ReadService<FileModel> {
     constructor(
+        @Inject(IFileRepository)
         protected readonly repository: IFileRepository,
+        @Inject(FileImageService)
         protected readonly fileImageService: FileImageService,
+        @Inject(FileConfigService)
         protected readonly fileConfigService: FileConfigService,
+        @Inject(IFileStorageFactory)
         protected readonly fileStorageFactory: IFileStorageFactory,
+        @Inject(EventEmitter2)
         protected readonly eventEmitter: IEventEmitter,
+        @Inject(IFileTypeService)
         protected readonly fileTypeService: IFileTypeService,
+        @Inject(FILE_VALIDATORS_TOKEN)
         public validators: IValidator[],
+        @Optional()
+        @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)
         protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
     ) {
         super();
