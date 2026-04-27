@@ -7,7 +7,7 @@ import * as mime from 'mime-types';
 import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
 import {ReadService} from '@steroidsjs/nest/usecases/services/ReadService';
 import SearchQuery from '@steroidsjs/nest/usecases/base/SearchQuery';
-import {Inject, Optional, Type} from '@nestjs/common';
+import {Inject, Injectable, Optional, Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
@@ -42,13 +42,12 @@ function isFileExpressOrLocalSource(
     return source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto;
 }
 
+@Injectable()
 export class FileService extends ReadService<FileModel> {
     constructor(
         @Inject(IFileRepository)
         protected readonly repository: IFileRepository,
-        @Inject(FileImageService)
         protected readonly fileImageService: FileImageService,
-        @Inject(FileConfigService)
         protected readonly fileConfigService: FileConfigService,
         @Inject(IFileStorageFactory)
         protected readonly fileStorageFactory: IFileStorageFactory,

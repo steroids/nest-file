@@ -1,7 +1,7 @@
 import * as sharp from 'sharp';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
-import {Inject, Optional} from '@nestjs/common';
+import {Inject, Injectable, Optional} from '@nestjs/common';
 import {EventEmitter2} from '@nestjs/event-emitter';
 import {IFileImageRepository} from '../interfaces/IFileImageRepository';
 import {FileImageModel} from '../models/FileImageModel';
@@ -23,6 +23,7 @@ import {FileConfigService} from './FileConfigService';
 
 const SVG_MIME_TYPE = 'image/svg+xml';
 
+@Injectable()
 export class FileImageService {
     constructor(
         @Inject(IFileImageRepository)
