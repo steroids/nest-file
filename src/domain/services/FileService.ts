@@ -34,14 +34,6 @@ import {FILE_VALIDATORS_TOKEN} from '../constants/FileValidatorsToken';
 import {FileConfigService} from './FileConfigService';
 import {FileImageService} from './FileImageService';
 
-type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
-
-function isFileExpressOrLocalSource(
-    source: FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto,
-): source is FileExpressOrLocalSource {
-    return source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto;
-}
-
 @Injectable()
 export class FileService extends ReadService<FileModel> {
     constructor(
@@ -151,12 +143,6 @@ export class FileService extends ReadService<FileModel> {
         const writeResult = await this.fileStorageFactory
             .get(options.storageName)
             .write(fileDto, stream, fileStorageParams);
-
-        // Delete temporary file
-        const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
-        if (isFileExpressOrLocalSource(options.source) && shouldDeleteTemporaryFile) {
-            this.deleteTemporaryFile(options.source.path);
-        }
 
         // Save file in database
         return this.repository.create(DataMapper.create(FileModel, {
@@ -296,19 +282,6 @@ export class FileService extends ReadService<FileModel> {
 
     async getFileWithDocument(fileName: string) {
         return this.repository.getFileWithDocument(fileName);
-    }
-
-    private deleteTemporaryFile(pathToFile: string): void {
-        try {
-            fs.rmSync(pathToFile);
-        } catch (error) {
-            Sentry.captureException(error, {
-                extra: {
-                    scope: 'FileService',
-                    pathToFile,
-                },
-            });
-        }
     }
 
     async getFilesPathsFromDb(storageName: FileStorageEnum): Promise<string[] | null> {
