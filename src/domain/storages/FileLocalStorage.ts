@@ -1,6 +1,8 @@
 import {Readable} from 'stream';
 import {join} from 'path';
 import * as fs from 'fs';
+import {existsSync, Stats} from 'fs';
+import {stat} from 'fs/promises';
 import * as md5File from 'md5-file';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import * as Sentry from '@sentry/node';
@@ -64,6 +66,15 @@ export class FileLocalStorage implements IFileLocalStorage {
 
     public getUrl(file: IFileReadable): string {
         return [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
+    }
+
+    public async getFileCreateTimeMs(fileName: string) {
+        const filePath = join(this.rootPath, fileName);
+        if (!existsSync(filePath)) {
+            throw new Error(`File ${fileName} not exist`);
+        }
+        const stats: Stats = await stat(filePath);
+        return (stats.birthtime || stats.mtime).getTime();
     }
 
     getFilesPaths(relativePath = ''): string[] | null {
