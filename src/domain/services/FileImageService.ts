@@ -1,7 +1,8 @@
 import * as sharp from 'sharp';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
-import {Inject, Optional} from '@nestjs/common';
+import {Inject, Injectable, Optional} from '@nestjs/common';
+import {EventEmitter2} from '@nestjs/event-emitter';
 import {IFileImageRepository} from '../interfaces/IFileImageRepository';
 import {FileImageModel} from '../models/FileImageModel';
 import {FileModel} from '../models/FileModel';
@@ -22,11 +23,16 @@ import {FileConfigService} from './FileConfigService';
 
 const SVG_MIME_TYPE = 'image/svg+xml';
 
+@Injectable()
 export class FileImageService {
     constructor(
+        @Inject(IFileImageRepository)
         public repository: IFileImageRepository,
+        @Inject(FileConfigService)
         protected readonly fileConfigService: FileConfigService,
+        @Inject(IFileStorageFactory)
         protected readonly fileStorageFactory: IFileStorageFactory,
+        @Inject(EventEmitter2)
         protected readonly eventEmitter: IEventEmitter,
         @Optional()
         @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)

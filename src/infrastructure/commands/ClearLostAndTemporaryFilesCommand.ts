@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
 import {Command, Option} from 'nestjs-command';
-import {Inject} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {DeleteLostAndTemporaryFilesService} from '../../domain/services/DeleteLostAndTemporaryFilesService';
 import {FileStorageEnum, FileStorageEnumHelper} from '../../domain/enums/FileStorageEnum';
 
+@Injectable()
 export class ClearLostAndTemporaryFilesCommand {
     constructor(
-        @Inject(DeleteLostAndTemporaryFilesService)
         private deleteLostAndTemporaryFilesService: DeleteLostAndTemporaryFilesService,
     ) {
     }

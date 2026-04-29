@@ -82,7 +82,12 @@ export class TemporaryFileUploadInterceptor implements NestInterceptor {
                     fs
                         .promises
                         .rm(path, {force: true})
-                        .catch((error) => Sentry.captureException(error));
+                        .catch((error) => Sentry.captureException(error, {
+                            extra: {
+                                scope: 'TemporaryFileUploadInterceptor',
+                                path,
+                            },
+                        }));
                 }
             }),
         );
