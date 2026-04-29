@@ -72,3 +72,8 @@ APP_FILE_STORAGE_S3_ROOT_URL=https://storage.yandexcloud.net/arm-supervisor
    - APP_FILE_STORAGE_S3_USE_SSL - использовать SSL для подключения
    - APP_FILE_STORAGE_S3_ROOT_URL - адрес S3 хранилища, включая бакет
    - APP_FILE_STORAGE_S3_REGION - регион S3 хранилища
+
+### Параметры загрузки файла в определенное хранилище
+
+В проекте по токену GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN можно положить в DI-контейнер юзкейс, возвращающий параметры загрузки в определенный тип хранилища для конкретного fileType.
+Данный юзкейс будет вызван при загрузке файла в FileService и FileImageService

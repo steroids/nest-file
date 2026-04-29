@@ -7,11 +7,12 @@ import * as mime from 'mime-types';
 import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
 import {ReadService} from '@steroidsjs/nest/usecases/services/ReadService';
 import SearchQuery from '@steroidsjs/nest/usecases/base/SearchQuery';
-import {Type} from '@nestjs/common';
+import {Inject, Injectable, Optional, Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
 import {generateUid} from '@steroidsjs/nest/infrastructure/decorators/typeorm/fields/TypeOrmUidField/TypeOrmUidBehaviour';
+import {EventEmitter2} from '@nestjs/event-emitter';
 import {IFileRepository} from '../interfaces/IFileRepository';
 import {FileModel} from '../models/FileModel';
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
@@ -25,6 +26,11 @@ import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFileTypeService} from '../interfaces/IFileTypeService';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
+import {
+    GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN,
+    IGetFileStorageParamsUseCase,
+} from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
+import {FILE_VALIDATORS_TOKEN} from '../constants/FileValidatorsToken';
 import {FileConfigService} from './FileConfigService';
 import {FileImageService} from './FileImageService';
 
@@ -36,15 +42,24 @@ function isFileExpressOrLocalSource(
     return source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto;
 }
 
+@Injectable()
 export class FileService extends ReadService<FileModel> {
     constructor(
-        public repository: IFileRepository,
+        @Inject(IFileRepository)
+        protected readonly repository: IFileRepository,
         protected readonly fileImageService: FileImageService,
         protected readonly fileConfigService: FileConfigService,
+        @Inject(IFileStorageFactory)
         protected readonly fileStorageFactory: IFileStorageFactory,
+        @Inject(EventEmitter2)
         protected readonly eventEmitter: IEventEmitter,
+        @Inject(IFileTypeService)
         protected readonly fileTypeService: IFileTypeService,
+        @Inject(FILE_VALIDATORS_TOKEN)
         public validators: IValidator[],
+        @Optional()
+        @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)
+        protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
     ) {
         super();
     }
@@ -103,11 +118,17 @@ export class FileService extends ReadService<FileModel> {
         const firstUid = [].concat(options.uids || [])?.[0];
 
         const fileDto = await this.createDtoFromSource(options.source, firstUid);
+        if (options.fileType) {
+            fileDto.fileType = options.fileType;
+        }
         if (options.folder) {
             fileDto.folder = options.folder;
         }
         if (options.title) {
             fileDto.title = options.title;
+        }
+        if (options.userId) {
+            fileDto.userId = options.userId;
         }
 
         // Validate
@@ -122,8 +143,14 @@ export class FileService extends ReadService<FileModel> {
         // Get file stream from source
         const stream = await this.createStreamFromSource(options.source);
 
+        const fileStorageParams = this.getFileStorageParamsUseCase
+            ? await this.getFileStorageParamsUseCase.handle(options.fileType, options.storageName)
+            : null;
+
         // Save original file via storage
-        const writeResult = await this.fileStorageFactory.get(options.storageName).write(fileDto, stream);
+        const writeResult = await this.fileStorageFactory
+            .get(options.storageName)
+            .write(fileDto, stream, fileStorageParams);
 
         // Delete temporary file
         const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
@@ -177,7 +204,7 @@ export class FileService extends ReadService<FileModel> {
             try {
                 await fs.promises.access(source.path, fs.constants.F_OK);
             } catch (e) {
-                throw new Error('Файл не найден: ' + source.path);
+                throw new Error('File not found: ' + source.path);
             }
 
             if (source instanceof FileExpressSourceDto) {

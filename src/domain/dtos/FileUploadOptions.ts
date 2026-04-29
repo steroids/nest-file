@@ -59,4 +59,10 @@ export class FileUploadOptions {
         nullable: true,
     })
     fileType: string;
+
+    @IntegerField({
+        label: 'User ID',
+        nullable: true,
+    })
+    userId?: number;
 }

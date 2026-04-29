@@ -1,21 +1,45 @@
 # Steroids Nest File
 
-## [0.3.3](https://github.com/steroids/nest/compare/0.3.2...0.3.3) (2025-07-03)
+## [0.5.0](https://github.com/steroids/nest-file/compare/0.4.1...0.5.0) (2026-03-25)
+
+[Migration guide](docs/MigrationGuide.md#050-2026-03-25)
 
 ### Features
 
-[Migration guide](docs/MigrationGuide.md#040-2025-07-03)
+- В FileModel добавлено поле userId. Поле также включено в FileUploadOptions
+
+## [0.4.1](https://github.com/steroids/nest-file/compare/0.4.0...0.4.1) (2025-12-18)
+
+### Fixes
+
+- Исправлено сохранение FileModel (поле fileType включено в состав save dto)
+
+## [0.4.0](https://github.com/steroids/nest-file/compare/0.3.3...0.4.0) (2025-12-18)
+
+### Features
+
+[Migration guide](docs/MigrationGuide.md#040-2025-12-18)
+
+- удален FileController ([#127](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/127))
+- Добавлены параметры загрузки файлов в хранилища по fileType ([#169](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/169))
+- Steroids зависимости вынесены в peerDependencies ([#190](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/190))
+
+## [0.3.3](https://github.com/steroids/nest-file/compare/0.3.2...0.3.3) (2025-07-03)
+
+### Features
+
+[Migration guide](docs/MigrationGuide.md#033-2025-07-03)
 
 - На замену декоратору FileUpload добавлен FileUploadInterceptor, у которого есть доступ к DI.
   Он обращается в FileTypeService, получает конфиг для загружаемого типа файла и валидирует его по этому конфигу ([#128](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/128))
 
-## [0.3.2](https://github.com/steroids/nest/compare/0.3.1...0.3.2) (2025-06-26)
+## [0.3.2](https://github.com/steroids/nest-file/compare/0.3.1...0.3.2) (2025-06-26)
 
 ### Fixes
 
 - Фикс ClearUnusedFilesCommand
 
-## [0.3.1](https://github.com/steroids/nest/compare/0.3.0...0.3.1) (2025-06-24)
+## [0.3.1](https://github.com/steroids/nest-file/compare/0.3.0...0.3.1) (2025-06-24)
 
 ### Features
 
@@ -24,7 +48,7 @@
 - Обновлены интерфейсы методов в IFileStorage ([#114](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/114))
 - Добавлен тип загружаемых файлов в конфиг для @FileUpload ([#120](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/120))
 
-## [0.3.0](https://github.com/steroids/nest/compare/0.2.6...0.3.0) (2025-05-12)
+## [0.3.0](https://github.com/steroids/nest-file/compare/0.2.6...0.3.0) (2025-05-12)
 
 ### Features
 

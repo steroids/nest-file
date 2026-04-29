@@ -10,7 +10,6 @@ export class ClearUnusedFilesCommand {
     constructor(
         @Inject(IFileService)
         private fileService: FileService,
-        @Inject(FileConfigService)
         private fileConfigService: FileConfigService,
     ) {
     }

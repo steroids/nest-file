@@ -26,5 +26,11 @@ export class FileSaveDto {
     folder: string;
 
     @ExtendField(FileModel)
+    fileType?: string;
+
+    @ExtendField(FileModel)
     md5: string;
+
+    @ExtendField(FileModel)
+    userId?: number;
 }

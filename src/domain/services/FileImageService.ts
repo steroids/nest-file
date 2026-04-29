@@ -1,9 +1,10 @@
 import * as sharp from 'sharp';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
+import {Inject, Injectable, Optional} from '@nestjs/common';
+import {EventEmitter2} from '@nestjs/event-emitter';
 import {IFileImageRepository} from '../interfaces/IFileImageRepository';
 import {FileImageModel} from '../models/FileImageModel';
-import {FileConfigService} from './FileConfigService';
 import {FileModel} from '../models/FileModel';
 import {FileHelper} from '../helpers/FileHelper';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
@@ -12,17 +13,30 @@ import {SharpHelper} from '../helpers/SharpHelper';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
-import { IFileStorageFactory } from '../interfaces/IFileStorageFactory';
+import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
+import {
+    GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN,
+    IGetFileStorageParamsUseCase,
+} from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
+import {FileConfigService} from './FileConfigService';
 
 const SVG_MIME_TYPE = 'image/svg+xml';
 
+@Injectable()
 export class FileImageService {
     constructor(
+        @Inject(IFileImageRepository)
         public repository: IFileImageRepository,
+        @Inject(FileConfigService)
         protected readonly fileConfigService: FileConfigService,
+        @Inject(IFileStorageFactory)
         protected readonly fileStorageFactory: IFileStorageFactory,
+        @Inject(EventEmitter2)
         protected readonly eventEmitter: IEventEmitter,
+        @Optional()
+        @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)
+        protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
     ) {
     }
 
@@ -113,15 +127,22 @@ export class FileImageService {
         });
 
         if (hasChanges) {
-            await this.fileStorageFactory.get(file.storageName).write(
-                DataMapper.create<FileSaveDto>(FileSaveDto, {
-                    uid: file.uid,
-                    folder: imageModel.folder,
-                    fileName: imageModel.fileName,
-                    fileMimeType: file.fileMimeType,
-                }),
-                data,
-            );
+            const fileStorageParams = this.getFileStorageParamsUseCase
+                ? await this.getFileStorageParamsUseCase.handle(file.fileType, file.storageName)
+                : null;
+
+            await this.fileStorageFactory
+                .get(file.storageName)
+                .write(
+                    DataMapper.create<FileSaveDto>(FileSaveDto, {
+                        uid: file.uid,
+                        folder: imageModel.folder,
+                        fileName: imageModel.fileName,
+                        fileMimeType: file.fileMimeType,
+                    }),
+                    data,
+                    fileStorageParams,
+                );
         }
 
         return this.repository.create(imageModel);

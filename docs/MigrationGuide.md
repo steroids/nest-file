@@ -1,5 +1,39 @@
 # Steroids Nest File Migration Guide
 
+## [0.5.0](../CHANGELOG.md#050-2026-03-25) (2026-03-25)
+
+### userId в FileModel
+
+В FileModel было добавлено integer nullable поле userId, поэтому после обновления пакета можно добавить сохранение id пользователя, загрузившего файл.
+Это можно сделать через fileUploadOptions. Например, в эндпоинте загрузки файла:
+
+```ts
+@Put('/upload-file')
+async files(
+    @UploadedFile() file: any,
+    @Query() dto: ProjectFileUploadDto,
+    @Context() context: ContextDto,
+) {
+    return this.fileService.upload(
+        DataMapper.create<FileUploadOptions>(FileUploadOptions, {
+            ...dto,
+            userId: context.user.id,
+            source: DataMapper.create(FileExpressSourceDto, file),
+        }),
+        FileSchema,
+    );
+}
+```
+
+## [0.4.0](../CHANGELOG.md#040-2025-12-18) (2025-12-18)
+
+### Параметры загрузки в хранилище по fileType
+
+В FileModel было добавлено string nullable поле fileType, поэтому после обновления пакета необходимо сгененерировать и применить миграции в проекте
+
+В проекте в FileModule по токену ```GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN``` можно определить сервис, реализующий интерфейс ```IGetFileStorageParamsUseCase```
+, что позволяет задать необходимые параметры при загрузке файла в соответствующее хранилище.
+
 ## [0.3.3](../CHANGELOG.md#033-2025-07-03) (2025-07-03)
 
 ### FileUploadInterceptor

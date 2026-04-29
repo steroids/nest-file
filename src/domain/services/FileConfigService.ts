@@ -143,11 +143,6 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      */
     public justUploadedUnusedFileLifetimeMs: number;
 
-    /**
-     * Temporary file lifetime
-     */
-    public justUploadedFileLifetimeMs: number;
-
     constructor(
         private custom: IFileModuleConfig,
     ) {

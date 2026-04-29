@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import {Inject, Optional} from '@nestjs/common';
+import {Inject, Injectable, Optional} from '@nestjs/common';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
@@ -9,13 +9,14 @@ import {
 } from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
 import {FileConfigService} from './FileConfigService';
 
+@Injectable()
 export class DeleteLostAndTemporaryFilesService {
     constructor(
         @Inject(IFileStorageFactory)
         private fileStorageFactory: IFileStorageFactory,
-        @Inject(FileConfigService)
         protected readonly fileConfigService: FileConfigService,
-        @Optional() @Inject(GetFileModelsPathUsecaseToken)
+        @Optional()
+        @Inject(GetFileModelsPathUsecaseToken)
         private getFileModelsPathUsecase: IGetFileModelsPathUsecase,
     ) {
     }

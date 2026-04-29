@@ -1,10 +1,13 @@
 import * as Sentry from '@sentry/node';
+import {Inject, Injectable} from '@nestjs/common';
 import {FileConfigService} from '../../domain/services/FileConfigService';
 import {FileRemovedEventDto} from '../../domain/dtos/events/FileRemovedEventDto';
 import {IFileStorageFactory} from '../../domain/interfaces/IFileStorageFactory';
 
+@Injectable()
 export class FileRemovedEventHandleUseCase {
     constructor(
+        @Inject(IFileStorageFactory)
         private readonly storageFactory: IFileStorageFactory,
         private readonly fileConfigService: FileConfigService,
     ) {}

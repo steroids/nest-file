@@ -1,5 +1,5 @@
-import {toInteger as _toInteger} from 'lodash';
 import {Readable} from 'stream';
+import {toInteger as _toInteger} from 'lodash';
 import * as Minio from 'minio';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
@@ -73,8 +73,17 @@ export class MinioS3Storage implements IFileStorage {
         });
     }
 
-    public async write(file: IFileWritable, source: Readable | Buffer): Promise<FileWriteResult> {
+    public async write(
+        file: IFileWritable,
+        source: Readable | Buffer,
+        fileStorageParams: Record<string, any> | null = {},
+    ): Promise<FileWriteResult> {
         await this.makeMainBucket();
+
+        const metaData = {
+            'Content-Type': file.fileMimeType,
+            ...fileStorageParams,
+        };
 
         return new Promise((resolve, reject) => {
             this.getClient().putObject(
@@ -82,7 +91,7 @@ export class MinioS3Storage implements IFileStorage {
                 [file.folder, file.fileName].filter(Boolean).join('/'),
                 source,
                 file.fileSize,
-                {'Content-Type': file.fileMimeType},
+                metaData,
                 (err, {etag}) => {
                     if (err) {
                         reject(err);

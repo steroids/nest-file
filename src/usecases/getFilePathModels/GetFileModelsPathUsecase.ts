@@ -10,7 +10,6 @@ export class GetFileModelsPathUsecase implements IGetFileModelsPathUsecase {
     constructor(
         @Inject(IFileService)
         protected readonly fileService: FileService,
-        @Inject(FileImageService)
         protected readonly fileImageService: FileImageService,
     ) {}
 

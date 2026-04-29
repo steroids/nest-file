@@ -6,7 +6,6 @@ import {FileRemovedEventHandleUseCase} from '../../usecases/fileRemovedEventHand
 @Injectable()
 export class FileEventsSubscriber {
     constructor(
-        @Inject(FileRemovedEventHandleUseCase)
         private readonly fileRemovedEventHandleUseCase: FileRemovedEventHandleUseCase,
     ) {}
 
