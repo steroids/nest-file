@@ -1,5 +1,34 @@
 # Steroids Nest File Migration Guide
 
+## [0.6.0](../CHANGELOG.md#060-2026-05-04) (2026-05-04)
+
+### Lifetime для только что загруженных файлов
+
+В очистку lost/temporary и unused файлов добавлена задержка перед удалением недавно созданных файлов.
+Это снижает риск удалить файл, который уже загружен в хранилище, но еще не успел сохраниться в БД или привязаться к сущности.
+
+По умолчанию применяются следующие значения:
+
+- `JUST_UPLOADED_TEMP_FILE_LIFETIME_S=10` - lost/temporary файлы из local storage не удаляются в течение 10 секунд после создания
+- `JUST_UPLOADED_UNUSED_FILE_LIFETIME_S=86400` - команда `unused-files` не удаляет файлы, созданные менее 24 часов назад
+
+Значения в env задаются в секундах. Если параметры передаются через конфиг модуля, используйте поля `justUploadedTempFileLifetimeMs` и `justUploadedUnusedFileLifetimeMs` в миллисекундах.
+
+Если в проекте нужно сохранить прежнее поведение без задержки, можно задать env-переменные со значением `0`:
+
+```env
+JUST_UPLOADED_TEMP_FILE_LIFETIME_S=0
+JUST_UPLOADED_UNUSED_FILE_LIFETIME_S=0
+```
+
+### Изменения контрактов для кастомных реализаций
+
+Если в проекте есть собственная реализация `IFileLocalStorage`, необходимо добавить метод `getFileCreateTimeMs(fileName: string): Promise<number>`.
+Метод должен вернуть время создания файла в миллисекундах. Для local storage можно ориентироваться на `birthtime` или `mtime` файла.
+
+Если в проекте есть собственная реализация `IFileRepository.getUnusedFilesIds`, она должна принимать новый опциональный параметр `unusedFileLifetimeMs`.
+Этот параметр используется для фильтрации файлов по `createTime` перед удалением.
+
 ## [0.5.0](../CHANGELOG.md#050-2026-03-25) (2026-03-25)
 
 ### userId в FileModel

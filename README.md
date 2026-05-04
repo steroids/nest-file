@@ -55,7 +55,9 @@ APP_FILE_STORAGE_S3_SECRET=yyy
 APP_FILE_STORAGE_S3_MAIN_BUCKET=arm-supervisor
 APP_FILE_STORAGE_S3_PORT=443
 APP_FILE_STORAGE_S3_USE_SSL=1
-APP_FILE_STORAGE_S3_ROOT_URL=https://storage.yandexcloud.net/arm-supervisor
+APP_FILE_STORAGE_ROOT_URL=https://storage.yandexcloud.net/arm-supervisor
+JUST_UPLOADED_TEMP_FILE_LIFETIME_S=10
+JUST_UPLOADED_UNUSED_FILE_LIFETIME_S=86400
 ```
 Описание переменных: 
    - APP_FILE_STORAGE_NAME - тип используемого хранилища по-умолчанию (minio_s3 или local, из словаря FileStorageEnum)
@@ -70,8 +72,14 @@ APP_FILE_STORAGE_S3_ROOT_URL=https://storage.yandexcloud.net/arm-supervisor
    - APP_FILE_STORAGE_S3_MAIN_BUCKET - название бакета S3 хранилища
    - APP_FILE_STORAGE_S3_PORT - порт S3 хранилища
    - APP_FILE_STORAGE_S3_USE_SSL - использовать SSL для подключения
-   - APP_FILE_STORAGE_S3_ROOT_URL - адрес S3 хранилища, включая бакет
    - APP_FILE_STORAGE_S3_REGION - регион S3 хранилища
+   - JUST_UPLOADED_TEMP_FILE_LIFETIME_S - время жизни только что загруженных temporary/lost файлов в секундах перед удалением cron-очисткой (по-умолчанию 10 секунд)
+   - JUST_UPLOADED_UNUSED_FILE_LIFETIME_S - минимальный возраст unused файла в секундах перед удалением командой `unused-files` (по-умолчанию 86400 секунд)
+
+### Lifetime только что загруженных файлов
+
+Чтобы очистка не удаляла файлы, которые уже загружены в хранилище, но еще не успели сохраниться в БД или привязаться к сущности, для temporary/lost и unused файлов используется задержка перед удалением.
+Для настройки через конфиг модуля доступны поля `justUploadedTempFileLifetimeMs` и `justUploadedUnusedFileLifetimeMs` в миллисекундах.
 
 ### Параметры загрузки файла в определенное хранилище
 
