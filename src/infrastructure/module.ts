@@ -18,7 +18,7 @@ import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleU
 import {IFileTypeService} from '../domain/interfaces/IFileTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
-import {FILE_STORAGES_TOKEN} from '../domain/storages';
+import {FILE_STORAGES_TOKEN} from '../domain/interfaces/IFileStorage';
 import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {CronJobsRegister} from './services/CronJobsRegister';
 import {IFileModuleConfig} from './config';

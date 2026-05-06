@@ -15,3 +15,5 @@ export interface IFileStorage {
     deleteFile(fileName: string): void | Promise<void>,
     storageName?: FileStorageNameType,
 }
+
+export const FILE_STORAGES_TOKEN = 'file_storages_token';

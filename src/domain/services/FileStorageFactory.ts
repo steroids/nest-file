@@ -1,8 +1,7 @@
 import {Inject, Injectable} from '@nestjs/common';
-import {IFileStorage} from '../interfaces/IFileStorage';
+import {FILE_STORAGES_TOKEN, IFileStorage} from '../interfaces/IFileStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import {FileStorageNameType} from '../types/FileStorageNameType';
-import {FILE_STORAGES_TOKEN} from '../storages';
 import {FileConfigService} from './FileConfigService';
 
 @Injectable()
