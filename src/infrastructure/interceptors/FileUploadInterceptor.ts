@@ -11,9 +11,10 @@ import {Observable, switchMap} from 'rxjs';
 import * as multer from 'multer';
 import {Request} from 'express';
 import {IFileTypeService} from '../../domain/interfaces/IFileTypeService';
+import {FILE_UPLOAD_FIELD_NAME_METADATA_KEY} from '../decorators/FileUploadFieldName';
 
-// Ключ в объекте request, по которому будет лежать загруженный файл. По-умолчанию декоратор UploadedFile из NestJS ожидает значение file
-const FILE_QUERY_KEY = 'file';
+// Имя multipart-поля для загружаемого файла по умолчанию
+const DEFAULT_FILE_UPLOAD_FIELD_NAME = 'file';
 
 @Injectable()
 export class FileUploadInterceptor implements NestInterceptor {
@@ -26,6 +27,7 @@ export class FileUploadInterceptor implements NestInterceptor {
         const ctx = context.switchToHttp();
         const request = ctx.getRequest<Request>();
         const response = ctx.getResponse();
+        const fileFieldName = this.getFileFieldName(context);
 
         const fileType = request.query.fileType as string;
 
@@ -53,7 +55,7 @@ export class FileUploadInterceptor implements NestInterceptor {
                 }
                 callback(null, true);
             },
-        }).single(FILE_QUERY_KEY);
+        }).single(fileFieldName);
 
         return new Observable<void>(observer => {
             upload(request, response, err => {
@@ -70,5 +72,14 @@ export class FileUploadInterceptor implements NestInterceptor {
         }).pipe(
             switchMap(() => next.handle()),
         );
+    }
+
+    private getFileFieldName(context: ExecutionContext): string {
+        const fieldName = Reflect.getMetadata(FILE_UPLOAD_FIELD_NAME_METADATA_KEY, context.getHandler())
+          ?? Reflect.getMetadata(FILE_UPLOAD_FIELD_NAME_METADATA_KEY, context.getClass());
+
+        return typeof fieldName === 'string' && fieldName.trim()
+            ? fieldName
+            : DEFAULT_FILE_UPLOAD_FIELD_NAME;
     }
 }
