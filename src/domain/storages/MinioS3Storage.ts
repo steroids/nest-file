@@ -3,12 +3,23 @@ import {toInteger as _toInteger} from 'lodash';
 import * as Minio from 'minio';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
+import {Inject, Injectable, Optional, Scope} from '@nestjs/common';
 import {IFileStorage} from '../interfaces/IFileStorage';
 import {FileWriteResult} from '../dtos/FileWriteResult';
 import {IFileReadable} from '../interfaces/IFileReadable';
 import {IFileWritable} from '../interfaces/IFileWritable';
+import {
+    GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN,
+    IGetFileStorageParamsUseCase,
+} from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
+import FileStorageEnum from '../enums/FileStorageEnum';
 
+@Injectable({
+    scope: Scope.TRANSIENT,
+})
 export class MinioS3Storage implements IFileStorage {
+    public storageName: string;
+
     public host: string;
 
     public port: number;
@@ -29,6 +40,13 @@ export class MinioS3Storage implements IFileStorage {
 
     private _isBucketCreated: boolean;
 
+    constructor(
+        @Optional()
+        @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)
+        protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
+    ) {
+    }
+
     public init(config: any) {
         this.host = config?.host;
         this.port = _toInteger(config?.port);
@@ -38,6 +56,7 @@ export class MinioS3Storage implements IFileStorage {
         this.region = config?.region;
         this.mainBucket = config?.mainBucket;
         this.rootUrl = config?.rootUrl;
+        this.storageName = config?.storageName ?? FileStorageEnum.MINIO_S3;
 
         // if (!this.accessKey) {
         //     throw new Error('Not found accessKey for MinioS3Storage');
@@ -76,13 +95,16 @@ export class MinioS3Storage implements IFileStorage {
     public async write(
         file: IFileWritable,
         source: Readable | Buffer,
-        fileStorageParams: Record<string, any> | null = {},
     ): Promise<FileWriteResult> {
         await this.makeMainBucket();
 
+        const fileTypeStorageParams = this.getFileStorageParamsUseCase
+            ? await this.getFileStorageParamsUseCase.handle(file.fileType, this.storageName)
+            : {};
+
         const metaData = {
             'Content-Type': file.fileMimeType,
-            ...fileStorageParams,
+            ...fileTypeStorageParams,
         };
 
         return new Promise((resolve, reject) => {

@@ -9,8 +9,10 @@ export interface IFileStorage {
     write(
         file: IFileWritable,
         source: Readable | Buffer,
-        fileStorageParams?: Record<string, any> | null,
     ): Promise<FileWriteResult>,
     getUrl(file: IFileReadable): string,
     deleteFile(fileName: string): void | Promise<void>,
+    storageName: string,
 }
+
+export const FILE_STORAGES_TOKEN = 'file_storages_token';

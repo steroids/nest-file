@@ -1,5 +1,6 @@
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
 import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
+import {ModuleRef} from '@nestjs/core';
 import {IFileRepository} from '../domain/interfaces/IFileRepository';
 import {IFileImageRepository} from '../domain/interfaces/IFileImageRepository';
 import {FileService} from '../domain/services/FileService';
@@ -16,6 +17,7 @@ import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
 import {fileValidators} from '../domain/validators';
 import {FILE_VALIDATORS_TOKEN} from '../domain/constants/FileValidatorsToken';
+import {FILE_STORAGES_TOKEN} from '../domain/interfaces/IFileStorage';
 import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {CronJobsRegister} from './services/CronJobsRegister';
 import {IFileModuleConfig} from './config';
@@ -62,16 +64,17 @@ export default (config: IFileModuleConfig) => ({
         },
 
         {
-            inject: [FileConfigService, FileLocalStorage, MinioS3Storage],
-            provide: IFileStorageFactory,
-            useFactory: (
-                fileConfigService: FileConfigService,
-                fileLocalStorage: FileLocalStorage,
-                minioS3Storage: MinioS3Storage,
-            ) => new FileStorageFactory(fileConfigService, {
-                [FileStorageEnum.LOCAL]: fileLocalStorage,
-                [FileStorageEnum.MINIO_S3]: minioS3Storage,
+            provide: FILE_STORAGES_TOKEN,
+            inject: [ModuleRef],
+            useFactory: async (moduleRef: ModuleRef) => ({
+                [FileStorageEnum.LOCAL]: await moduleRef.resolve(FileLocalStorage),
+                [FileStorageEnum.MINIO_S3]: await moduleRef.resolve(MinioS3Storage),
             }),
+        },
+
+        {
+            provide: IFileStorageFactory,
+            useClass: FileStorageFactory,
         },
         {
             provide: IFileService,

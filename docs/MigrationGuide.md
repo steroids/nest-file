@@ -1,5 +1,51 @@
 # Steroids Nest File Migration Guide
 
+## Unreleased
+
+### Провайдинг хранилищ после обновления
+
+`FileStorageFactory` теперь получает хранилища из DI по токену `FILE_STORAGES_TOKEN`.
+Если проект использует стандартный `coreModule.module(config)` и не переопределяет провайдинг хранилищ, токен уже настроен внутри пакета.
+Если проект переопределяет providers, использует кастомные хранилища или несколько экземпляров одного хранилища с разными настройками, нужно:
+
+1. Добавить настройки каждого хранилища в `FileModule.config.storages`.
+   Ключи в `storages` будут использоваться как `storageName`.
+
+```typescript
+@Module({
+    ...coreModule,
+    config: () => {
+        const coreConfig = coreModule.config();
+        return {
+            ...coreConfig,
+            storages: {
+                ...coreConfig.storages,
+                minio_s3_1: {},
+                minio_s3_2: {},
+            },
+        };
+    },
+})
+export class FileModule {}
+```
+
+2. Запровайдить эти же ключи по токену `FILE_STORAGES_TOKEN`.
+   Для `TRANSIENT` хранилищ нужно использовать `moduleRef.resolve`, чтобы получить отдельный экземпляр для каждого имени.
+
+```typescript
+{
+    provide: FILE_STORAGES_TOKEN,
+    inject: [ModuleRef],
+    useFactory: async (moduleRef: ModuleRef) => ({
+        minio_s3_1: await moduleRef.resolve(MinioS3Storage),
+        minio_s3_2: await moduleRef.resolve(MinioS3Storage),
+    }),
+},
+```
+
+3. Убрать передачу `fileStorageParams` в `IFileStorage.write`.
+   Параметры записи, зависящие от `fileType` или `storageName`, нужно перенести в `IGetFileStorageParamsUseCase` и запровайдить его по токену `GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN`.
+
 ## [0.6.0](../CHANGELOG.md#060-2026-05-04) (2026-05-04)
 
 ### Lifetime для только что загруженных файлов

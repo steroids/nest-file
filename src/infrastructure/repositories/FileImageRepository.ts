@@ -6,7 +6,6 @@ import {IFileImageRepository} from '../../domain/interfaces/IFileImageRepository
 import {FileImageModel} from '../../domain/models/FileImageModel';
 import {FileImageTable} from '../tables/FileImageTable';
 import {IFileStorageFactory} from '../../domain/interfaces/IFileStorageFactory';
-import FileStorageEnum from '../../domain/enums/FileStorageEnum';
 
 @Injectable()
 export class FileImageRepository extends CrudRepository<FileImageModel> implements IFileImageRepository {
@@ -27,7 +26,7 @@ export class FileImageRepository extends CrudRepository<FileImageModel> implemen
         return model;
     }
 
-    async getFilesPathsByStorageName(storageName: FileStorageEnum): Promise<string[] | null> {
+    async getFilesPathsByStorageName(storageName: string): Promise<string[] | null> {
         const files = await this.createQuery()
             .select([
                 'fileName',

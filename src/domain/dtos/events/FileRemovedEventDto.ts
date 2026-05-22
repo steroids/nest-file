@@ -1,5 +1,4 @@
-import { EnumField, IntegerField, StringField } from '@steroidsjs/nest/infrastructure/decorators/fields';
-import FileStorageEnum from '../../enums/FileStorageEnum';
+import {IntegerField, StringField} from '@steroidsjs/nest/infrastructure/decorators/fields';
 
 export class FileRemovedEventDto {
     static eventName = Symbol('File.Removed');
@@ -13,8 +12,6 @@ export class FileRemovedEventDto {
     @StringField()
     fileName: string;
 
-    @EnumField({
-        enum: FileStorageEnum,
-    })
-    storageName: FileStorageEnum;
+    @StringField()
+    storageName: string;
 }

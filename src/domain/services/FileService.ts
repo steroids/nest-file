@@ -7,7 +7,7 @@ import * as mime from 'mime-types';
 import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
 import {ReadService} from '@steroidsjs/nest/usecases/services/ReadService';
 import SearchQuery from '@steroidsjs/nest/usecases/base/SearchQuery';
-import {Inject, Injectable, Optional, Type} from '@nestjs/common';
+import {Inject, Injectable, Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
@@ -25,11 +25,6 @@ import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFileTypeService} from '../interfaces/IFileTypeService';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
-import FileStorageEnum from '../enums/FileStorageEnum';
-import {
-    GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN,
-    IGetFileStorageParamsUseCase,
-} from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
 import {FILE_VALIDATORS_TOKEN} from '../constants/FileValidatorsToken';
 import {FileConfigService} from './FileConfigService';
 import {FileImageService} from './FileImageService';
@@ -57,9 +52,6 @@ export class FileService extends ReadService<FileModel> {
         protected readonly fileTypeService: IFileTypeService,
         @Inject(FILE_VALIDATORS_TOKEN)
         public validators: IValidator[],
-        @Optional()
-        @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)
-        protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
     ) {
         super();
     }
@@ -111,7 +103,7 @@ export class FileService extends ReadService<FileModel> {
 
         // Resolve storage name
         if (!options.storageName) {
-            options.storageName = this.fileConfigService.defaultStorageName as FileStorageEnum;
+            options.storageName = this.fileConfigService.defaultStorageName;
         }
 
         // Create FileModel from source
@@ -143,14 +135,10 @@ export class FileService extends ReadService<FileModel> {
         // Get file stream from source
         const stream = await this.createStreamFromSource(options.source);
 
-        const fileStorageParams = this.getFileStorageParamsUseCase
-            ? await this.getFileStorageParamsUseCase.handle(options.fileType, options.storageName)
-            : null;
-
         // Save original file via storage
         const writeResult = await this.fileStorageFactory
             .get(options.storageName)
-            .write(fileDto, stream, fileStorageParams);
+            .write(fileDto, stream);
 
         // Delete temporary file
         const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
@@ -311,7 +299,7 @@ export class FileService extends ReadService<FileModel> {
         }
     }
 
-    async getFilesPathsFromDb(storageName: FileStorageEnum): Promise<string[] | null> {
+    async getFilesPathsFromDb(storageName: string): Promise<string[] | null> {
         return this.repository.getFilesPathsByStorageName(storageName);
     }
 
