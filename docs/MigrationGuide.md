@@ -1,24 +1,13 @@
 # Steroids Nest File Migration Guide
 
-### Провайдинг хранилищ
+### Провайдинг хранилищ после обновления
 
-Объект с хранилищами теперь провайдятся по токену `FILE_STORAGES_TOKEN`, а так же хранилища имеют injection scope `TRANSIENT`.
-Это позволяет создавать несколько экземпляров одного хранилища с разными конфигурациями.
-Чтобы этим воспользоваться, нужно:
+`FileStorageFactory` теперь получает хранилища из DI по токену `FILE_STORAGES_TOKEN`.
+Если проект использует стандартный `coreModule.module(config)` и не переопределяет провайдинг хранилищ, токен уже настроен внутри пакета.
+Если проект переопределяет providers, использует кастомные хранилища или несколько экземпляров одного хранилища с разными настройками, нужно:
 
-1. Запровайдить `FILE_STORAGES_TOKEN` (нужно использовать именно `moduleRef.resolve`, так как используется `TRANSIENT` scope, возвращая новый экземпляр):
-```typescript
-{
-    provide: FILE_STORAGES_TOKEN,
-    inject: [ModuleRef],
-    useFactory: async (moduleRef: ModuleRef) => ({
-        ['minio_s3_1']: await moduleRef.resolve(MinioS3Storage),
-        ['minio_s3_2']: await moduleRef.resolve(MinioS3Storage),
-    }),
-},
-```
-
-2. В конфиге модуля `FileModule` указать в поле `storages` поля с теми же названиями хранилищ, что и запровайденные выше:
+1. Добавить настройки каждого хранилища в `FileModule.config.storages`.
+   Ключи в `storages` будут использоваться как `storageName`.
 
 ```typescript
 @Module({
@@ -37,6 +26,23 @@
 })
 export class FileModule {}
 ```
+
+2. Запровайдить эти же ключи по токену `FILE_STORAGES_TOKEN`.
+   Для `TRANSIENT` хранилищ нужно использовать `moduleRef.resolve`, чтобы получить отдельный экземпляр для каждого имени.
+
+```typescript
+{
+    provide: FILE_STORAGES_TOKEN,
+    inject: [ModuleRef],
+    useFactory: async (moduleRef: ModuleRef) => ({
+        minio_s3_1: await moduleRef.resolve(MinioS3Storage),
+        minio_s3_2: await moduleRef.resolve(MinioS3Storage),
+    }),
+},
+```
+
+3. Убрать передачу `fileStorageParams` в `IFileStorage.write`.
+   Параметры записи, зависящие от `fileType` или `storageName`, нужно перенести в `IGetFileStorageParamsUseCase` и запровайдить его по токену `GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN`.
 
 ## [0.4.0](../CHANGELOG.md#040-2025-12-18) (2025-12-18)
 

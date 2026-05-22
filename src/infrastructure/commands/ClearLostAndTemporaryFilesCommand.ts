@@ -3,7 +3,6 @@ import {Command, Option} from 'nestjs-command';
 import {Inject} from '@nestjs/common';
 import {DeleteLostAndTemporaryFilesService} from '../../domain/services/DeleteLostAndTemporaryFilesService';
 import {FileStorageEnum} from '../../domain/enums/FileStorageEnum';
-import {FileStorageNameType} from '../../domain/types/FileStorageNameType';
 
 export class ClearLostAndTemporaryFilesCommand {
     constructor(
@@ -25,7 +24,7 @@ export class ClearLostAndTemporaryFilesCommand {
             demandOption: false,
             default: FileStorageEnum.LOCAL,
         })
-            storageName: FileStorageNameType,
+            storageName: string,
 
         @Option({
             name: 'dry-run',

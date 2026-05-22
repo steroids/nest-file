@@ -7,7 +7,6 @@ import FileStorageEnum from '../enums/FileStorageEnum';
 import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IFileModuleConfig} from '../../infrastructure/config';
-import {FileStorageNameType} from '../types/FileStorageNameType';
 
 const getStoragesConfig = (storagesConfig: IFileModuleConfig['storages'] = {}) => {
     const localStorageConfig = {
@@ -44,7 +43,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      * Env:
      *  - APP_FILE_STORAGE_NAME
      */
-    public defaultStorageName: FileStorageNameType;
+    public defaultStorageName: string;
 
     /**
      * Configurations for storages
@@ -110,7 +109,10 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     public deleteLostAndTemporaryFilesByCron: {
         isEnable: boolean,
         cronTimePattern: string,
-        storageName: FileStorageNameType,
+        /**
+         * Storage name from FileModule storages config.
+         */
+        storageName: string,
     };
 
     /**
@@ -130,7 +132,7 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
 
     protected init(custom: IFileModuleConfig = {}) {
         // Default storage
-        this.defaultStorageName = process.env.APP_FILE_STORAGE_NAME as FileStorageEnum
+        this.defaultStorageName = process.env.APP_FILE_STORAGE_NAME
             || custom.defaultStorageName
             || FileStorageEnum.LOCAL;
 

@@ -1,21 +1,20 @@
 import {Inject, Injectable} from '@nestjs/common';
 import {FILE_STORAGES_TOKEN, IFileStorage} from '../interfaces/IFileStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
-import {FileStorageNameType} from '../types/FileStorageNameType';
 import {FileConfigService} from './FileConfigService';
 
 @Injectable()
 export class FileStorageFactory implements IFileStorageFactory {
-    private initializedNames: FileStorageNameType[] = [];
+    private initializedNames: string[] = [];
 
     constructor(
         private fileConfigService: FileConfigService,
         @Inject(FILE_STORAGES_TOKEN)
-        private storages: Record<FileStorageNameType, IFileStorage>,
+        private storages: Record<string, IFileStorage>,
     ) {
     }
 
-    public get(name: FileStorageNameType = null): IFileStorage {
+    public get(name: string = null): IFileStorage {
         name = name || this.fileConfigService.defaultStorageName;
 
         if (!this.storages[name]) {

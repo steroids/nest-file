@@ -1,6 +1,5 @@
 import {Readable} from 'stream';
 import {FileWriteResult} from '../dtos/FileWriteResult';
-import {FileStorageNameType} from '../types/FileStorageNameType';
 import {IFileReadable} from './IFileReadable';
 import {IFileWritable} from './IFileWritable';
 
@@ -13,7 +12,7 @@ export interface IFileStorage {
     ): Promise<FileWriteResult>,
     getUrl(file: IFileReadable): string,
     deleteFile(fileName: string): void | Promise<void>,
-    storageName?: FileStorageNameType,
+    storageName: string,
 }
 
 export const FILE_STORAGES_TOKEN = 'file_storages_token';

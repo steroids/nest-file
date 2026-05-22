@@ -6,7 +6,6 @@ import {
     GetFileModelsPathUsecaseToken,
     IGetFileModelsPathUsecase,
 } from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
-import {FileStorageNameType} from '../types/FileStorageNameType';
 
 export class DeleteLostAndTemporaryFilesService {
     constructor(
@@ -23,7 +22,7 @@ export class DeleteLostAndTemporaryFilesService {
      * - in MinioS3Storage class implement extended IFileStorage interface
      * - return in getStorage() method object that implements IFileStorage interface
      */
-    async deleteLostAndTemporaryFiles(storageName: FileStorageNameType): Promise<void> {
+    async deleteLostAndTemporaryFiles(storageName: string): Promise<void> {
         const storage = this.getStorage(storageName);
         if (!storage) {
             return;
@@ -34,7 +33,7 @@ export class DeleteLostAndTemporaryFilesService {
         }
     }
 
-    async getLostAndTemporaryFilesPaths(storageName: FileStorageNameType): Promise<string[]> {
+    async getLostAndTemporaryFilesPaths(storageName: string): Promise<string[]> {
         if (!this.getFileModelsPathUsecase) {
             throw new Error('GetFileModelsPathUsecase is not provided');
         }
@@ -64,7 +63,7 @@ export class DeleteLostAndTemporaryFilesService {
         return lostAndTemporaryFilesPaths;
     }
 
-    private getStorage(storageName: FileStorageNameType): IFileLocalStorage {
+    private getStorage(storageName: string): IFileLocalStorage {
         try {
             return this.fileStorageFactory.get(storageName) as IFileLocalStorage;
         } catch (error) {

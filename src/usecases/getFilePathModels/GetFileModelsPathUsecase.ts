@@ -1,7 +1,6 @@
 import {Inject, Injectable} from '@nestjs/common';
 import {FileService} from '../../domain/services/FileService';
 import {FileImageService} from '../../domain/services/FileImageService';
-import {FileStorageNameType} from '../../domain/types/FileStorageNameType';
 import {IGetFileModelsPathUsecase} from './interfaces/IGetFileModelsPathUsecase';
 
 @Injectable()
@@ -13,7 +12,7 @@ export class GetFileModelsPathUsecase implements IGetFileModelsPathUsecase {
         protected readonly fileImageService: FileImageService,
     ) {}
 
-    async handle(storageName: FileStorageNameType) {
+    async handle(storageName: string) {
         return [
             ...await this.fileImageService.getFilesPathsFromDb(storageName),
             ...await this.fileService.getFilesPathsFromDb(storageName),

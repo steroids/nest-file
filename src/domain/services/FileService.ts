@@ -24,8 +24,6 @@ import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFileTypeService} from '../interfaces/IFileTypeService';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
-import FileStorageEnum from '../enums/FileStorageEnum';
-import {FileStorageNameType} from '../types/FileStorageNameType';
 import {FileConfigService} from './FileConfigService';
 import {FileImageService} from './FileImageService';
 
@@ -97,7 +95,7 @@ export class FileService extends ReadService<FileModel> {
 
         // Resolve storage name
         if (!options.storageName) {
-            options.storageName = this.fileConfigService.defaultStorageName as FileStorageEnum;
+            options.storageName = this.fileConfigService.defaultStorageName;
         }
 
         // Create FileModel from source
@@ -290,7 +288,7 @@ export class FileService extends ReadService<FileModel> {
         }
     }
 
-    async getFilesPathsFromDb(storageName: FileStorageNameType): Promise<string[] | null> {
+    async getFilesPathsFromDb(storageName: string): Promise<string[] | null> {
         return this.repository.getFilesPathsByStorageName(storageName);
     }
 

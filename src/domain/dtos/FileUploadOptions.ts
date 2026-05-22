@@ -1,5 +1,4 @@
 import {BooleanField, IntegerField, StringField} from '@steroidsjs/nest/infrastructure/decorators/fields';
-import {FileStorageNameType} from '../types/FileStorageNameType';
 import {FileExpressSourceDto} from './sources/FileExpressSourceDto';
 import {FileLocalSourceDto} from './sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from './sources/FileStreamSourceDto';
@@ -33,7 +32,7 @@ export class FileUploadOptions {
         label: 'Storage name (file, aws, ...)',
         nullable: true,
     })
-    storageName: FileStorageNameType;
+    storageName: string;
 
     @IntegerField({
         label: 'Max file size in megabyte',

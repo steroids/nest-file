@@ -12,7 +12,6 @@ import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
-import {FileStorageNameType} from '../types/FileStorageNameType';
 import {FileConfigService} from './FileConfigService';
 
 const SVG_MIME_TYPE = 'image/svg+xml';
@@ -130,7 +129,7 @@ export class FileImageService {
         return this.repository.create(imageModel);
     }
 
-    async getFilesPathsFromDb(storageName: FileStorageNameType): Promise<string[] | null> {
+    async getFilesPathsFromDb(storageName: string): Promise<string[] | null> {
         return this.repository.getFilesPathsByStorageName(storageName);
     }
 

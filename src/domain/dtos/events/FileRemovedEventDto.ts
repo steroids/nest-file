@@ -1,5 +1,4 @@
 import {IntegerField, StringField} from '@steroidsjs/nest/infrastructure/decorators/fields';
-import {FileStorageNameType} from '../../types/FileStorageNameType';
 
 export class FileRemovedEventDto {
     static eventName = Symbol('File.Removed');
@@ -14,5 +13,5 @@ export class FileRemovedEventDto {
     fileName: string;
 
     @StringField()
-    storageName: FileStorageNameType;
+    storageName: string;
 }

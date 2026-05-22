@@ -4,7 +4,6 @@ import {
     StringField,
     CreateTimeField, IntegerField, UidField,
 } from '@steroidsjs/nest/infrastructure/decorators/fields';
-import {FileStorageNameType} from '../types/FileStorageNameType';
 import {FileImageModel} from './FileImageModel';
 
 /**
@@ -42,7 +41,7 @@ export class FileModel {
         label: 'Имя хранилища',
         nullable: true,
     })
-    storageName: FileStorageNameType;
+    storageName: string;
 
     @StringField({
         label: 'Название сохраненного файла',
