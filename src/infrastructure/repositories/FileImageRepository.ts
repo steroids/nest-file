@@ -1,12 +1,13 @@
 import {InjectRepository} from '@steroidsjs/nest-typeorm';
 import {Repository} from '@steroidsjs/typeorm';
-import {Inject} from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import {CrudRepository} from '@steroidsjs/nest/infrastructure/repositories/CrudRepository';
 import {IFileImageRepository} from '../../domain/interfaces/IFileImageRepository';
 import {FileImageModel} from '../../domain/models/FileImageModel';
 import {FileImageTable} from '../tables/FileImageTable';
 import {IFileStorageFactory} from '../../domain/interfaces/IFileStorageFactory';
 
+@Injectable()
 export class FileImageRepository extends CrudRepository<FileImageModel> implements IFileImageRepository {
     protected modelClass = FileImageModel;
 

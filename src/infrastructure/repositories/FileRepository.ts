@@ -53,9 +53,10 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
     }
 
     public async getUnusedFilesIds(config: {
-        fileNameLike: string,
-        ignoredTables: string[],
-        isEmpty: boolean,
+        fileNameLike?: string,
+        ignoredTables?: string[],
+        isEmpty?: boolean,
+        unusedFileLifetimeMs?: number,
     }): Promise<number[]> {
         // Массив объектов, где каждый объект содержит название таблицы и колонку в этой таблице, ссылающуюся на таблицу file
         const tablesWithFileReferenceColumn: Array<{table_name: string, col_name: string}> = await this.dbRepository.query(`
@@ -82,7 +83,7 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
                 return [];
             }
             const tableFilesIds = await this.dbRepository.query(`
-                    SELECT DISTINCT "${table.col_name}" as id FROM ${table.table_name}
+                    SELECT DISTINCT "${table.col_name}" as id FROM "${table.table_name}"
                 `);
             return tableFilesIds.map(item => item.id);
         }));
@@ -98,6 +99,14 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
 
         if (config.isEmpty) {
             allFilesQb.andWhere('(model.fileSize = 0 OR model.fileSize IS NULL)');
+        }
+
+        if (config.unusedFileLifetimeMs) {
+            // Добавляем условие фильтрации файлов по дате создания.
+            // Выбираются файлы, созданные до пороговой даты, которая определяется
+            // как текущее время минус значение unusedFileLifetimeMs.
+            const thresholdDate = new Date(Date.now() - config.unusedFileLifetimeMs);
+            allFilesQb.andWhere('model."createTime" < :threshold', {threshold: thresholdDate});
         }
 
         return (await allFilesQb.getRawMany())

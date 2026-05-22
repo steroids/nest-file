@@ -6,13 +6,16 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     outputs:
       isPublish: ${{ steps.is-publish.outputs.isPublish }}
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
-          node-version: 18
+          node-version: 24
       - run: yarn
       - run: yarn build
       - id: previous-version
@@ -31,10 +34,10 @@ jobs:
           else
             echo "isPublish=false" >> $GITHUB_OUTPUT
           fi
-      - uses: JS-DevTools/npm-publish@v1
+      - uses: JS-DevTools/npm-publish@v4
+        if: steps.is-publish.outputs.isPublish == 'true'
         with:
           package: ./dist/package.json
-          token: ${{ secrets.NPM_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
           name: dist-package

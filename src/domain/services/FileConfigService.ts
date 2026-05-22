@@ -8,6 +8,10 @@ import FilePreviewEnum from '../enums/FilePreviewEnum';
 import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {IFileModuleConfig} from '../../infrastructure/config';
 
+const DEFAULT_JUST_UPLOADED_TEMP_FILE_LIFETIME_S = 10;
+// 24 часа
+const DEFAULT_JUST_UPLOADED_UNUSED_FILE_LIFETIME_S = 24 * 60 * 60;
+
 const getStoragesConfig = (storagesConfig: IFileModuleConfig['storages'] = {}) => {
     const localStorageConfig = {
         rootPath: process.env.APP_FILE_STORAGE_ROOT_PATH || join(process.cwd(), '../files/uploaded'),
@@ -109,9 +113,6 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
     public deleteLostAndTemporaryFilesByCron: {
         isEnable: boolean,
         cronTimePattern: string,
-        /**
-         * Storage name from FileModule storages config.
-         */
         storageName: string,
     };
 
@@ -120,6 +121,28 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
      * This option is disabled by default.
      */
     public deleteFileFromStorage: boolean;
+
+    /**
+     * Temporary file lifetime, stored in milliseconds.
+     * The value is configured via env in seconds and will be
+     * automatically converted to milliseconds.
+     * Default: 10 seconds.
+     *
+     * Env:
+     *  - JUST_UPLOADED_TEMP_FILE_LIFETIME_S
+     */
+    public justUploadedTempFileLifetimeMs: number;
+
+    /**
+     * Unused file lifetime, stored in milliseconds.
+     * The value is configured via env in seconds and will be
+     * automatically converted to milliseconds.
+     * Default: 86400 seconds (1 day).
+     *
+     * Env:
+     *  - JUST_UPLOADED_UNUSED_FILE_LIFETIME_S
+     */
+    public justUploadedUnusedFileLifetimeMs: number;
 
     constructor(
         private custom: IFileModuleConfig,
@@ -185,5 +208,11 @@ export class FileConfigService implements OnModuleInit, IFileModuleConfig {
         };
 
         this.deleteFileFromStorage = custom.deleteFileFromStorage;
+
+        this.justUploadedTempFileLifetimeMs = custom.justUploadedTempFileLifetimeMs
+          || parseInt(process.env.JUST_UPLOADED_TEMP_FILE_LIFETIME_S || String(DEFAULT_JUST_UPLOADED_TEMP_FILE_LIFETIME_S), 10) * 1000;
+
+        this.justUploadedUnusedFileLifetimeMs = custom.justUploadedUnusedFileLifetimeMs
+          || parseInt(process.env.JUST_UPLOADED_UNUSED_FILE_LIFETIME_S || String(DEFAULT_JUST_UPLOADED_UNUSED_FILE_LIFETIME_S), 10) * 1000;
     }
 }

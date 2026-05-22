@@ -7,11 +7,12 @@ import * as mime from 'mime-types';
 import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
 import {ReadService} from '@steroidsjs/nest/usecases/services/ReadService';
 import SearchQuery from '@steroidsjs/nest/usecases/base/SearchQuery';
-import {Type} from '@nestjs/common';
+import {Inject, Injectable, Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
 import {generateUid} from '@steroidsjs/nest/infrastructure/decorators/typeorm/fields/TypeOrmUidField/TypeOrmUidBehaviour';
+import {EventEmitter2} from '@nestjs/event-emitter';
 import {IFileRepository} from '../interfaces/IFileRepository';
 import {FileModel} from '../models/FileModel';
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
@@ -24,6 +25,7 @@ import {IEventEmitter} from '../interfaces/IEventEmitter';
 import {FileRemovedEventDto} from '../dtos/events/FileRemovedEventDto';
 import {IFileTypeService} from '../interfaces/IFileTypeService';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
+import {FILE_VALIDATORS_TOKEN} from '../constants/FileValidatorsToken';
 import {FileConfigService} from './FileConfigService';
 import {FileImageService} from './FileImageService';
 
@@ -35,14 +37,20 @@ function isFileExpressOrLocalSource(
     return source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto;
 }
 
+@Injectable()
 export class FileService extends ReadService<FileModel> {
     constructor(
+        @Inject(IFileRepository)
         protected readonly repository: IFileRepository,
         protected readonly fileImageService: FileImageService,
         protected readonly fileConfigService: FileConfigService,
+        @Inject(IFileStorageFactory)
         protected readonly fileStorageFactory: IFileStorageFactory,
+        @Inject(EventEmitter2)
         protected readonly eventEmitter: IEventEmitter,
+        @Inject(IFileTypeService)
         protected readonly fileTypeService: IFileTypeService,
+        @Inject(FILE_VALIDATORS_TOKEN)
         public validators: IValidator[],
     ) {
         super();
@@ -110,6 +118,9 @@ export class FileService extends ReadService<FileModel> {
         }
         if (options.title) {
             fileDto.title = options.title;
+        }
+        if (options.userId) {
+            fileDto.userId = options.userId;
         }
 
         // Validate
@@ -181,7 +192,7 @@ export class FileService extends ReadService<FileModel> {
             try {
                 await fs.promises.access(source.path, fs.constants.F_OK);
             } catch (e) {
-                throw new Error('Файл не найден: ' + source.path);
+                throw new Error('File not found: ' + source.path);
             }
 
             if (source instanceof FileExpressSourceDto) {
@@ -313,9 +324,10 @@ export class FileService extends ReadService<FileModel> {
     }
 
     public async getUnusedFilesIds(config: {
-        fileNameLike: string,
-        ignoredTables: string[],
-        isEmpty: boolean,
+        fileNameLike?: string,
+        ignoredTables?: string[],
+        isEmpty?: boolean,
+        unusedFileLifetimeMs?: number,
     }): Promise<number[]> {
         return this.repository.getUnusedFilesIds(config);
     }

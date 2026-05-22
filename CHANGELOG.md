@@ -4,13 +4,40 @@
 
 ### Fixes
 
-[Migration guide](docs/MigrationGuide.md#провайдинг-хранилищ-после-обновления)
+[Migration guide]()
 
 - `IFileStorage.write` больше не принимает в качестве аргумента `fileStorageParams`, вместо этого хранилища сами берут эти настройки
 из `IGetFileStorageParamsUseCase`
 - Добавлен токен `FILE_STORAGES_TOKEN`, по которому провайдится объект с хранилищами и их названиями
 - Хранилища теперь имеют injection scope `TRANSIENT`, что позволяет создать несколько экземпляров одного хранилища с разным конфигом
 - Использование `FileStorageEnum` в качестве типа обновлено на `string`
+
+## [0.6.0](https://github.com/steroids/nest-file/compare/0.5.0...0.6.0) (2026-05-04)
+
+[Migration guide](docs/MigrationGuide.md#060-2026-05-04)
+
+### Features
+
+- Добавлен lifetime для только что загруженных файлов: очистка lost/temporary файлов не удаляет свежие файлы сразу, а команда `unused-files` учитывает минимальный возраст файла перед удалением ([#118](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/118))
+- Добавлены параметры конфигурации `justUploadedTempFileLifetimeMs` и `justUploadedUnusedFileLifetimeMs`, а также env-переменные `JUST_UPLOADED_TEMP_FILE_LIFETIME_S` и `JUST_UPLOADED_UNUSED_FILE_LIFETIME_S`
+
+### Fixes
+
+- Исправлена DI-конфигурация сервисов после удаления deprecated `ModuleHelper.provide`; валидаторы файлов теперь регистрируются через `FILE_VALIDATORS_TOKEN` ([#159](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/159))
+- Исправлена ошибка в запросе `unused-files` для таблиц, которым требуется quoted identifier
+- Сообщение об ошибке отсутствующего локального файла переведено на английский язык ([#209](https://gitlab.kozhindev.com/steroids/steroids-nest/-/issues/209))
+
+### Build
+
+- Публикация npm-пакета переведена на Trusted Publisher
+
+## [0.5.0](https://github.com/steroids/nest-file/compare/0.4.1...0.5.0) (2026-03-25)
+
+[Migration guide](docs/MigrationGuide.md#050-2026-03-25)
+
+### Features
+
+- В FileModel добавлено поле userId. Поле также включено в FileUploadOptions
 
 ## [0.4.1](https://github.com/steroids/nest-file/compare/0.4.0...0.4.1) (2025-12-18)
 

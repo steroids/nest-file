@@ -14,9 +14,11 @@ export class CronJobsRegister implements OnApplicationBootstrap {
     public deleteLostAndTemporaryFilesJobName = 'delete_lost_and_temporary_files_job';
 
     constructor(
-        @Inject(DeleteLostAndTemporaryFilesService) private deleteService: DeleteLostAndTemporaryFilesService,
-        @Inject(FileConfigService) private fileConfigService: FileConfigService,
-        @Optional() @Inject(SchedulerRegistry) private schedulerRegistry: SchedulerRegistry,
+        private deleteService: DeleteLostAndTemporaryFilesService,
+        private fileConfigService: FileConfigService,
+        @Optional()
+        @Inject(SchedulerRegistry)
+        private schedulerRegistry: SchedulerRegistry,
     ) {}
 
     onApplicationBootstrap(): void {

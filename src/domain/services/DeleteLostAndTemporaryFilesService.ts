@@ -1,19 +1,24 @@
 import * as Sentry from '@sentry/node';
-import {Inject, Optional} from '@nestjs/common';
+import {Inject, Injectable, Optional} from '@nestjs/common';
 import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import {
     GetFileModelsPathUsecaseToken,
     IGetFileModelsPathUsecase,
 } from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
+import {FileConfigService} from './FileConfigService';
 
+@Injectable()
 export class DeleteLostAndTemporaryFilesService {
     constructor(
         @Inject(IFileStorageFactory)
         private fileStorageFactory: IFileStorageFactory,
-        @Optional() @Inject(GetFileModelsPathUsecaseToken)
+        protected readonly fileConfigService: FileConfigService,
+        @Optional()
+        @Inject(GetFileModelsPathUsecaseToken)
         private getFileModelsPathUsecase: IGetFileModelsPathUsecase,
-    ) {}
+    ) {
+    }
 
     /**
      * @dev This feature is currently only available for local storage.
@@ -27,9 +32,18 @@ export class DeleteLostAndTemporaryFilesService {
         if (!storage) {
             return;
         }
+        const currentTimeMs = (new Date()).getTime();
         const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
         for (const filePath of lostAndTemporaryFilesPaths) {
-            await storage.deleteFile(filePath);
+            try {
+                const createTimeFileMs = await storage.getFileCreateTimeMs(filePath);
+                const isFileJustCreated = (currentTimeMs - createTimeFileMs) < this.fileConfigService.justUploadedTempFileLifetimeMs;
+                if (!isFileJustCreated) {
+                    await storage.deleteFile(filePath);
+                }
+            } catch (er) {
+                Sentry.captureException(er);
+            }
         }
     }
 

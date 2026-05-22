@@ -7,9 +7,10 @@ export interface IFileRepository extends ICrudRepository<FileModel> {
     getFileWithDocument: (fileName: string) => Promise<FileModel>,
     getFilesPathsByStorageName: (storageName: string) => Promise<string[] | null>,
     getUnusedFilesIds: (config: {
-        fileNameLike: string,
-        ignoredTables: string[],
-        isEmpty: boolean,
+        fileNameLike?: string,
+        ignoredTables?: string[],
+        isEmpty?: boolean,
+        unusedFileLifetimeMs?: number,
     }) => Promise<number[]>,
     getCount: () => Promise<number>,
 }
