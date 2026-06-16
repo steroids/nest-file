@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
 import {Inject, Injectable, Optional} from '@nestjs/common';
-import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
+import {IFileStorage} from '../interfaces/IFileStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 import {
@@ -22,11 +22,10 @@ export class DeleteLostAndTemporaryFilesService {
     }
 
     /**
-     * @dev This feature is currently only available for local storage.
-     * To implement work with s3 you need:
-     * - extend IFileStorage interface with methods of IFileLocalStorage interface
-     * - in MinioS3Storage class implement extended IFileStorage interface
-     * - return in getStorage() method object that implements IFileStorage interface
+     * Removes files that exist in the storage but are not referenced from the database
+     * (lost/orphaned files), except those created recently enough to still be uploading.
+     * Works for both local filesystem and S3 (Minio) storages, as both implement
+     * the `getFilesPaths` / `getFileCreateTimeMs` / `deleteFile` contract of IFileStorage.
      */
     async deleteLostAndTemporaryFiles(storageName: FileStorageEnum): Promise<void> {
         const storage = this.getStorage(storageName);
@@ -59,7 +58,7 @@ export class DeleteLostAndTemporaryFilesService {
             return [];
         }
 
-        const filePathsFromStorage = storage.getFilesPaths();
+        const filePathsFromStorage = await storage.getFilesPaths();
 
         if (!filePathsFromStorage) {
             return [];
@@ -78,9 +77,9 @@ export class DeleteLostAndTemporaryFilesService {
         return lostAndTemporaryFilesPaths;
     }
 
-    private getStorage(storageName: FileStorageEnum): IFileLocalStorage {
+    private getStorage(storageName: FileStorageEnum): IFileStorage {
         try {
-            return this.fileStorageFactory.get(storageName) as IFileLocalStorage;
+            return this.fileStorageFactory.get(storageName) as IFileStorage;
         } catch (error) {
             Sentry.captureException(error);
             return null;
