@@ -13,4 +13,6 @@ export interface IFileStorage {
     ): Promise<FileWriteResult>,
     getUrl(file: IFileReadable): string,
     deleteFile(fileName: string): void | Promise<void>,
+    getFilesPaths(): Promise<string[] | null>,
+    getFileCreateTimeMs(fileName: string): Promise<number>,
 }

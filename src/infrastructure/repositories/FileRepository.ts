@@ -8,6 +8,7 @@ import {FileTable} from '../tables/FileTable';
 import {FileModel} from '../../domain/models/FileModel';
 import {IFileStorageFactory} from '../../domain/interfaces/IFileStorageFactory';
 import FileStorageEnum from '../../domain/enums/FileStorageEnum';
+import {FilePathHelper} from '../../domain/helpers/FilePathHelper';
 
 @Injectable()
 export class FileRepository extends CrudRepository<FileModel> implements IFileRepository {
@@ -50,7 +51,7 @@ export class FileRepository extends CrudRepository<FileModel> implements IFileRe
             ])
             .where({storageName})
             .many();
-        return files.map(file => [file.folder, file.fileName].join('/'));
+        return files.map(file => FilePathHelper.normalizeRelativePath(file.folder, file.fileName));
     }
 
     public async getUnusedFilesIds(config: {

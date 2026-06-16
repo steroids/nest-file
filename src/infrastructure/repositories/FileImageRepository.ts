@@ -7,6 +7,7 @@ import {FileImageModel} from '../../domain/models/FileImageModel';
 import {FileImageTable} from '../tables/FileImageTable';
 import {IFileStorageFactory} from '../../domain/interfaces/IFileStorageFactory';
 import FileStorageEnum from '../../domain/enums/FileStorageEnum';
+import {FilePathHelper} from '../../domain/helpers/FilePathHelper';
 
 @Injectable()
 export class FileImageRepository extends CrudRepository<FileImageModel> implements IFileImageRepository {
@@ -35,6 +36,6 @@ export class FileImageRepository extends CrudRepository<FileImageModel> implemen
             ])
             .where({storageName})
             .many();
-        return files.map(file => [file.folder, file.fileName].join('/'));
+        return files.map(file => FilePathHelper.normalizeRelativePath(file.folder, file.fileName));
     }
 }
