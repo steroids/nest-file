@@ -8,7 +8,7 @@ import {IFileStorage} from '../interfaces/IFileStorage';
 import {FileWriteResult} from '../dtos/FileWriteResult';
 import {IFileReadable} from '../interfaces/IFileReadable';
 import {IFileWritable} from '../interfaces/IFileWritable';
-import {FilePathHelper} from '../helpers/FilePathHelper';
+import {normalizeRelativePath} from '../helpers/FilePathHelper';
 
 export class MinioS3Storage implements IFileStorage {
     public host: string;
@@ -161,7 +161,7 @@ export class MinioS3Storage implements IFileStorage {
 
             for await (const file of filesStream) {
                 if (file?.name && !file.name.endsWith('/')) {
-                    filesPaths.push(FilePathHelper.normalizeRelativePath(file.name));
+                    filesPaths.push(normalizeRelativePath(file.name));
                 }
             }
 
