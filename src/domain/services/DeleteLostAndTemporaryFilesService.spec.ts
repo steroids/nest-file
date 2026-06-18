@@ -2,7 +2,7 @@ import {FileStorageEnum} from '../enums/FileStorageEnum';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import {IFileStorage} from '../interfaces/IFileStorage';
 import {IGetFileModelsPathUsecase} from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
-import {FilePathHelper} from '../helpers/FilePathHelper';
+import {normalizeRelativePath} from '../helpers/FilePathHelper';
 import {DeleteLostAndTemporaryFilesService} from './DeleteLostAndTemporaryFilesService';
 import {FileConfigService} from './FileConfigService';
 
@@ -120,12 +120,12 @@ describe('DeleteLostAndTemporaryFilesService', () => {
         });
 
         it('does not flag files as lost when DB path previously had a leading slash (regression)', async () => {
-            const {storage} = makeStorage([FilePathHelper.normalizeRelativePath('uid.original.jpg')]);
+            const {storage} = makeStorage([normalizeRelativePath('uid.original.jpg')]);
 
             const service = new DeleteLostAndTemporaryFilesService(
                 makeFactory(storage),
                 makeConfig(),
-                makeUsecase([FilePathHelper.normalizeRelativePath('', 'uid.original.jpg')]),
+                makeUsecase([normalizeRelativePath('/uid.original.jpg')]),
             );
             const result = await service.getLostAndTemporaryFilesPaths(FileStorageEnum.LOCAL);
             expect(result).not.toContain('uid.original.jpg');
@@ -133,11 +133,11 @@ describe('DeleteLostAndTemporaryFilesService', () => {
         });
 
         it('matches files located in subfolders regardless of OS separator (regression)', async () => {
-            const {storage} = makeStorage([FilePathHelper.normalizeRelativePath('sub', 'inner.jpg')]);
+            const {storage} = makeStorage([normalizeRelativePath('sub\\inner.jpg')]);
             const service = new DeleteLostAndTemporaryFilesService(
                 makeFactory(storage),
                 makeConfig(),
-                makeUsecase([FilePathHelper.normalizeRelativePath('sub', 'inner.jpg')]),
+                makeUsecase([normalizeRelativePath('sub/inner.jpg')]),
             );
             const result = await service.getLostAndTemporaryFilesPaths(FileStorageEnum.LOCAL);
             expect(result).toEqual([]);

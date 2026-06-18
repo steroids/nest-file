@@ -10,7 +10,7 @@ import {FileWriteResult} from '../dtos/FileWriteResult';
 import {IFileStorage} from '../interfaces/IFileStorage';
 import {IFileReadable} from '../interfaces/IFileReadable';
 import {IFileWritable} from '../interfaces/IFileWritable';
-import {FilePathHelper} from '../helpers/FilePathHelper';
+import {normalizeRelativePath} from '../helpers/FilePathHelper';
 
 const DEFAULT_FILE_ENCODING: BufferEncoding = 'utf8';
 
@@ -96,7 +96,7 @@ export class FileLocalStorage implements IFileStorage {
                         results = results.concat(nestedFiles);
                     }
                 } else {
-                    results.push(FilePathHelper.normalizeRelativePath(fileRelativePath));
+                    results.push(normalizeRelativePath(fileRelativePath));
                 }
             }
 
