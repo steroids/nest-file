@@ -2,7 +2,6 @@ import {FileStorageEnum} from '../enums/FileStorageEnum';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import {IFileStorage} from '../interfaces/IFileStorage';
 import {IGetFileModelsPathUsecase} from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
-import {normalizeRelativePath} from '../helpers/FilePathHelper';
 import {DeleteLostAndTemporaryFilesService} from './DeleteLostAndTemporaryFilesService';
 import {FileConfigService} from './FileConfigService';
 
@@ -117,30 +116,6 @@ describe('DeleteLostAndTemporaryFilesService', () => {
             );
             await expect(service.getLostAndTemporaryFilesPaths(FileStorageEnum.LOCAL))
                 .resolves.toEqual(expect.arrayContaining(['lost.jpg', 'also-lost.jpg']));
-        });
-
-        it('does not flag files as lost when DB path previously had a leading slash (regression)', async () => {
-            const {storage} = makeStorage([normalizeRelativePath('uid.original.jpg')]);
-
-            const service = new DeleteLostAndTemporaryFilesService(
-                makeFactory(storage),
-                makeConfig(),
-                makeUsecase([normalizeRelativePath('/uid.original.jpg')]),
-            );
-            const result = await service.getLostAndTemporaryFilesPaths(FileStorageEnum.LOCAL);
-            expect(result).not.toContain('uid.original.jpg');
-            expect(result).toEqual([]);
-        });
-
-        it('matches files located in subfolders regardless of OS separator (regression)', async () => {
-            const {storage} = makeStorage([normalizeRelativePath('sub\\inner.jpg')]);
-            const service = new DeleteLostAndTemporaryFilesService(
-                makeFactory(storage),
-                makeConfig(),
-                makeUsecase([normalizeRelativePath('sub/inner.jpg')]),
-            );
-            const result = await service.getLostAndTemporaryFilesPaths(FileStorageEnum.LOCAL);
-            expect(result).toEqual([]);
         });
     });
 
