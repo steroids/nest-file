@@ -4,11 +4,10 @@ import * as Minio from 'minio';
 import * as Sentry from '@sentry/node';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import {normalizeBoolean} from '@steroidsjs/nest/infrastructure/decorators/fields/BooleanField';
-import {IFileStorage} from '../interfaces/IFileStorage';
+import {CANONICAL_PATH_SEPARATOR, IFileStorage} from '../interfaces/IFileStorage';
 import {FileWriteResult} from '../dtos/FileWriteResult';
 import {IFileReadable} from '../interfaces/IFileReadable';
 import {IFileWritable} from '../interfaces/IFileWritable';
-import {normalizeRelativePath} from '../helpers/FilePathHelper';
 
 export class MinioS3Storage implements IFileStorage {
     public host: string;
@@ -153,6 +152,16 @@ export class MinioS3Storage implements IFileStorage {
         return this._client;
     }
 
+    /**
+     * Converts a raw path (as returned by the storage driver) into the
+     * canonical form used by this module: CANONICAL_PATH_SEPARATOR only.
+     */
+    protected toCanonicalPath(rawPath: string) {
+        return rawPath
+            .replace(/\\/g, CANONICAL_PATH_SEPARATOR)
+            .replace(/^\/+/, '');
+    }
+
     async getFilesPaths(relativePath = ''): Promise<string[] | null> {
         try {
             const client = this.getClient();
@@ -161,7 +170,7 @@ export class MinioS3Storage implements IFileStorage {
 
             for await (const file of filesStream) {
                 if (file?.name && !file.name.endsWith('/')) {
-                    filesPaths.push(normalizeRelativePath(file.name));
+                    filesPaths.push(this.toCanonicalPath(file.name));
                 }
             }
 
