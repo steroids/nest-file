@@ -7,6 +7,7 @@ import {FileImageModel} from '../../domain/models/FileImageModel';
 import {FileImageTable} from '../tables/FileImageTable';
 import {IFileStorageFactory} from '../../domain/interfaces/IFileStorageFactory';
 import FileStorageEnum from '../../domain/enums/FileStorageEnum';
+import {CANONICAL_PATH_SEPARATOR} from '../../domain/interfaces/IFileStorage';
 
 @Injectable()
 export class FileImageRepository extends CrudRepository<FileImageModel> implements IFileImageRepository {
@@ -37,6 +38,6 @@ export class FileImageRepository extends CrudRepository<FileImageModel> implemen
             .many();
         return files.map(file => [file.folder, file.fileName]
             .filter(Boolean)
-            .join('/'));
+            .join(CANONICAL_PATH_SEPARATOR));
     }
 }
