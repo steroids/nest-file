@@ -1,5 +1,15 @@
 # Steroids Nest File
 
+## Unreleased
+
+[Migration guide](docs/MigrationGuide.md#unreleased)
+
+### Breaking Changes
+
+- Форки `@steroidsjs/typeorm` и `@steroidsjs/nest-typeorm` заменены на оригинальные пакеты `typeorm` и `@nestjs/typeorm`
+- Зависимости NestJS и Steroids обновлены до версий, совместимых с `@steroidsjs/nest@5.0.0-beta.1`
+- Минимальная поддерживаемая версия Node.js повышена до 22, `@types/node` обновлен до `^22.13.17`
+
 ## [0.6.0](https://github.com/steroids/nest-file/compare/0.5.0...0.6.0) (2026-05-04)
 
 [Migration guide](docs/MigrationGuide.md#060-2026-05-04)

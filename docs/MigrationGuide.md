@@ -1,5 +1,54 @@
 # Steroids Nest File Migration Guide
 
+## Unreleased
+
+### Переход на оригинальные пакеты TypeORM
+
+Форки `@steroidsjs/typeorm` и `@steroidsjs/nest-typeorm` больше не используются.
+Удалите их из зависимостей приложения и подключите оригинальные пакеты:
+
+```json
+{
+  "dependencies": {
+    "@nestjs/typeorm": "^11.0.3",
+    "typeorm": "^1.1.0"
+  }
+}
+```
+
+Замените импорты:
+
+```ts
+// До
+import {InjectRepository} from '@steroidsjs/nest-typeorm';
+import {Index, Repository} from '@steroidsjs/typeorm';
+
+// После
+import {InjectRepository} from '@nestjs/typeorm';
+import {Index, Repository} from 'typeorm';
+```
+
+### Обновление NestJS и Steroids
+
+Зависимости приведены к версиям, совместимым с `@steroidsjs/nest@5.0.0-beta.1`.
+В приложении необходимо использовать как минимум следующие версии:
+
+```json
+{
+  "dependencies": {
+    "@nestjs/common": "^10.4.19",
+    "@nestjs/event-emitter": "^3.0.1",
+    "@nestjs/platform-express": "^10.4.19",
+    "@nestjs/typeorm": "^11.0.3",
+    "@steroidsjs/nest": "^5.0.0-beta.1",
+    "@steroidsjs/nest-modules": "^0.1.6",
+    "typeorm": "^1.1.0"
+  }
+}
+```
+
+Если проект напрямую использует `@nestjs/schematics` или `@nestjs/testing`, обновите их до `^10.2.3` и `^10.4.19` соответственно.
+
 ## [0.6.0](../CHANGELOG.md#060-2026-05-04) (2026-05-04)
 
 ### Lifetime для только что загруженных файлов
