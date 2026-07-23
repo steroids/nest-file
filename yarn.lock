@@ -502,10 +502,10 @@
   resolved "https://registry.yarnpkg.com/@steroidsjs/nest-modules/-/nest-modules-0.1.7.tgz#ab6dfd667463c19df553b15d91edce71f7d70a62"
   integrity sha512-fAA3n6uFXTkqzSOtOTdDuFxQO9rr1/YJgIOf8zL+00DRVOeYPMobWBIlFB0yiiEPow94XETP+7tvWvZK1F/bsQ==
 
-"@steroidsjs/nest@^5.0.0-beta.1":
-  version "5.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@steroidsjs/nest/-/nest-5.0.0-beta.1.tgz#2c692a009afeb67e2074cb0bb4cc9baa4c93962d"
-  integrity sha512-R+o8aAFfFt6jU0Xyo+1pAQ8vlWHaYZiUdWVpeh0OMlyqehBvXoi7HTWityk3xwgePefZXAYv4UopkCGQVn/p8Q==
+"@steroidsjs/nest@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@steroidsjs/nest/-/nest-5.0.0.tgz#aa6696ad6f2620ba3f90f6ab3e8d7d01a38be0b6"
+  integrity sha512-cKao7U8jeS+gSC1fH97P7Al4z/fWmaKZBNdoj2OsSY0se2A+ZteE/Dz7qGve9/5y2uDb2dbqAm3E/aFt/6R0OQ==
   dependencies:
     "@dbml/core" "^2.4.4"
     "@sentry/nestjs" "^10.38.0"

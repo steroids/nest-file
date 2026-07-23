@@ -1,6 +1,6 @@
 # Steroids Nest File Migration Guide
 
-## Unreleased
+## [0.7.0](../CHANGELOG.md#070-2026-07-23) (2026-07-23)
 
 ### Переход на оригинальные пакеты TypeORM
 

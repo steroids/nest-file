@@ -1,8 +1,8 @@
 # Steroids Nest File
 
-## Unreleased
+## [0.7.0](https://github.com/steroids/nest-file/compare/0.6.0...0.7.0) (2026-07-23)
 
-[Migration guide](docs/MigrationGuide.md#unreleased)
+[Migration guide](docs/MigrationGuide.md#070-2026-07-23)
 
 ### Breaking Changes
 
