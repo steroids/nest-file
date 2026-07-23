@@ -1,5 +1,5 @@
-import {InjectRepository} from '@steroidsjs/nest-typeorm';
-import {Repository} from '@steroidsjs/typeorm';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
 import {Inject, Injectable} from '@nestjs/common';
 import {CrudRepository} from '@steroidsjs/nest/infrastructure/repositories/CrudRepository';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
