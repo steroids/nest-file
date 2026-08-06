@@ -1,5 +1,25 @@
 # Steroids Nest File
 
+## [Unreleased]
+
+[Migration guide](docs/MigrationGuide.md#unreleased)
+
+### Changes
+
+- Добавлена одновременная поддержка NestJS 10 и NestJS 11 в `peerDependencies` для `@nestjs/common`, `@nestjs/core` и `@nestjs/platform-express`.
+- Диапазон поддерживаемых версий `@nestjs/schedule` расширен до major-версий 4–6, а `@nestjs/swagger` — до согласованных с NestJS 10 и NestJS 11 версий 8 и 11.
+- Среда разработки обновлена до NestJS 11, Schedule 6, типов Express 5 и типов Multer 2.
+- Multer обновлён до версии 2, Cron — до версии 4.
+- Импорты `Request` и `OnApplicationBootstrap`, используемые только как типы, переведены на type-only imports.
+
+### Fixes
+
+- Исправлен двойной вызов callback в `FileUploadInterceptor` при загрузке файла с недопустимым MIME-типом.
+
+### Removed
+
+- Удалена прямая зависимость от Express 4. Версия Express теперь определяется установленным `@nestjs/platform-express`: Express 4 для NestJS 10 и Express 5 для NestJS 11.
+
 ## [0.7.0](https://github.com/steroids/nest-file/compare/0.6.0...0.7.0) (2026-07-23)
 
 [Migration guide](docs/MigrationGuide.md#070-2026-07-23)
