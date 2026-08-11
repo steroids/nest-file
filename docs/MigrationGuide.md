@@ -1,5 +1,75 @@
 # Steroids Nest File Migration Guide
 
+## [Unreleased](../CHANGELOG.md#unreleased)
+
+### Поддержка NestJS 11
+
+Новый релиз `@steroidsjs/nest-file` будет одновременно поддерживать NestJS 10 и NestJS 11.
+Обновление пакета не требует обязательного перехода на NestJS 11: приложение может остаться на NestJS 10, используя согласованные с ним версии интеграционных пакетов.
+
+Для перехода приложения на NestJS 11 обновите NestJS-зависимости согласованно:
+
+```json
+{
+  "dependencies": {
+    "@nestjs/common": "^11.1.28",
+    "@nestjs/core": "^11.1.28",
+    "@nestjs/event-emitter": "^3.0.1",
+    "@nestjs/platform-express": "^11.1.28",
+    "@nestjs/schedule": "^6.0.1",
+    "@nestjs/swagger": "^11.4.6",
+    "@nestjs/typeorm": "^11.0.3"
+  }
+}
+```
+
+Перед обновлением также необходимо:
+
+1. Обновить `@steroidsjs/nest` до версии с поддержкой NestJS 11.
+2. Проверить `peerDependencies` остальных NestJS- и `@steroidsjs/*`-пакетов приложения.
+3. Не смешивать разные major-версии `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express` и `@nestjs/testing`.
+4. Для NestJS 11 использовать Swagger 11 и Schedule 5 или 6. Schedule 4 поддерживает только NestJS 10.
+
+Для приложения на NestJS 10 остаются совместимыми `@nestjs/platform-express` 10, Swagger 8 и Schedule 4–6.
+
+Минимальная версия Node.js для `@steroidsjs/nest-file` остаётся равна 22.
+
+### Переход на Express 5 и Multer 2
+
+`@nestjs/platform-express` использует Express 4 в NestJS 10 и Express 5 в NestJS 11.
+`@steroidsjs/nest-file` больше не устанавливает и не требует собственную версию Express, поэтому HTTP-платформа приложения определяет единственную используемую major-версию Express.
+
+Если приложение добавляло `express` только для совместимости с `@steroidsjs/nest-file`, прямую зависимость можно удалить. Если приложение напрямую использует runtime API Express, при переходе на NestJS 11 обновите его собственную зависимость до Express 5 и проверьте маршруты и middleware paths на соответствие новому синтаксису.
+
+Multer внутри `@steroidsjs/nest-file` обновлён до версии 2. Используемые пакетом `diskStorage`, `single`, `limits` и `fileFilter` сохранили прежние контракты, поэтому менять конфигурацию `FileUploadInterceptor` в приложении не требуется.
+
+Если приложение напрямую использует типы Express или Multer, обновите их:
+
+```json
+{
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.2.0"
+  }
+}
+```
+
+Для type-only использования импортируйте Express-типы следующим образом:
+
+```ts
+import type {Request, Response} from 'express';
+```
+
+### Обновление Schedule и Cron
+
+Поддерживаемый диапазон `@nestjs/schedule` расширен до major-версий 4–6, а внутренняя зависимость `cron` обновлена до версии 4.
+Публичная конфигурация `CronJobsRegister` не изменилась. Если приложение создаёт собственные экземпляры `CronJob`, при обновлении его прямой зависимости `cron` необходимо отдельно проверить их параметры по migration guide пакета Cron.
+
+### Проверка MIME-типа загружаемого файла
+
+Исправлен двойной вызов callback в `FileUploadInterceptor` при отклонении файла с недопустимым MIME-типом.
+Теперь такой файл однократно отклоняется с `UnsupportedMediaTypeException`; публичная конфигурация `mimeTypes` не изменилась.
+
 ## [0.7.0](../CHANGELOG.md#070-2026-07-23) (2026-07-23)
 
 ### Переход на оригинальные пакеты TypeORM

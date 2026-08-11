@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import {Observable, switchMap} from 'rxjs';
 import * as multer from 'multer';
-import {Request} from 'express';
+import type {Request} from 'express';
 import {IFileTypeService} from '../../domain/interfaces/IFileTypeService';
 import {FILE_UPLOAD_FIELD_NAME_METADATA_KEY} from '../decorators/FileUploadFieldName';
 
@@ -49,11 +49,11 @@ export class FileUploadInterceptor implements NestInterceptor {
             limits: {fileSize: config.maxSizeMb * 1024 * 1024},
             fileFilter: (req, file, callback: multer.FileFilterCallback) => {
                 if (config.mimeTypes?.length && !config.mimeTypes.includes(file.mimetype)) {
-                    callback(new UnsupportedMediaTypeException(
+                    return callback(new UnsupportedMediaTypeException(
                         `Недопустимый тип файла: ${file.mimetype}. Допустимы форматы ${config.mimeTypes.join(', ')}`,
                     ));
                 }
-                callback(null, true);
+                return callback(null, true);
             },
         }).single(fileFieldName);
 
