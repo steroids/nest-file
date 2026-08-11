@@ -1,6 +1,6 @@
 {
   "name": "@steroidsjs/nest-file",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Steroids Nest File Module",
   "author": "",
   "license": "MIT",
@@ -39,6 +39,7 @@
   "devDependencies": {
     "@nestjs/common": "^11.1.28",
     "@nestjs/core": "^11.1.28",
+    "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/platform-express": "^11.1.28",
     "@nestjs/schedule": "^6.0.1",
     "@nestjs/schematics": "^11.0.0",
@@ -67,5 +68,9 @@
     "tsconfig-paths": "^4.1.2",
     "typeorm": "^1.1.0",
     "typescript": "^4.9.4"
+  },
+  "resolutions": {
+    "@types/express": "5.0.6",
+    "@types/express-serve-static-core": "5.1.3"
   }
 }
