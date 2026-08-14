@@ -1,8 +1,9 @@
-import {BooleanField, IntegerField, StringField} from '@steroidsjs/nest/infrastructure/decorators/fields';
+import {BooleanField, IntegerField, JSONBField, StringField} from '@steroidsjs/nest/infrastructure/decorators/fields';
+import FileStorageEnum from '../enums/FileStorageEnum';
+import {IFilePreviewOptions} from '../interfaces/IFilePreviewOptions';
 import {FileExpressSourceDto} from './sources/FileExpressSourceDto';
 import {FileLocalSourceDto} from './sources/FileLocalSourceDto';
 import {FileStreamSourceDto} from './sources/FileStreamSourceDto';
-import FileStorageEnum from '../enums/FileStorageEnum';
 
 export class FileUploadOptions {
     @StringField({
@@ -65,4 +66,10 @@ export class FileUploadOptions {
         nullable: true,
     })
     userId?: number;
+
+    @JSONBField({
+        label: 'Preview options map',
+        nullable: true,
+    })
+    previews?: Record<string, IFilePreviewOptions>;
 }

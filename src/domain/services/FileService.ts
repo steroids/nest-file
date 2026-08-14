@@ -73,8 +73,10 @@ export class FileService extends ReadService<FileModel> {
         rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
         schemaClass: T = null,
     ): Promise<T | FileModel> {
-        const fileModel = await this.uploadFileInternal(rawOptions);
-        await this.createPreviewsOnImage(fileModel, this.fileConfigService.previews);
+        const options = this.normalizeUploadOptions(rawOptions);
+        const fileModel = await this.uploadFileInternal(options);
+        const previewOptionsMap = await this.getPreviewOptionsMap(fileModel.fileType, options.previews);
+        await this.createPreviewsOnImage(fileModel, previewOptionsMap);
         // @ts-ignore
         return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
     }
@@ -84,25 +86,16 @@ export class FileService extends ReadService<FileModel> {
         customPreviews: Record<string, IFilePreviewOptions> = null,
         schemaClass: T = null,
     ): Promise<T | FileModel> {
-        const fileModel = await this.uploadFileInternal(rawOptions);
-        await this.createPreviewsOnImage(fileModel, customPreviews || this.fileConfigService.previews);
+        const options = this.normalizeUploadOptions(rawOptions);
+        const fileModel = await this.uploadFileInternal(options);
+        const overridePreviewOptionsMap = customPreviews || options.previews || null;
+        const previewOptionsMap = await this.getPreviewOptionsMap(fileModel.fileType, overridePreviewOptionsMap);
+        await this.createPreviewsOnImage(fileModel, previewOptionsMap);
         // @ts-ignore
         return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
     }
 
-    protected async uploadFileInternal(
-        rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
-    ): Promise<FileModel> {
-        // Resolve options
-        if (typeof rawOptions === 'string') {
-            rawOptions = FileLocalSourceDto.createFromPath(rawOptions);
-        }
-
-        const options: FileUploadOptions = rawOptions instanceof FileExpressSourceDto
-        || rawOptions instanceof FileLocalSourceDto || rawOptions instanceof FileStreamSourceDto
-            ? DataMapper.create(FileUploadOptions, {source: rawOptions})
-            : rawOptions as FileUploadOptions;
-
+    protected async uploadFileInternal(options: FileUploadOptions): Promise<FileModel> {
         // If "fileType" filed is specified, the options associated with it are applied
         if (options.fileType) {
             const fileTypeOptions = await this.fileTypeService.getFileUploadOptionsByType(options.fileType);
@@ -189,6 +182,43 @@ export class FileService extends ReadService<FileModel> {
                 }
             }
         }
+    }
+
+    protected async getPreviewOptionsMap(
+        fileType: string = null,
+        customPreviewOptionsMap: Record<string, IFilePreviewOptions> = null,
+    ): Promise<Record<string, IFilePreviewOptions>> {
+        if (customPreviewOptionsMap) {
+            return customPreviewOptionsMap;
+        }
+
+        if (fileType) {
+            const fileTypeOptions = await this.fileTypeService.getFileUploadOptionsByType(fileType);
+
+            if (fileTypeOptions?.previews) {
+                return fileTypeOptions.previews;
+            }
+        }
+
+        return this.fileConfigService.previews;
+    }
+
+    protected normalizeUploadOptions(
+        rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
+    ): FileUploadOptions {
+        if (typeof rawOptions === 'string') {
+            rawOptions = FileLocalSourceDto.createFromPath(rawOptions);
+        }
+
+        if (
+            rawOptions instanceof FileExpressSourceDto
+            || rawOptions instanceof FileLocalSourceDto
+            || rawOptions instanceof FileStreamSourceDto
+        ) {
+            return DataMapper.create(FileUploadOptions, {source: rawOptions});
+        }
+
+        return rawOptions as FileUploadOptions;
     }
 
     /**
