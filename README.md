@@ -19,7 +19,7 @@ import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper
     ...coreModule,
     tables: [
         ...coreModule.tables,
-        ...ModuleHelper.importDir(__dirname + '/tables'),
+        ...nestFileTables,
     ],
     module: (config: IFileModuleConfig) => {
         const module = coreModule.module(config);
