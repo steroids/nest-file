@@ -1,5 +1,30 @@
 # Steroids Nest File
 
+## [0.9.0](https://github.com/steroids/nest-file/compare/0.8.0...0.9.0) (2026-08-14)
+
+[Migration guide](docs/MigrationGuide.md#090-2026-08-14)
+
+### Breaking Changes
+
+- `FileUploadInterceptor` переименован в `TemporaryFileUploadInterceptor`. Новый интерцептор удаляет созданный Multer временный файл после завершения обработки запроса, если `saveTemporaryFileAfterUpload` выключен. При программной загрузке через `FileService` локальный исходный файл больше не удаляется автоматически. ([#30](https://github.com/steroids/nest-file/pull/30))
+- Удалён отдельный интерфейс `IFileLocalStorage`: методы `getFilesPaths()` и `getFileCreateTimeMs()` перенесены в общий `IFileStorage`, а `getFilesPaths()` теперь асинхронный. Кастомные хранилища должны реализовать обновлённый контракт. ([#33](https://github.com/steroids/nest-file/pull/33))
+- В `peerDependencies` добавлен `@sentry/nestjs` версии `^10`, используемый для логирования ошибок при удалении временных файлов. ([#30](https://github.com/steroids/nest-file/pull/30))
+
+### Features
+
+- В `FileUploadOptions` добавлена карта `previews`, позволяющая задавать параметры превью для конкретной загрузки или возвращать их из `FileTypeService` для конкретного `fileType`. ([#32](https://github.com/steroids/nest-file/pull/32))
+- Создание превью вынесено в `ICreateImagePreviewUseCase`; добавлены резолвер генераторов и отдельные генераторы для SVG и остальных поддерживаемых Sharp изображений. ([#32](https://github.com/steroids/nest-file/pull/32))
+- Очистка lost/temporary файлов теперь поддерживает Minio S3: хранилище умеет получать список объектов и время их создания. ([#33](https://github.com/steroids/nest-file/pull/33))
+
+### Fixes
+
+- Пути файлов из БД, локального хранилища и S3 приведены к единому относительному формату: разделитель `/`, без ведущего слеша и без пустого сегмента папки. Это исправляет сопоставление файлов при очистке, в том числе для файлов в корне хранилища и при запуске на разных ОС. ([#33](https://github.com/steroids/nest-file/pull/33))
+- В инструкции по подключению модуля использование удалённого `ModuleHelper.importDir` заменено явным списком таблиц. ([#36](https://github.com/steroids/nest-file/pull/36))
+
+### Tests
+
+- Добавлена Jest-конфигурация и тесты очистки lost/temporary файлов, нормализации локальных путей и получения путей из Minio S3. ([#33](https://github.com/steroids/nest-file/pull/33))
+
 ## [0.8.0](https://github.com/steroids/nest-file/compare/0.7.0...0.8.0) (2026-08-11)
 
 [Migration guide](docs/MigrationGuide.md#080-2026-08-11)

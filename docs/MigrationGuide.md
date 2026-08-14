@@ -1,5 +1,118 @@
 # Steroids Nest File Migration Guide
 
+## [0.9.0](../CHANGELOG.md#090-2026-08-14) (2026-08-14)
+
+### Переименование интерцептора загрузки
+
+`FileUploadInterceptor` переименован в `TemporaryFileUploadInterceptor`. Если интерцептор импортируется в приложении напрямую, замените импорт и класс в `@UseInterceptors`:
+
+```ts
+// До
+import {FileUploadInterceptor} from '@steroidsjs/nest-file/infrastructure/interceptors/FileUploadInterceptor';
+
+@UseInterceptors(FileUploadInterceptor)
+```
+
+```ts
+// После
+import {TemporaryFileUploadInterceptor} from '@steroidsjs/nest-file/infrastructure/interceptors/TemporaryFileUploadInterceptor';
+
+@UseInterceptors(TemporaryFileUploadInterceptor)
+```
+
+Deprecated-декоратор `@FileUpload()` продолжает работать, но для нового кода следует использовать `TemporaryFileUploadInterceptor`.
+
+### Удаление временных файлов
+
+При `saveTemporaryFileAfterUpload: false` удаление созданного Multer временного файла теперь выполняет `TemporaryFileUploadInterceptor` после завершения обработчика запроса, в том числе если обработчик завершился ошибкой. Ошибки удаления отправляются в Sentry.
+
+Установите совместимую peer-зависимость, если её ещё нет в приложении:
+
+```json
+{
+  "dependencies": {
+    "@sentry/nestjs": "^10"
+  }
+}
+```
+
+`FileService.upload()` и `FileService.uploadImage()` больше не удаляют переданный `FileLocalSourceDto` или локальный путь автоматически. Если приложение программно загружает локальный файл и рассчитывало на прежнее удаление исходника, удалите его самостоятельно после завершения загрузки.
+
+### Обновление кастомных хранилищ
+
+Интерфейс `IFileLocalStorage` удалён. Методы перечисления файлов и получения времени создания теперь входят в общий контракт `IFileStorage`, чтобы очистка lost/temporary файлов могла работать не только с локальным диском, но и с S3.
+
+Если в приложении есть собственное хранилище, замените `IFileLocalStorage` на `IFileStorage` и реализуйте новые методы:
+
+```ts
+import {IFileStorage} from '@steroidsjs/nest-file/domain/interfaces/IFileStorage';
+
+export class CustomFileStorage implements IFileStorage {
+    // Остальные методы IFileStorage опущены.
+
+    async getFilesPaths(): Promise<string[] | null> {
+        // Верните относительные пути с разделителем `/` и без ведущего слеша.
+        return ['folder/file.jpg'];
+    }
+
+    async getFileCreateTimeMs(fileName: string): Promise<number> {
+        // Верните время создания или последнего изменения в миллисекундах.
+        return Date.now();
+    }
+}
+```
+
+Код, который напрямую вызывает `FileLocalStorage.getFilesPaths()`, также необходимо сделать асинхронным:
+
+```ts
+const paths = await fileLocalStorage.getFilesPaths();
+```
+
+### Явное подключение таблиц
+
+Если модуль приложения всё ещё собирает свои таблицы через удалённый `ModuleHelper.importDir`, замените динамический импорт явным списком:
+
+```ts
+// До
+import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper';
+
+tables: [
+    ...coreModule.tables,
+    ...ModuleHelper.importDir(__dirname + '/tables'),
+],
+```
+
+```ts
+// После
+import nestFileTables from './tables';
+
+tables: [
+    ...coreModule.tables,
+    ...nestFileTables,
+],
+```
+
+Если у приложения нет собственных таблиц для файлового модуля, достаточно оставить `coreModule.tables`.
+
+### Настройка превью по fileType
+
+Обязательных действий не требуется. При необходимости кастомный `FileTypeService` теперь может вернуть карту `previews` вместе с остальными параметрами загрузки:
+
+```ts
+return DataMapper.create(FileUploadOptions, {
+    folder: 'images',
+    previews: {
+        thumbnail: {
+            enable: true,
+            width: 320,
+            height: 240,
+        },
+    },
+});
+```
+
+Ту же карту можно передать непосредственно в `FileUploadOptions.previews` для отдельной загрузки. Если она не задана, продолжает использоваться глобальная конфигурация `previews`.
+
 ## [0.8.0](../CHANGELOG.md#080-2026-08-11) (2026-08-11)
 
 ### Поддержка NestJS 11
