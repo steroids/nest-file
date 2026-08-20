@@ -120,13 +120,16 @@ export class MinioS3Storage implements IFileStorage {
 
     public getUrl(file: IFileReadable): string {
         const urlString = [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
-        const url = new URL(urlString);
 
-        if (this.responseCacheControl) {
-            url.searchParams.set('response-cache-control', this.responseCacheControl);
+        if (!this.responseCacheControl) {
+            return urlString;
         }
 
-        return url.toString();
+        const searchParam = new URLSearchParams({
+            'response-cache-control': this.responseCacheControl,
+        }).toString();
+
+        return `${urlString}${urlString.includes('?') ? '&' : '?'}${searchParam}`;
     }
 
     protected makeMainBucket(): Promise<void> {
