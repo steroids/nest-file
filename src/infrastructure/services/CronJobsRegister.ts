@@ -1,7 +1,7 @@
 import {Inject, Injectable, Optional} from '@nestjs/common';
 import {SchedulerRegistry} from '@nestjs/schedule';
 import {CronJob} from 'cron';
-import {OnApplicationBootstrap} from '@nestjs/common/interfaces/hooks/on-application-bootstrap.interface';
+import type {OnApplicationBootstrap} from '@nestjs/common/interfaces/hooks/on-application-bootstrap.interface';
 import {FileConfigService} from '../../domain/services/FileConfigService';
 import {DeleteLostAndTemporaryFilesService} from '../../domain/services/DeleteLostAndTemporaryFilesService';
 
@@ -14,9 +14,11 @@ export class CronJobsRegister implements OnApplicationBootstrap {
     public deleteLostAndTemporaryFilesJobName = 'delete_lost_and_temporary_files_job';
 
     constructor(
-        @Inject(DeleteLostAndTemporaryFilesService) private deleteService: DeleteLostAndTemporaryFilesService,
-        @Inject(FileConfigService) private fileConfigService: FileConfigService,
-        @Optional() @Inject(SchedulerRegistry) private schedulerRegistry: SchedulerRegistry,
+        private deleteService: DeleteLostAndTemporaryFilesService,
+        private fileConfigService: FileConfigService,
+        @Optional()
+        @Inject(SchedulerRegistry)
+        private schedulerRegistry: SchedulerRegistry,
     ) {}
 
     onApplicationBootstrap(): void {

@@ -84,4 +84,10 @@ export class FileModel {
         relationClass: () => FileImageModel,
     })
     images: FileImageModel[];
+
+    @IntegerField({
+        label: 'ID пользователя',
+        nullable: true,
+    })
+    userId: number;
 }

@@ -1,17 +1,19 @@
 import {Readable} from 'stream';
 import {join} from 'path';
 import * as fs from 'fs';
+import {existsSync, Stats} from 'fs';
+import {stat} from 'fs/promises';
 import * as md5File from 'md5-file';
 import {DataMapper} from '@steroidsjs/nest/usecases/helpers/DataMapper';
 import * as Sentry from '@sentry/node';
 import {FileWriteResult} from '../dtos/FileWriteResult';
-import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
+import {CANONICAL_PATH_SEPARATOR, IFileStorage} from '../interfaces/IFileStorage';
 import {IFileReadable} from '../interfaces/IFileReadable';
 import {IFileWritable} from '../interfaces/IFileWritable';
 
 const DEFAULT_FILE_ENCODING: BufferEncoding = 'utf8';
 
-export class FileLocalStorage implements IFileLocalStorage {
+export class FileLocalStorage implements IFileStorage {
     /**
      * Absolute path to root user files dir
      */
@@ -66,23 +68,46 @@ export class FileLocalStorage implements IFileLocalStorage {
         return [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
     }
 
-    getFilesPaths(relativePath = ''): string[] | null {
+    public async getFileCreateTimeMs(fileName: string) {
+        const filePath = join(this.rootPath, fileName);
+        if (!existsSync(filePath)) {
+            throw new Error(`File ${fileName} not exist`);
+        }
+        const stats: Stats = await stat(filePath);
+        return (stats.birthtime || stats.mtime).getTime();
+    }
+
+    /**
+     * Converts a raw path (as returned by the storage driver) into the
+     * canonical form used by this module: CANONICAL_PATH_SEPARATOR only.
+     */
+    protected toCanonicalPath(rawPath: string) {
+        return rawPath
+            .replace(/\\/g, CANONICAL_PATH_SEPARATOR)
+            .replace(/^\/+/, '');
+    }
+
+    async getFilesPaths(relativePath = ''): Promise<string[] | null> {
         try {
             const folderPath = join(this.rootPath, relativePath);
             const files = fs.readdirSync(folderPath);
-            let results = [];
+            let results: string[] = [];
 
-            files.forEach(file => {
+            for (const file of files) {
                 const filePath = join(folderPath, file);
                 const fileRelativePath = join(relativePath, file);
-                const stat = fs.statSync(filePath);
+                const statFile = fs.statSync(filePath);
 
-                if (stat.isDirectory()) {
-                    results = results.concat(this.getFilesPaths(fileRelativePath));
+                if (statFile.isDirectory()) {
+                    const nestedFiles = await this.getFilesPaths(fileRelativePath);
+
+                    if (nestedFiles) {
+                        results = results.concat(nestedFiles);
+                    }
                 } else {
-                    results.push(fileRelativePath);
+                    results.push(this.toCanonicalPath(fileRelativePath));
                 }
-            });
+            }
 
             return results;
         } catch (error) {

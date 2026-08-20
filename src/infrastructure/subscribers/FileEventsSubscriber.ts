@@ -1,4 +1,4 @@
-import {Inject, Injectable} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {OnEvent} from '@nestjs/event-emitter';
 import {FileRemovedEventDto} from '../../domain/dtos/events/FileRemovedEventDto';
 import {FileRemovedEventHandleUseCase} from '../../usecases/fileRemovedEventHandleUseCase/FileRemovedEventHandleUseCase';
@@ -6,7 +6,6 @@ import {FileRemovedEventHandleUseCase} from '../../usecases/fileRemovedEventHand
 @Injectable()
 export class FileEventsSubscriber {
     constructor(
-        @Inject(FileRemovedEventHandleUseCase)
         private readonly fileRemovedEventHandleUseCase: FileRemovedEventHandleUseCase,
     ) {}
 

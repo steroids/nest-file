@@ -1,13 +1,10 @@
-import {ModuleHelper} from '@steroidsjs/nest/infrastructure/helpers/ModuleHelper';
 import {IFileService} from '@steroidsjs/nest-modules/file/services/IFileService';
-import {EventEmitter2} from '@nestjs/event-emitter';
+import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
 import {IFileRepository} from '../domain/interfaces/IFileRepository';
 import {IFileImageRepository} from '../domain/interfaces/IFileImageRepository';
 import {FileService} from '../domain/services/FileService';
 import {FileImageService} from '../domain/services/FileImageService';
 import {FileConfigService} from '../domain/services/FileConfigService';
-import {FileMaxSizeValidator} from '../domain/validators/FileMaxSizeValidator';
-import {FileMimeTypesValidator} from '../domain/validators/FileMimeTypesValidator';
 import {FileStorageFactory} from '../domain/services/FileStorageFactory';
 import {FileLocalStorage} from '../domain/storages/FileLocalStorage';
 import {MinioS3Storage} from '../domain/storages/MinioS3Storage';
@@ -17,12 +14,21 @@ import {FileRemovedEventHandleUseCase} from '../usecases/fileRemovedEventHandleU
 import {IFileTypeService} from '../domain/interfaces/IFileTypeService';
 import {FileTypeService} from '../domain/services/FileTypeService';
 import {IFileStorageFactory} from '../domain/interfaces/IFileStorageFactory';
+import {fileValidators} from '../domain/validators';
+import {FILE_VALIDATORS_TOKEN} from '../domain/constants/FileValidatorsToken';
+import {ICreateImagePreviewUseCase} from '../domain/interfaces/ICreateImagePreviewUseCase';
+import {CreateImagePreviewUsecase} from '../usecases/createImagePreview/CreateImagePreviewUsecase';
+import {IImagePreviewGeneratorResolver} from '../domain/interfaces/IImagePreviewGeneratorResolver';
+import {IImagePreviewGenerator, IImagePreviewGeneratorsToken} from '../domain/interfaces/IImagePreviewGenerator';
 import {FileEventsSubscriber} from './subscribers/FileEventsSubscriber';
 import {CronJobsRegister} from './services/CronJobsRegister';
 import {IFileModuleConfig} from './config';
 import {FileImageRepository} from './repositories/FileImageRepository';
 import {FileRepository} from './repositories/FileRepository';
 import {ClearUnusedFilesCommand} from './commands/ClearUnusedFilesCommand';
+import {ImagePreviewGeneratorResolver} from './services/ImagePreviewGeneratorResolver';
+import {SharpImagePreviewGenerator} from './adapters/previewGenerators/SharpImagePreviewGenerator';
+import {SvgImagePreviewGenerator} from './adapters/previewGenerators/SvgImagePreviewGenerator';
 
 export default (config: IFileModuleConfig) => ({
     controllers: [],
@@ -41,8 +47,12 @@ export default (config: IFileModuleConfig) => ({
         CronJobsRegister,
 
         // Validators
-        FileMaxSizeValidator,
-        FileMimeTypesValidator,
+        ...fileValidators,
+        {
+            provide: FILE_VALIDATORS_TOKEN,
+            useFactory: (...providers: IValidator[]) => providers,
+            inject: fileValidators,
+        },
 
         // Storages
         FileLocalStorage,
@@ -59,6 +69,22 @@ export default (config: IFileModuleConfig) => ({
         },
 
         {
+            provide: ICreateImagePreviewUseCase,
+            useClass: CreateImagePreviewUsecase,
+        },
+        {
+            provide: IImagePreviewGeneratorResolver,
+            useClass: ImagePreviewGeneratorResolver,
+        },
+        SharpImagePreviewGenerator,
+        SvgImagePreviewGenerator,
+        {
+            provide: IImagePreviewGeneratorsToken,
+            useFactory: (...generators: IImagePreviewGenerator[]) => generators,
+            inject: [SvgImagePreviewGenerator, SharpImagePreviewGenerator],
+        },
+
+        {
             inject: [FileConfigService, FileLocalStorage, MinioS3Storage],
             provide: IFileStorageFactory,
             useFactory: (
@@ -70,24 +96,14 @@ export default (config: IFileModuleConfig) => ({
                 [FileStorageEnum.MINIO_S3]: minioS3Storage,
             }),
         },
-        ModuleHelper.provide(FileService, IFileService, [
-            IFileRepository,
-            FileImageService,
-            FileConfigService,
-            IFileStorageFactory,
-            EventEmitter2,
-            IFileTypeService,
-            [
-                FileMimeTypesValidator,
-                FileMaxSizeValidator,
-            ],
-        ]),
-        ModuleHelper.provide(FileImageService, [
-            IFileImageRepository,
-            FileConfigService,
-            IFileStorageFactory,
-            EventEmitter2,
-        ]),
+        {
+            provide: IFileService,
+            useClass: FileService,
+        },
+        {
+            provide: FileImageService,
+            useClass: FileImageService,
+        },
 
         DeleteLostAndTemporaryFilesService,
 
@@ -95,10 +111,7 @@ export default (config: IFileModuleConfig) => ({
         FileEventsSubscriber,
 
         // UseCases
-        ModuleHelper.provide(FileRemovedEventHandleUseCase, [
-            IFileStorageFactory,
-            FileConfigService,
-        ]),
+        FileRemovedEventHandleUseCase,
         ClearUnusedFilesCommand,
     ],
     exports: [

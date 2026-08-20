@@ -1,36 +1,49 @@
 import * as Sentry from '@sentry/node';
-import {Inject, Optional} from '@nestjs/common';
-import {IFileLocalStorage} from '../interfaces/IFileLocalStorage';
+import {Inject, Injectable, Optional} from '@nestjs/common';
+import {IFileStorage} from '../interfaces/IFileStorage';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 import {
     GetFileModelsPathUsecaseToken,
     IGetFileModelsPathUsecase,
 } from '../../usecases/getFilePathModels/interfaces/IGetFileModelsPathUsecase';
+import {FileConfigService} from './FileConfigService';
 
+@Injectable()
 export class DeleteLostAndTemporaryFilesService {
     constructor(
         @Inject(IFileStorageFactory)
         private fileStorageFactory: IFileStorageFactory,
-        @Optional() @Inject(GetFileModelsPathUsecaseToken)
+        protected readonly fileConfigService: FileConfigService,
+        @Optional()
+        @Inject(GetFileModelsPathUsecaseToken)
         private getFileModelsPathUsecase: IGetFileModelsPathUsecase,
-    ) {}
+    ) {
+    }
 
     /**
-     * @dev This feature is currently only available for local storage.
-     * To implement work with s3 you need:
-     * - extend IFileStorage interface with methods of IFileLocalStorage interface
-     * - in MinioS3Storage class implement extended IFileStorage interface
-     * - return in getStorage() method object that implements IFileStorage interface
+     * Removes files that exist in the storage but are not referenced from the database
+     * (lost/orphaned files), except those created recently enough to still be uploading.
+     * Works for both local filesystem and S3 (Minio) storages, as both implement
+     * the `getFilesPaths` / `getFileCreateTimeMs` / `deleteFile` contract of IFileStorage.
      */
     async deleteLostAndTemporaryFiles(storageName: FileStorageEnum): Promise<void> {
         const storage = this.getStorage(storageName);
         if (!storage) {
             return;
         }
+        const currentTimeMs = (new Date()).getTime();
         const lostAndTemporaryFilesPaths = await this.getLostAndTemporaryFilesPaths(storageName);
         for (const filePath of lostAndTemporaryFilesPaths) {
-            await storage.deleteFile(filePath);
+            try {
+                const createTimeFileMs = await storage.getFileCreateTimeMs(filePath);
+                const isFileJustCreated = (currentTimeMs - createTimeFileMs) < this.fileConfigService.justUploadedTempFileLifetimeMs;
+                if (!isFileJustCreated) {
+                    await storage.deleteFile(filePath);
+                }
+            } catch (er) {
+                Sentry.captureException(er);
+            }
         }
     }
 
@@ -45,7 +58,7 @@ export class DeleteLostAndTemporaryFilesService {
             return [];
         }
 
-        const filePathsFromStorage = storage.getFilesPaths();
+        const filePathsFromStorage = await storage.getFilesPaths();
 
         if (!filePathsFromStorage) {
             return [];
@@ -64,9 +77,9 @@ export class DeleteLostAndTemporaryFilesService {
         return lostAndTemporaryFilesPaths;
     }
 
-    private getStorage(storageName: FileStorageEnum): IFileLocalStorage {
+    private getStorage(storageName: FileStorageEnum): IFileStorage {
         try {
-            return this.fileStorageFactory.get(storageName) as IFileLocalStorage;
+            return this.fileStorageFactory.get(storageName) as IFileStorage;
         } catch (error) {
             Sentry.captureException(error);
             return null;

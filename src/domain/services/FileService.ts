@@ -7,11 +7,12 @@ import * as mime from 'mime-types';
 import {IValidator} from '@steroidsjs/nest/usecases/interfaces/IValidator';
 import {ReadService} from '@steroidsjs/nest/usecases/services/ReadService';
 import SearchQuery from '@steroidsjs/nest/usecases/base/SearchQuery';
-import {Type} from '@nestjs/common';
+import {Inject, Injectable, Optional, Type} from '@nestjs/common';
 import {toInteger as _toInteger} from 'lodash';
 import * as Sentry from '@sentry/node';
 import {ContextDto} from '@steroidsjs/nest/usecases/dtos/ContextDto';
 import {generateUid} from '@steroidsjs/nest/infrastructure/decorators/typeorm/fields/TypeOrmUidField/TypeOrmUidBehaviour';
+import {EventEmitter2} from '@nestjs/event-emitter';
 import {IFileRepository} from '../interfaces/IFileRepository';
 import {FileModel} from '../models/FileModel';
 import {FileUploadOptions} from '../dtos/FileUploadOptions';
@@ -26,28 +27,30 @@ import {IFileTypeService} from '../interfaces/IFileTypeService';
 import {IFileStorageFactory} from '../interfaces/IFileStorageFactory';
 import FileStorageEnum from '../enums/FileStorageEnum';
 import {
+    GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN,
     IGetFileStorageParamsUseCase,
 } from '../../usecases/getFileStorageParams/interfaces/IGetFileStorageParamsUseCase';
+import {FILE_VALIDATORS_TOKEN} from '../constants/FileValidatorsToken';
 import {FileConfigService} from './FileConfigService';
 import {FileImageService} from './FileImageService';
 
-type FileExpressOrLocalSource = FileExpressSourceDto | FileLocalSourceDto;
-
-function isFileExpressOrLocalSource(
-    source: FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto,
-): source is FileExpressOrLocalSource {
-    return source instanceof FileExpressSourceDto || source instanceof FileLocalSourceDto;
-}
-
+@Injectable()
 export class FileService extends ReadService<FileModel> {
     constructor(
+        @Inject(IFileRepository)
         protected readonly repository: IFileRepository,
         protected readonly fileImageService: FileImageService,
         protected readonly fileConfigService: FileConfigService,
+        @Inject(IFileStorageFactory)
         protected readonly fileStorageFactory: IFileStorageFactory,
+        @Inject(EventEmitter2)
         protected readonly eventEmitter: IEventEmitter,
+        @Inject(IFileTypeService)
         protected readonly fileTypeService: IFileTypeService,
+        @Inject(FILE_VALIDATORS_TOKEN)
         public validators: IValidator[],
+        @Optional()
+        @Inject(GET_FILE_STORAGE_PARAMS_USE_CASE_TOKEN)
         protected readonly getFileStorageParamsUseCase?: IGetFileStorageParamsUseCase,
     ) {
         super();
@@ -62,8 +65,10 @@ export class FileService extends ReadService<FileModel> {
         rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
         schemaClass: T = null,
     ): Promise<T | FileModel> {
-        const fileModel = await this.uploadFileInternal(rawOptions);
-        await this.createPreviewsOnImage(fileModel, this.fileConfigService.previews);
+        const options = this.normalizeUploadOptions(rawOptions);
+        const fileModel = await this.uploadFileInternal(options);
+        const previewOptionsMap = await this.getPreviewOptionsMap(fileModel.fileType, options.previews);
+        await this.createPreviewsOnImage(fileModel, previewOptionsMap);
         // @ts-ignore
         return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
     }
@@ -73,25 +78,16 @@ export class FileService extends ReadService<FileModel> {
         customPreviews: Record<string, IFilePreviewOptions> = null,
         schemaClass: T = null,
     ): Promise<T | FileModel> {
-        const fileModel = await this.uploadFileInternal(rawOptions);
-        await this.createPreviewsOnImage(fileModel, customPreviews || this.fileConfigService.previews);
+        const options = this.normalizeUploadOptions(rawOptions);
+        const fileModel = await this.uploadFileInternal(options);
+        const overridePreviewOptionsMap = customPreviews || options.previews || null;
+        const previewOptionsMap = await this.getPreviewOptionsMap(fileModel.fileType, overridePreviewOptionsMap);
+        await this.createPreviewsOnImage(fileModel, previewOptionsMap);
         // @ts-ignore
         return schemaClass ? DataMapper.create(schemaClass, fileModel) : fileModel;
     }
 
-    protected async uploadFileInternal(
-        rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
-    ): Promise<FileModel> {
-        // Resolve options
-        if (typeof rawOptions === 'string') {
-            rawOptions = FileLocalSourceDto.createFromPath(rawOptions);
-        }
-
-        const options: FileUploadOptions = rawOptions instanceof FileExpressSourceDto
-        || rawOptions instanceof FileLocalSourceDto || rawOptions instanceof FileStreamSourceDto
-            ? DataMapper.create(FileUploadOptions, {source: rawOptions})
-            : rawOptions as FileUploadOptions;
-
+    protected async uploadFileInternal(options: FileUploadOptions): Promise<FileModel> {
         // If "fileType" filed is specified, the options associated with it are applied
         if (options.fileType) {
             const fileTypeOptions = await this.fileTypeService.getFileUploadOptionsByType(options.fileType);
@@ -116,6 +112,9 @@ export class FileService extends ReadService<FileModel> {
         if (options.title) {
             fileDto.title = options.title;
         }
+        if (options.userId) {
+            fileDto.userId = options.userId;
+        }
 
         // Validate
         if (options.imagesOnly) {
@@ -137,12 +136,6 @@ export class FileService extends ReadService<FileModel> {
         const writeResult = await this.fileStorageFactory
             .get(options.storageName)
             .write(fileDto, stream, fileStorageParams);
-
-        // Delete temporary file
-        const shouldDeleteTemporaryFile = !this.fileConfigService.saveTemporaryFileAfterUpload;
-        if (isFileExpressOrLocalSource(options.source) && shouldDeleteTemporaryFile) {
-            this.deleteTemporaryFile(options.source.path);
-        }
 
         // Save file in database
         return this.repository.create(DataMapper.create(FileModel, {
@@ -177,6 +170,43 @@ export class FileService extends ReadService<FileModel> {
         }
     }
 
+    protected async getPreviewOptionsMap(
+        fileType: string = null,
+        customPreviewOptionsMap: Record<string, IFilePreviewOptions> = null,
+    ): Promise<Record<string, IFilePreviewOptions>> {
+        if (customPreviewOptionsMap) {
+            return customPreviewOptionsMap;
+        }
+
+        if (fileType) {
+            const fileTypeOptions = await this.fileTypeService.getFileUploadOptionsByType(fileType);
+
+            if (fileTypeOptions?.previews) {
+                return fileTypeOptions.previews;
+            }
+        }
+
+        return this.fileConfigService.previews;
+    }
+
+    protected normalizeUploadOptions(
+        rawOptions: string | FileExpressSourceDto | FileLocalSourceDto | FileStreamSourceDto | FileUploadOptions,
+    ): FileUploadOptions {
+        if (typeof rawOptions === 'string') {
+            rawOptions = FileLocalSourceDto.createFromPath(rawOptions);
+        }
+
+        if (
+            rawOptions instanceof FileExpressSourceDto
+            || rawOptions instanceof FileLocalSourceDto
+            || rawOptions instanceof FileStreamSourceDto
+        ) {
+            return DataMapper.create(FileUploadOptions, {source: rawOptions});
+        }
+
+        return rawOptions as FileUploadOptions;
+    }
+
     /**
      * Convert any sources to stream and return it
      * @param source
@@ -190,7 +220,7 @@ export class FileService extends ReadService<FileModel> {
             try {
                 await fs.promises.access(source.path, fs.constants.F_OK);
             } catch (e) {
-                throw new Error('Файл не найден: ' + source.path);
+                throw new Error('File not found: ' + source.path);
             }
 
             if (source instanceof FileExpressSourceDto) {
@@ -284,19 +314,6 @@ export class FileService extends ReadService<FileModel> {
         return this.repository.getFileWithDocument(fileName);
     }
 
-    private deleteTemporaryFile(pathToFile: string): void {
-        try {
-            fs.rmSync(pathToFile);
-        } catch (error) {
-            Sentry.captureException(error, {
-                extra: {
-                    scope: 'FileService',
-                    pathToFile,
-                },
-            });
-        }
-    }
-
     async getFilesPathsFromDb(storageName: FileStorageEnum): Promise<string[] | null> {
         return this.repository.getFilesPathsByStorageName(storageName);
     }
@@ -322,9 +339,10 @@ export class FileService extends ReadService<FileModel> {
     }
 
     public async getUnusedFilesIds(config: {
-        fileNameLike: string,
-        ignoredTables: string[],
-        isEmpty: boolean,
+        fileNameLike?: string,
+        ignoredTables?: string[],
+        isEmpty?: boolean,
+        unusedFileLifetimeMs?: number,
     }): Promise<number[]> {
         return this.repository.getUnusedFilesIds(config);
     }
