@@ -26,6 +26,16 @@ export class MinioS3Storage implements IFileStorage {
 
     public rootUrl: string;
 
+    /**
+     * https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html#API_GetObject_RequestSyntax
+     * The value of the `Cache-Control` header that will be passed as the
+     * `response-cache-control` query parameter when generating the file URL.
+     *
+     * Example:
+     * `public, max-age=31536000, immutable`.
+     */
+    public responseCacheControl: string;
+
     private _client: Minio.Client;
 
     private _isBucketCreated: boolean;
@@ -39,6 +49,7 @@ export class MinioS3Storage implements IFileStorage {
         this.region = config?.region;
         this.mainBucket = config?.mainBucket;
         this.rootUrl = config?.rootUrl;
+        this.responseCacheControl = config?.responseCacheControl;
 
         // if (!this.accessKey) {
         //     throw new Error('Not found accessKey for MinioS3Storage');
@@ -109,7 +120,17 @@ export class MinioS3Storage implements IFileStorage {
     }
 
     public getUrl(file: IFileReadable): string {
-        return [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
+        const urlString = [this.rootUrl, file.folder, file.fileName].filter(Boolean).join('/');
+
+        if (!this.responseCacheControl) {
+            return urlString;
+        }
+
+        const searchParam = new URLSearchParams({
+            'response-cache-control': this.responseCacheControl,
+        }).toString();
+
+        return `${urlString}${urlString.includes('?') ? '&' : '?'}${searchParam}`;
     }
 
     protected makeMainBucket(): Promise<void> {
